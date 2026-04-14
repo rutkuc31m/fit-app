@@ -25,11 +25,15 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
   const scannerRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const cbRef = useRef({ onDetected, onPhoto });
+  cbRef.current = { onDetected, onPhoto };
+  const detectedRef = useRef(false);
 
   /* ───── Barcode mode ───── */
   useEffect(() => {
     if (mode !== "barcode") return;
     setErr(null);
+    detectedRef.current = false;
     const scanner = new Html5Qrcode(regionId, {
       verbose: false,
       formatsToSupport: BARCODE_FORMATS
@@ -44,13 +48,17 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
       { fps: 15, qrbox: box, aspectRatio: 1.4, disableFlip: false,
         videoConstraints: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } } },
       (text) => {
-        onDetected(text);
-        scanner.stop().catch(() => {});
+        if (detectedRef.current) return;
+        detectedRef.current = true;
+        scanner.stop().catch(() => {}).finally(() => cbRef.current.onDetected(text));
       },
       () => {}
     ).catch((e) => setErr(e.message || String(e)));
-    return () => { scanner.stop().catch(() => {}).finally(() => scanner.clear().catch(() => {})); };
-  }, [mode, onDetected]);
+    return () => {
+      const s = scannerRef.current;
+      if (s) s.stop().catch(() => {}).finally(() => s.clear().catch(() => {}));
+    };
+  }, [mode]);
 
   /* ───── Photo mode ───── */
   useEffect(() => {

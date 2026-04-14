@@ -34,6 +34,10 @@
     opacity: .6;
   }
   input, button, select, textarea { font: inherit; color: inherit; }
+  /* iOS Safari zooms into any input with font-size <16px → pushes layout. Force min 16px on touch devices. */
+  @supports (-webkit-touch-callout: none) {
+    input, select, textarea { font-size: 16px; }
+  }
   input::placeholder, textarea::placeholder { color: theme(colors.mute); }
   button { cursor: pointer; }
   /* Chromium/Safari number spinners off */
