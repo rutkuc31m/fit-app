@@ -21,8 +21,8 @@ export default {
       },
       fontFamily: {
         mono:    ["'IBM Plex Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
-        sans:    ["'Chakra Petch'", "system-ui", "-apple-system", "sans-serif"],
-        display: ["'Oxanium'", "'Chakra Petch'", "system-ui", "sans-serif"]
+        sans:    ["'Bricolage Grotesque'", "system-ui", "-apple-system", "sans-serif"],
+        display: ["'Fraunces'", "'Bricolage Grotesque'", "Georgia", "serif"]
       },
       borderRadius: { xl: "14px", lg: "10px" },
       boxShadow: {
