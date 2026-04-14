@@ -20,8 +20,9 @@ export default {
         cool:     "#5ec8ff"
       },
       fontFamily: {
-        mono: ["'IBM Plex Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
-        sans: ["'Instrument Sans'", "system-ui", "-apple-system", "sans-serif"]
+        mono:    ["'IBM Plex Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        sans:    ["'Chakra Petch'", "system-ui", "-apple-system", "sans-serif"],
+        display: ["'Oxanium'", "'Chakra Petch'", "system-ui", "sans-serif"]
       },
       borderRadius: { xl: "14px", lg: "10px" },
       boxShadow: {

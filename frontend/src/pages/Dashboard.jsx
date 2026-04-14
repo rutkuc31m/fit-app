@@ -67,7 +67,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="px-4 pt-1 pb-4">
-          <div className="mono font-bold text-signal leading-[.95] text-[clamp(2.6rem,11vw,3.8rem)] tracking-[-0.04em] [text-shadow:0_0_40px_rgba(212,255,58,.35)] flex items-baseline gap-1">
+          <div className="font-display font-extrabold text-signal leading-[.9] text-[clamp(3rem,13vw,4.4rem)] tracking-[-0.03em] [text-shadow:0_0_40px_rgba(212,255,58,.4)] flex items-baseline gap-1 tabular-nums">
             {cur.toFixed(1)}<span className="text-[.32em] text-ink2">{t("dashboard.kg")}</span>
           </div>
           <div className="mt-2 mono text-[.78rem] text-ink">
