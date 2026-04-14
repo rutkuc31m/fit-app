@@ -20,13 +20,6 @@ pollen.rutkuc.com {
     try_files {path} /index.html
 }
 
-dev.rutkuc.com {
-    root * /var/www/pollendev
-    file_server
-    encode gzip
-    try_files {path} /index.html
-}
-
 # === Fit ===
 api.fit.rutkuc.com {
     reverse_proxy localhost:8001
