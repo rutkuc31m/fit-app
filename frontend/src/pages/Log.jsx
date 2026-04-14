@@ -119,7 +119,17 @@ export default function Log() {
         </div>
       ))}
 
-      {scanOpen && <BarcodeScanner onDetected={onBarcode} onClose={() => setScanOpen(false)} />}
+      {scanOpen && <BarcodeScanner
+        onDetected={onBarcode}
+        onPhoto={(food) => {
+          setScanOpen(false);
+          setDraft({
+            ...emptyItem,
+            name: [food.brand, food.name].filter(Boolean).join(" — ") || "photo item",
+            _per100: { kcal: food.kcal_100g, p: food.protein_100g, c: food.carbs_100g, f: food.fat_100g }
+          });
+        }}
+        onClose={() => setScanOpen(false)} />}
 
       {draft && activeMeal && (
         <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-end md:items-center justify-center p-4" onClick={() => setDraft(null)}>

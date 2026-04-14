@@ -42,6 +42,54 @@ r.get("/barcode/:code", async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Photo → Claude vision → nutrition per 100g
+r.post("/analyze-photo", async (req, res, next) => {
+  try {
+    const { image } = req.body || {};
+    if (!image || typeof image !== "string") return res.status(400).json({ error: "no_image" });
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return res.status(503).json({ error: "ai_not_configured" });
+
+    const prompt = `You are analyzing a photo of a food product (likely showing packaging or the food itself).
+Identify the product and estimate nutrition per 100g. If a nutrition label is visible, read it directly.
+Respond with ONLY a JSON object, no prose, no markdown fences:
+{"name": string, "brand": string|null, "kcal_100g": number, "protein_100g": number, "carbs_100g": number, "fat_100g": number, "confidence": "high"|"medium"|"low"}
+If you cannot identify a food at all, return {"error": "not_food"}.`;
+
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 512,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: image } },
+            { type: "text", text: prompt }
+          ]
+        }]
+      })
+    });
+    if (!resp.ok) {
+      const txt = await resp.text();
+      return res.status(502).json({ error: "ai_error", detail: txt.slice(0, 300) });
+    }
+    const data = await resp.json();
+    const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return res.status(422).json({ error: "ai_parse_failed", raw: text.slice(0, 300) });
+    let parsed;
+    try { parsed = JSON.parse(match[0]); } catch { return res.status(422).json({ error: "ai_parse_failed", raw: match[0].slice(0, 300) }); }
+    if (parsed.error) return res.status(404).json({ error: parsed.error });
+    res.json({ source: "ai", ...parsed });
+  } catch (e) { next(e); }
+});
+
 // Recent unique items (for quick add from history)
 r.get("/recent", (req, res) => {
   const rows = db.prepare(

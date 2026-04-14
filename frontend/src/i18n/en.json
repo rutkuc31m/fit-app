@@ -21,7 +21,11 @@
     "save": "Save", "cancel": "Cancel", "delete": "Delete",
     "meal_name": "Meal name", "meal_time": "Time",
     "scan_hint": "Point camera at barcode", "not_found": "Product not found",
-    "totals": "Totals"
+    "totals": "Totals",
+    "mode_barcode": "Barcode", "mode_photo": "Photo",
+    "photo_analyze": "Photo → AI",
+    "photo_hint": "Fit label or product in frame, tap capture",
+    "capture": "Capture", "analyzing": "Analyzing…"
   },
   "training": {
     "title": "Training", "day_a": "Upper (Push/Pull)", "day_b": "Lower", "day_c": "Full Body",
