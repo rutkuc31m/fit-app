@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "fit.rutkuc.com",
-        short_name: "fit",
+        name: "FitApp",
+        short_name: "FitApp",
         description: "Transformation tracker",
         theme_color: "#0c0e0d",
         background_color: "#0c0e0d",
