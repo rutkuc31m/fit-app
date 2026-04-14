@@ -8,7 +8,16 @@ async function request(path, opts = {}) {
   const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
   const t = getToken();
   if (t) headers.Authorization = `Bearer ${t}`;
-  const res = await fetch(BASE + path, { ...opts, headers });
+  const ctrl = new AbortController();
+  const timeoutMs = opts.timeoutMs ?? 15000;
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  let res;
+  try {
+    res = await fetch(BASE + path, { ...opts, headers, signal: ctrl.signal, cache: "no-store" });
+  } catch (e) {
+    if (e.name === "AbortError") throw new Error("timeout");
+    throw e;
+  } finally { clearTimeout(timer); }
   if (res.status === 401) {
     setToken(null);
     if (location.pathname !== "/login") location.href = "/login";

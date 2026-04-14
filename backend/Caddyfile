@@ -5,7 +5,18 @@ api.fit.rutkuc.com {
 
 fit.rutkuc.com {
     root * /var/www/fitapp
-    file_server
     encode gzip
     try_files {path} /index.html
+
+    # HTML + service worker + manifest must never be cached — so new deploys land immediately
+    @nocache {
+        path /index.html /sw.js /registerSW.js /manifest.webmanifest /workbox-*.js
+    }
+    header @nocache Cache-Control "no-store, must-revalidate"
+
+    # Hashed immutable assets (vite emits /assets/*-HASH.{js,css})
+    @immutable path /assets/*
+    header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+    file_server
 }
