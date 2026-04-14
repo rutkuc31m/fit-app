@@ -21,12 +21,13 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
   const [mode, setMode] = useState("barcode"); // barcode | photo
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
   const regionId = "bc-region";
   const scannerRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
-  const cbRef = useRef({ onDetected, onPhoto });
-  cbRef.current = { onDetected, onPhoto };
+  const cbRef = useRef({ onDetected, onPhoto, onClose });
+  cbRef.current = { onDetected, onPhoto, onClose };
   const detectedRef = useRef(false);
 
   /* ───── Barcode mode ───── */
@@ -50,10 +51,15 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
       (text) => {
         if (detectedRef.current) return;
         detectedRef.current = true;
-        // Fire callback IMMEDIATELY so UI closes; stop the scanner in background.
-        // (scanner.stop() can be slow on iOS; waiting for it makes the modal feel stuck.)
-        try { cbRef.current.onDetected(text); } catch {}
+        // Hide UI right now so iOS shows progress even if parent re-render lags.
+        setDone(true);
+        // Tear down the camera stream synchronously — html5-qrcode's stop() is slow on iOS.
+        try {
+          const ve = document.querySelector(`#${regionId} video`);
+          if (ve?.srcObject) ve.srcObject.getTracks().forEach((t) => t.stop());
+        } catch {}
         scanner.stop().catch(() => {});
+        try { cbRef.current.onDetected(text); } catch {}
       },
       () => {}
     ).catch((e) => setErr(e.message || String(e)));
@@ -105,6 +111,8 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
       setErr(e.message || String(e));
     } finally { setBusy(false); }
   };
+
+  if (done) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-bg/95 backdrop-blur-lg flex flex-col">
