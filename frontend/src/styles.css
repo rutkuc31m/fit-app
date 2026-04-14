@@ -81,9 +81,14 @@
            hover:bg-surface2 hover:text-signal hover:border-line2 active:scale-[.96] transition shrink-0;
   }
   .input {
-    @apply bg-bg2 border border-line rounded-lg px-3 py-2 text-ink outline-none
+    @apply bg-bg2 border border-line rounded-lg px-3 text-ink outline-none
            focus:border-signal focus:ring-2 focus:ring-signal/20 transition;
+    height: 44px;            /* fixed height instead of py-* — iOS Safari aligns number value to top with padding */
+    line-height: 44px;       /* center value vertically across all input types incl. number */
+    min-height: 44px;
   }
+  /* Multiline (textarea) doesn't want fixed height/line-height */
+  textarea.input { height: auto; line-height: 1.45; padding-top: 10px; padding-bottom: 10px; }
 
   /* Breathing pulse dot */
   .pulse-dot { position: relative; }
