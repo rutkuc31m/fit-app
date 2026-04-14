@@ -7,7 +7,7 @@
   },
   "dashboard": {
     "phase": "Phase", "week": "Week", "day": "Day", "today_plan": "Today's plan",
-    "weight": "Weight", "kcal": "Calories", "protein": "Protein", "target": "Target",
+    "weight": "Weight", "kcal": "Calories", "protein": "Protein", "carbs": "Carbs", "fat": "Fat", "target": "Target",
     "quick_weigh": "Quick weigh-in", "kg": "kg", "of": "of",
     "progress_to_goal": "Progress to goal", "days_left": "days left",
     "training_day": "Training day", "rest_day": "Rest day", "fast_day": "Fast day",

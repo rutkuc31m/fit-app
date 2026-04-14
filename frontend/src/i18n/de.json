@@ -7,7 +7,7 @@
   },
   "dashboard": {
     "phase": "Phase", "week": "Woche", "day": "Tag", "today_plan": "Heute geplant",
-    "weight": "Gewicht", "kcal": "Kalorien", "protein": "Protein", "target": "Ziel",
+    "weight": "Gewicht", "kcal": "Kalorien", "protein": "Protein", "carbs": "Kohlenh.", "fat": "Fett", "target": "Ziel",
     "quick_weigh": "Schnell wiegen", "kg": "kg", "of": "von",
     "progress_to_goal": "Fortschritt zum Ziel", "days_left": "Tage verbleibend",
     "training_day": "Trainingstag", "rest_day": "Ruhetag", "fast_day": "Fastentag",
