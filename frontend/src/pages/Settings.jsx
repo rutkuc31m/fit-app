@@ -43,8 +43,8 @@ export default function Settings() {
         </label>
         <div className="grid grid-cols-3 gap-2">
           {[["start_weight", "start_weight"], ["target_weight", "target_weight"], ["height_cm", "height"]].map(([k, tk]) => (
-            <label key={k} className="flex flex-col gap-1">
-              <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t(`settings.${tk}`)}</span>
+            <label key={k} className="flex flex-col gap-1 justify-end">
+              <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em] min-h-[26px] flex items-end leading-tight">{t(`settings.${tk}`)}</span>
               <input className="input mono" type="number" step="0.1" value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: +e.target.value })} />
             </label>
           ))}
