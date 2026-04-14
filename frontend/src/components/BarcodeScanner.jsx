@@ -50,7 +50,10 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
       (text) => {
         if (detectedRef.current) return;
         detectedRef.current = true;
-        scanner.stop().catch(() => {}).finally(() => cbRef.current.onDetected(text));
+        // Fire callback IMMEDIATELY so UI closes; stop the scanner in background.
+        // (scanner.stop() can be slow on iOS; waiting for it makes the modal feel stuck.)
+        try { cbRef.current.onDetected(text); } catch {}
+        scanner.stop().catch(() => {});
       },
       () => {}
     ).catch((e) => setErr(e.message || String(e)));
