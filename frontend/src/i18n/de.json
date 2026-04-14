@@ -1,0 +1,48 @@
+{
+  "nav": { "today": "Heute", "log": "Log", "training": "Training", "progress": "Fortschritt", "settings": "Einstellungen" },
+  "auth": {
+    "login": "Anmelden", "register": "Registrieren", "email": "E-Mail", "password": "Passwort", "name": "Name",
+    "or_register": "Kein Konto? Registrieren", "or_login": "Konto vorhanden? Anmelden", "logout": "Abmelden",
+    "bad_credentials": "Falsche E-Mail oder Passwort", "email_taken": "E-Mail bereits vergeben"
+  },
+  "dashboard": {
+    "phase": "Phase", "week": "Woche", "day": "Tag", "today_plan": "Heute geplant",
+    "weight": "Gewicht", "kcal": "Kalorien", "protein": "Protein", "target": "Ziel",
+    "quick_weigh": "Schnell wiegen", "kg": "kg", "of": "von",
+    "progress_to_goal": "Fortschritt zum Ziel", "days_left": "Tage verbleibend",
+    "training_day": "Trainingstag", "rest_day": "Ruhetag", "fast_day": "Fastentag",
+    "meals_today": "Heutige Mahlzeiten", "no_meals": "Noch keine Mahlzeit erfasst",
+    "mark_training_done": "Training abgeschlossen"
+  },
+  "log": {
+    "title": "Essens-Log", "add_meal": "+ Mahlzeit", "add_item": "+ Zutat",
+    "scan_barcode": "Barcode scannen", "manual": "Manuell", "recent": "Kürzlich",
+    "amount_g": "Gramm", "kcal": "kcal", "protein": "Protein (g)", "carbs": "Kohlenh. (g)", "fat": "Fett (g)",
+    "save": "Speichern", "cancel": "Abbrechen", "delete": "Löschen",
+    "meal_name": "Mahlzeit", "meal_time": "Uhrzeit",
+    "scan_hint": "Kamera auf Barcode richten", "not_found": "Produkt nicht gefunden",
+    "totals": "Gesamt"
+  },
+  "training": {
+    "title": "Training", "day_a": "Oberkörper (Push/Pull)", "day_b": "Unterkörper", "day_c": "Ganzkörper",
+    "rest": "Ruhe", "sets": "Sätze", "reps": "Wdh", "weight": "Gewicht (kg)",
+    "add_set": "+ Satz", "last_time": "Letztes Mal", "complete": "Abschließen",
+    "cardio_min": "Cardio (Min)", "notes": "Notizen", "history": "Verlauf"
+  },
+  "progress": {
+    "title": "Fortschritt", "weight_chart": "Gewicht", "measurements": "Maße",
+    "waist": "Taille", "chest": "Brust", "arm": "Arm", "hip": "Hüfte", "thigh": "Oberschenkel",
+    "cm": "cm", "add_measurement": "+ Maß", "weekly_checkin": "Wöchentlicher Check-in",
+    "phases": "Phasen"
+  },
+  "settings": {
+    "title": "Einstellungen", "profile": "Profil", "language": "Sprache",
+    "start_date": "Startdatum", "start_weight": "Startgewicht (kg)",
+    "target_weight": "Zielgewicht (kg)", "height": "Größe (cm)",
+    "save": "Speichern", "saved": "Gespeichert"
+  },
+  "common": {
+    "yes": "Ja", "no": "Nein", "loading": "Lädt…", "error": "Fehler",
+    "retry": "Erneut", "close": "Schließen", "back": "Zurück"
+  }
+}

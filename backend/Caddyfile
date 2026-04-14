@@ -1,0 +1,11 @@
+api.fit.rutkuc.com {
+    reverse_proxy localhost:8001
+    encode gzip
+}
+
+fit.rutkuc.com {
+    root * /var/www/fitapp
+    file_server
+    encode gzip
+    try_files {path} /index.html
+}

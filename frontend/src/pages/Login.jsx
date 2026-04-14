@@ -1,0 +1,64 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "../lib/auth.jsx";
+import { setLang } from "../i18n";
+
+export default function Login() {
+  const { t, i18n } = useTranslation();
+  const { login, register } = useAuth();
+  const [mode, setMode] = useState("login");
+  const [form, setForm] = useState({ email: "", password: "", name: "" });
+  const [err, setErr] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault(); setErr(null); setBusy(true);
+    try {
+      if (mode === "login") await login(form.email, form.password);
+      else await register(form.email, form.password, form.name, i18n.language);
+    } catch (ex) {
+      setErr(ex.message);
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="page pt-[80px]">
+      <div className="text-center mb-2">
+        <div className="inline-block w-[44px] h-[44px] rounded-lg bg-signal grid place-items-center text-[#0a0c00] mono font-bold text-xl shadow-[0_0_30px_-6px_theme(colors.signal)]">F</div>
+        <div className="mt-3 mono text-xs caps text-ink2">fit · rutkuc</div>
+      </div>
+
+      <form onSubmit={submit} className="card p-4 flex flex-col gap-3">
+        <div className="section-label">{t(`auth.${mode}`)}</div>
+
+        {mode === "register" && (
+          <input className="input" placeholder={t("auth.name")} value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        )}
+        <input className="input" type="email" required placeholder={t("auth.email")}
+          value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <input className="input" type="password" required placeholder={t("auth.password")}
+          value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+
+        {err && <div className="mono text-xs text-warn">{t(`auth.${err}`, err)}</div>}
+
+        <button className="btn-primary" disabled={busy}>{busy ? "…" : t(`auth.${mode}`)}</button>
+
+        <button type="button" className="mono text-xs text-ink2 hover:text-signal transition"
+          onClick={() => { setMode(mode === "login" ? "register" : "login"); setErr(null); }}>
+          {mode === "login" ? t("auth.or_register") : t("auth.or_login")}
+        </button>
+
+        <div className="flex justify-center gap-2 pt-2 border-t border-line">
+          {["en", "de"].map((lng) => (
+            <button key={lng} type="button"
+              onClick={() => setLang(lng)}
+              className={`mono text-[.7rem] caps px-2 py-1 rounded ${i18n.language === lng ? "text-signal" : "text-mute hover:text-ink2"}`}>
+              {lng.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </form>
+    </div>
+  );
+}

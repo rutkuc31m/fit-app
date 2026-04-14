@@ -1,0 +1,48 @@
+{
+  "nav": { "today": "Today", "log": "Log", "training": "Training", "progress": "Progress", "settings": "Settings" },
+  "auth": {
+    "login": "Log in", "register": "Register", "email": "Email", "password": "Password", "name": "Name",
+    "or_register": "No account? Register", "or_login": "Have an account? Log in", "logout": "Log out",
+    "bad_credentials": "Wrong email or password", "email_taken": "Email already in use"
+  },
+  "dashboard": {
+    "phase": "Phase", "week": "Week", "day": "Day", "today_plan": "Today's plan",
+    "weight": "Weight", "kcal": "Calories", "protein": "Protein", "target": "Target",
+    "quick_weigh": "Quick weigh-in", "kg": "kg", "of": "of",
+    "progress_to_goal": "Progress to goal", "days_left": "days left",
+    "training_day": "Training day", "rest_day": "Rest day", "fast_day": "Fast day",
+    "meals_today": "Meals today", "no_meals": "No meals logged yet",
+    "mark_training_done": "Mark training done"
+  },
+  "log": {
+    "title": "Food log", "add_meal": "+ Meal", "add_item": "+ Item",
+    "scan_barcode": "Scan barcode", "manual": "Manual", "recent": "Recent",
+    "amount_g": "Grams", "kcal": "kcal", "protein": "Protein (g)", "carbs": "Carbs (g)", "fat": "Fat (g)",
+    "save": "Save", "cancel": "Cancel", "delete": "Delete",
+    "meal_name": "Meal name", "meal_time": "Time",
+    "scan_hint": "Point camera at barcode", "not_found": "Product not found",
+    "totals": "Totals"
+  },
+  "training": {
+    "title": "Training", "day_a": "Upper (Push/Pull)", "day_b": "Lower", "day_c": "Full Body",
+    "rest": "Rest", "sets": "Sets", "reps": "Reps", "weight": "Weight (kg)",
+    "add_set": "+ Set", "last_time": "Last time", "complete": "Mark complete",
+    "cardio_min": "Cardio (min)", "notes": "Notes", "history": "History"
+  },
+  "progress": {
+    "title": "Progress", "weight_chart": "Weight", "measurements": "Measurements",
+    "waist": "Waist", "chest": "Chest", "arm": "Arm", "hip": "Hip", "thigh": "Thigh",
+    "cm": "cm", "add_measurement": "+ Measurement", "weekly_checkin": "Weekly check-in",
+    "phases": "Phases"
+  },
+  "settings": {
+    "title": "Settings", "profile": "Profile", "language": "Language",
+    "start_date": "Start date", "start_weight": "Start weight (kg)",
+    "target_weight": "Target weight (kg)", "height": "Height (cm)",
+    "save": "Save", "saved": "Saved"
+  },
+  "common": {
+    "yes": "Yes", "no": "No", "loading": "Loading…", "error": "Error",
+    "retry": "Retry", "close": "Close", "back": "Back"
+  }
+}
