@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { PLAN, todayStr, getDayPlan } from "../lib/plan";
+import { Empty, Icon } from "../components/ui";
 
 export default function Training() {
   const { t } = useTranslation();
@@ -62,9 +63,7 @@ export default function Training() {
       </div>
 
       {plan.type === "rest" && (
-        <div className="card p-4 mono text-xs text-mute text-center">
-          {t("training.rest")} — {t("dashboard.rest_day")}
-        </div>
+        <Empty icon={<Icon.moon size={22} />} label={t("training.rest")} hint={t("dashboard.rest_day")} />
       )}
 
       {day.exercises.map((ex) => {
@@ -90,7 +89,7 @@ export default function Training() {
             <div className="flex flex-col divide-y divide-line">
               {sets.map((s) => (
                 <div key={s.id} className="px-4 py-2 flex items-center gap-2">
-                  <span className="mono text-[.66rem] text-mute w-6">#{s.set_number}</span>
+                  <span className="chip chip-signal w-7 justify-center">{s.set_number}</span>
                   <input type="number" className="input mono flex-1 text-center" defaultValue={s.weight_kg || ""} placeholder="kg"
                     onBlur={(e) => e.target.value !== String(s.weight_kg || "") && updateSet(s, { weight_kg: +e.target.value })} />
                   <span className="mono text-mute">×</span>
@@ -98,8 +97,8 @@ export default function Training() {
                     onBlur={(e) => e.target.value !== String(s.reps || "") && updateSet(s, { reps: +e.target.value })} />
                 </div>
               ))}
-              <button className="mono text-xs caps text-signal py-3 hover:bg-surface2 transition" onClick={() => addSet(ex)}>
-                {t("training.add_set")}
+              <button className="mono text-xs caps text-signal py-3 hover:bg-surface2 transition flex items-center justify-center gap-2" onClick={() => addSet(ex)}>
+                <Icon.plus size={14} /> {t("training.add_set")}
               </button>
             </div>
           </div>
@@ -111,7 +110,7 @@ export default function Training() {
           className={session.completed ? "btn" : "btn-primary"}
           onClick={complete}
           disabled={session.completed}>
-          {session.completed ? "✓ " + t("training.complete") : t("training.complete")}
+          {session.completed ? <span className="inline-flex items-center gap-2 justify-center"><Icon.check size={14} /> {t("training.complete")}</span> : t("training.complete")}
         </button>
       )}
     </div>

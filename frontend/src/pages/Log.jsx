@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr } from "../lib/plan";
 import BarcodeScanner from "../components/BarcodeScanner";
+import { Empty, Icon } from "../components/ui";
 
 const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, barcode: null };
 
@@ -79,7 +80,10 @@ export default function Log() {
         </div>
       </div>
 
-      {meals.length === 0 && <div className="card p-4 mono text-xs text-mute text-center">—</div>}
+      {meals.length === 0 && (
+        <Empty icon={<Icon.utensils size={22} />} label={t("log.title")} hint={t("log.add_meal")}
+          action={<button className="btn-ghost mt-2" onClick={addMeal}>+ {t("log.add_meal")}</button>} />
+      )}
 
       {meals.map((m) => (
         <div key={m.id} className="card overflow-hidden">
@@ -89,9 +93,9 @@ export default function Log() {
               <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-[2px]">{m.time}</div>
             </div>
             <div className="flex gap-2">
-              <button className="btn" onClick={() => { setActiveMeal(m.id); setScanOpen(true); }}>📷</button>
-              <button className="btn" onClick={() => { setActiveMeal(m.id); setDraft({ ...emptyItem }); }}>+</button>
-              <button className="btn text-warn" onClick={() => deleteMeal(m.id)}>✕</button>
+              <button className="btn-icon" aria-label="scan" onClick={() => { setActiveMeal(m.id); setScanOpen(true); }}><Icon.scan size={16} /></button>
+              <button className="btn-icon" aria-label="add item" onClick={() => { setActiveMeal(m.id); setDraft({ ...emptyItem }); }}><Icon.plus size={16} /></button>
+              <button className="btn-icon hover:!text-warn" aria-label="delete meal" onClick={() => deleteMeal(m.id)}><Icon.trash size={15} /></button>
             </div>
           </div>
           {m.items.length > 0 && (

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
+import { Ring, Bar, Brackets, Empty, Icon } from "../components/ui";
 
 const sumMacros = (meals) => meals.reduce((a, m) => {
   m.items.forEach((it) => {
@@ -93,27 +94,37 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Calorie ring */}
-      <div className="card p-4">
-        <div className="flex justify-between items-baseline mb-3">
-          <div className="card-title">{t("dashboard.kcal")}</div>
-          <div className="mono text-[.7rem] text-signal uppercase tracking-[.14em]">
-            {target.kcal} {t("dashboard.target")}
+      {/* Calorie ring + macros */}
+      <Brackets>
+        <div className="card p-4">
+          <div className="flex justify-between items-baseline mb-3">
+            <div className="card-title">{t("dashboard.kcal")}</div>
+            <div className="mono text-[.64rem] text-mute uppercase tracking-[.18em]">
+              {Math.round(macros.kcal)} / {target.kcal}
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Ring value={macros.kcal} target={target.kcal || 1} size={118} stroke={9}
+              over={target.kcal > 0 && macros.kcal > target.kcal}
+              unit="kcal" label={`${Math.max(0, target.kcal - Math.round(macros.kcal))} left`} />
+            <div className="flex-1 flex flex-col gap-[10px] min-w-0">
+              {[
+                { k: "protein", v: macros.protein, t: target.protein, tone: "signal" },
+                { k: "carbs",   v: macros.carbs,   t: target.carbs,   tone: "cool" },
+                { k: "fat",     v: macros.fat,     t: target.fat,     tone: "signal" }
+              ].map((m) => (
+                <div key={m.k}>
+                  <div className="flex justify-between mono text-[.62rem] uppercase tracking-[.16em] mb-[3px]">
+                    <span className="text-ink2">{t(`dashboard.${m.k}`)}</span>
+                    <span className="text-mute">{Math.round(m.v)}<span className="opacity-60">/{m.t}</span>g</span>
+                  </div>
+                  <Bar value={m.v} target={m.t || 1} tone={m.tone} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-0">
-          {[
-            { v: Math.round(macros.kcal), l: t("dashboard.kcal"), t: target.kcal, accent: true },
-            { v: Math.round(macros.protein), l: t("dashboard.protein"), t: target.protein },
-            { v: Math.round(macros.carbs + macros.fat), l: "carb+fat", t: target.carbs + target.fat }
-          ].map((s, i) => (
-            <div key={i} className={`px-3 py-1 ${i ? "border-l border-line" : ""}`}>
-              <div className={`mono text-[1.15rem] font-bold tracking-[-.02em] ${s.accent ? "text-signal" : "text-ink"}`}>{s.v}</div>
-              <div className="mono text-[.62rem] text-mute uppercase tracking-[.16em] mt-1">{s.l} / {s.t}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      </Brackets>
 
       {/* Today plan */}
       <div className="section-label">{t("dashboard.today_plan")}</div>
@@ -137,20 +148,25 @@ export default function Dashboard() {
       {/* Meals today */}
       <div className="section-label">{t("dashboard.meals_today")}</div>
       {meals.length === 0 ? (
-        <div className="card p-4 mono text-xs text-mute text-center">{t("dashboard.no_meals")}</div>
+        <Empty icon={<Icon.utensils size={22} />} label={t("dashboard.no_meals")} hint={t("dashboard.meals_today")}
+          action={<Link to="/log" className="btn-ghost mt-2">+ {t("log.add_meal")}</Link>} />
       ) : (
         <div className="flex flex-col gap-2">
-          {meals.map((m) => (
-            <div key={m.id} className="card p-3 flex justify-between">
-              <div>
-                <div className="mono text-xs text-ink">{m.name || m.time || "—"}</div>
-                <div className="mono text-[.66rem] text-mute">{m.items.length} items</div>
+          {meals.map((m) => {
+            const kcal = Math.round(m.items.reduce((a, i) => a + (i.kcal || 0), 0));
+            return (
+              <div key={m.id} className="card p-3 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md border border-line bg-bg2 grid place-items-center text-ink2 shrink-0">
+                  <Icon.utensils size={16} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="mono text-xs text-ink truncate">{m.name || m.time || "—"}</div>
+                  <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{m.items.length} · {m.time}</div>
+                </div>
+                <div className="mono text-sm text-signal font-bold tabular-nums">{kcal}<span className="text-mute text-[.6rem] ml-1">kcal</span></div>
               </div>
-              <div className="mono text-sm text-signal font-bold">
-                {Math.round(m.items.reduce((a, i) => a + (i.kcal || 0), 0))} kcal
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
