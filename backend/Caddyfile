@@ -1,3 +1,33 @@
+# Merged VM Caddyfile — pollen + fit on same host.
+# IMPORTANT: this is the AUTHORITATIVE Caddyfile. Do not copy only a subset to /etc/caddy/Caddyfile
+# or you will drop pollen routing. If editing fit blocks only, still keep pollen blocks intact.
+
+# === Pollen ===
+api.rutkuc.com {
+    reverse_proxy localhost:8000
+    encode gzip
+    header {
+        Access-Control-Allow-Origin "https://pollen.rutkuc.com"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, X-Device-Token"
+    }
+}
+
+pollen.rutkuc.com {
+    root * /var/www/pollen-app
+    file_server
+    encode gzip
+    try_files {path} /index.html
+}
+
+dev.rutkuc.com {
+    root * /var/www/pollendev
+    file_server
+    encode gzip
+    try_files {path} /index.html
+}
+
+# === Fit ===
 api.fit.rutkuc.com {
     reverse_proxy localhost:8001
     encode gzip
@@ -8,13 +38,11 @@ fit.rutkuc.com {
     encode gzip
     try_files {path} /index.html
 
-    # HTML + service worker + manifest must never be cached — so new deploys land immediately
     @nocache {
         path /index.html /sw.js /registerSW.js /manifest.webmanifest /workbox-*.js
     }
     header @nocache Cache-Control "no-store, must-revalidate"
 
-    # Hashed immutable assets (vite emits /assets/*-HASH.{js,css})
     @immutable path /assets/*
     header @immutable Cache-Control "public, max-age=31536000, immutable"
 
