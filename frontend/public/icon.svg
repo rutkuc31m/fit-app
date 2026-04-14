@@ -1,5 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0c0e0d"/>
-  <rect x="8" y="8" width="48" height="48" rx="10" fill="none" stroke="#d4ff3a" stroke-width="2"/>
-  <text x="32" y="42" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="700" font-size="28" fill="#d4ff3a">F</text>
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%"  stop-color="#1a2010"/>
+      <stop offset="60%" stop-color="#0c0e0d"/>
+      <stop offset="100%" stop-color="#0c0e0d"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#eaffac"/>
+      <stop offset="50%" stop-color="#d4ff3a"/>
+      <stop offset="100%" stop-color="#9bc41a"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background tile with subtle inner ring -->
+  <rect width="64" height="64" rx="14" fill="url(#bgGlow)"/>
+  <rect x="3.5" y="3.5" width="57" height="57" rx="11.5" fill="none" stroke="#1f2418" stroke-width="1"/>
+
+  <!-- Tactical corner brackets -->
+  <g stroke="#d4ff3a" stroke-width="1.4" fill="none" opacity=".85">
+    <path d="M7 12 V7 H12"/>
+    <path d="M52 7 H57 V12"/>
+    <path d="M57 52 V57 H52"/>
+    <path d="M12 57 H7 V52"/>
+  </g>
+
+  <!-- Dumbbell -->
+  <g filter="url(#glow)">
+    <!-- Bar (grip) -->
+    <rect x="20" y="30.5" width="24" height="3" rx="1.2" fill="url(#metal)"/>
+    <!-- Inner collars -->
+    <rect x="18" y="27" width="3" height="10" rx="1" fill="#0c0e0d" stroke="url(#metal)" stroke-width="1.2"/>
+    <rect x="43" y="27" width="3" height="10" rx="1" fill="#0c0e0d" stroke="url(#metal)" stroke-width="1.2"/>
+    <!-- Outer plates (big) -->
+    <rect x="11" y="22" width="6" height="20" rx="1.6" fill="url(#metal)"/>
+    <rect x="47" y="22" width="6" height="20" rx="1.6" fill="url(#metal)"/>
+    <!-- Plate inner shine -->
+    <rect x="12.2" y="23.5" width="1.2" height="17" rx=".6" fill="#f5ffd0" opacity=".6"/>
+    <rect x="48.2" y="23.5" width="1.2" height="17" rx=".6" fill="#f5ffd0" opacity=".6"/>
+  </g>
+
+  <!-- Power dot on grip center -->
+  <circle cx="32" cy="32" r="1.4" fill="#0c0e0d"/>
+  <circle cx="32" cy="32" r=".7" fill="#d4ff3a"/>
 </svg>
