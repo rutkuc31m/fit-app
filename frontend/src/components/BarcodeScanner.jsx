@@ -18,7 +18,6 @@ const BARCODE_FORMATS = [
 export default function BarcodeScanner({ onDetected, onClose }) {
   const { t } = useTranslation();
   const [err, setErr] = useState(null);
-  const [done, setDone] = useState(false);
   const regionId = "bc-region";
   const scannerRef = useRef(null);
   const cbRef = useRef({ onDetected, onClose });
@@ -41,15 +40,8 @@ export default function BarcodeScanner({ onDetected, onClose }) {
       (text) => {
         if (detectedRef.current) return;
         detectedRef.current = true;
-        try {
-          const ve = document.querySelector(`#${regionId} video`);
-          if (ve?.srcObject) ve.srcObject.getTracks().forEach((t) => t.stop());
-        } catch {}
-        scanner.stop().catch(() => {});
-        // Defer state updates into main event loop — html5-qrcode callback
-        // can fire from inside rAF where React 18 batching misbehaves on iOS.
+        // Defer everything out of rAF. Let useEffect cleanup handle scanner.stop.
         setTimeout(() => {
-          setDone(true);
           try { cbRef.current.onDetected(text); } catch (e) { alert("onDetected err: " + (e.message || e)); }
         }, 0);
       },
@@ -60,8 +52,6 @@ export default function BarcodeScanner({ onDetected, onClose }) {
       if (s) s.stop().catch(() => {}).finally(() => s.clear().catch(() => {}));
     };
   }, []);
-
-  if (done) return null;
 
   return (
     <div className="fixed inset-0 z-[60] bg-bg/95 backdrop-blur-lg flex flex-col pb-[env(safe-area-inset-bottom)]">
