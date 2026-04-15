@@ -55,7 +55,7 @@ Respond with ONLY a JSON object, no prose, no markdown fences:
 {"name": string, "brand": string|null, "kcal_100g": number, "protein_100g": number, "carbs_100g": number, "fat_100g": number, "confidence": "high"|"medium"|"low"}
 If the photo contains no food, return {"error": "not_food"}.`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${encodeURIComponent(apiKey)}`;
     const resp = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
