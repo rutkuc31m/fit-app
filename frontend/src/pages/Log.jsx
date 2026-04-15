@@ -77,7 +77,8 @@ export default function Log() {
   };
 
   const saveDraft = async () => {
-    await api.post(`/meals/${activeMeal}/items`, draft);
+    const { _per100, _analyzing, _noData, ...clean } = draft;
+    await api.post(`/meals/${activeMeal}/items`, clean);
     setDraft(null); setActiveMeal(null); load();
   };
 
@@ -172,7 +173,7 @@ export default function Log() {
 
       {draft && activeMeal && (
         <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+80px)]">
-          <div className="card w-full max-w-md p-4 flex flex-col gap-3">
+          <div className="card w-full max-w-md p-4 flex flex-col gap-3 relative">
             <div className="section-label">{t("log.add_item")}</div>
             {draft._noData && (
               <div className="mono text-[.62rem] text-warn uppercase tracking-[.14em] bg-warn/10 border border-warn/40 rounded-lg px-3 py-2">
@@ -183,7 +184,7 @@ export default function Log() {
             <div className="relative">
               <input className="input" placeholder="search product…" value={search} onChange={(e) => setSearch(e.target.value)} />
               {(searching || results.length > 0) && (
-                <div className="absolute left-0 right-0 top-full mt-1 z-10 card max-h-60 overflow-y-auto">
+                <div className="absolute left-0 right-0 top-full mt-1 z-30 card max-h-60 overflow-y-auto shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)]">
                   {searching && <div className="px-3 py-2 mono text-[.66rem] text-mute">searching…</div>}
                   {!searching && results.length === 0 && search.trim().length >= 2 && (
                     <div className="px-3 py-2 mono text-[.66rem] text-mute">no matches</div>

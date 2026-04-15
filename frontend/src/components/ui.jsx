@@ -78,15 +78,85 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
   );
 }
 
+/* ─────────── Mini ring (compact macro display) ─────────── */
+export function MiniRing({ value = 0, target = 100, size = 54, stroke = 5, color = "#d4ff3a" }) {
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(1, target > 0 ? value / target : 0));
+  return (
+    <svg width={size} height={size} className="-rotate-90 overflow-visible">
+      <circle cx={size/2} cy={size/2} r={r} stroke="#2a2f33" strokeWidth={stroke} fill="none" />
+      <circle cx={size/2} cy={size/2} r={r} stroke={color} strokeWidth={stroke} fill="none"
+        strokeDasharray={`${c * pct} ${c}`} strokeLinecap="round"
+        style={{ filter: `drop-shadow(0 0 4px ${color}aa)`, transition: "stroke-dasharray .5s cubic-bezier(.2,.8,.2,1)" }} />
+    </svg>
+  );
+}
+
 /* ─────────── Mini bar (for macros) ─────────── */
 export function Bar({ value = 0, target = 100, tone = "signal" }) {
   const pct = target > 0 ? Math.min(150, (value / target) * 100) : 0;
   const over = pct > 100;
-  const cls = over ? "over" : tone === "cool" ? "dim" : "";
+  const cls = over ? "over" : tone === "cool" ? "dim" : tone === "warn" ? "warn" : "";
   return (
     <div className={`meter ${cls}`}>
       <span style={{ width: `${Math.min(100, pct)}%` }} />
     </div>
+  );
+}
+
+/* ─────────── Sparkline (tiny trend) ─────────── */
+export function Sparkline({ values = [], width = 200, height = 32, color = "#d4ff3a" }) {
+  const pts = values.filter((v) => v != null && !isNaN(v));
+  if (pts.length < 2) return <div style={{ height }} className="mono text-[.58rem] text-mute flex items-center">no trend yet</div>;
+  const min = Math.min(...pts), max = Math.max(...pts);
+  const span = max - min || 1;
+  const step = width / (pts.length - 1);
+  const d = pts.map((v, i) => `${i === 0 ? "M" : "L"} ${(i * step).toFixed(1)} ${(height - ((v - min) / span) * height).toFixed(1)}`).join(" ");
+  const last = pts[pts.length - 1];
+  const lastX = (pts.length - 1) * step;
+  const lastY = height - ((last - min) / span) * height;
+  return (
+    <svg width={width} height={height} className="overflow-visible">
+      <path d={d} stroke={color} strokeWidth="1.3" fill="none" style={{ filter: `drop-shadow(0 0 4px ${color}80)` }} />
+      <circle cx={lastX} cy={lastY} r="2.2" fill={color} style={{ filter: `drop-shadow(0 0 5px ${color})` }} />
+    </svg>
+  );
+}
+
+/* ─────────── Phase strip (P1..P4 segmented) ─────────── */
+export function PhaseStrip({ phases = [], currentPhase }) {
+  return (
+    <div className="flex items-center gap-[3px]">
+      {phases.map((p) => (
+        <div key={p.id}
+          className={`phase-seg ${p.id < currentPhase ? "done" : p.id === currentPhase ? "now" : ""}`}
+          title={`P${p.id}`} />
+      ))}
+    </div>
+  );
+}
+
+/* ─────────── Day glyph (A=triangle, B=square, C=hex) ─────────── */
+export function DayGlyph({ type = "A", size = 34 }) {
+  const shapes = {
+    A: <polygon points={`${size/2},4 ${size-4},${size-4} 4,${size-4}`} />,
+    B: <rect x="5" y="5" width={size-10} height={size-10} rx="2" />,
+    C: (() => {
+      const cx = size/2, cy = size/2, r = size/2 - 4;
+      const pts = Array.from({ length: 6 }).map((_, i) => {
+        const a = (Math.PI / 3) * i - Math.PI / 2;
+        return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`;
+      }).join(" ");
+      return <polygon points={pts} />;
+    })()
+  };
+  const shape = shapes[type] || null;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="text-signal" style={{ filter: "drop-shadow(0 0 6px rgba(212,255,58,.4))" }}>
+      <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">{shape}</g>
+      <text x={size/2} y={size/2 + 4} textAnchor="middle" className="mono" fontSize={size * 0.32} fill="currentColor" fontWeight="700">{type}</text>
+    </svg>
   );
 }
 

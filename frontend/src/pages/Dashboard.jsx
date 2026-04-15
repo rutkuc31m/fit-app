@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
-import { Ring, Bar, Brackets, Empty, Icon } from "../components/ui";
+import { Ring, Brackets, Empty, Icon, Sparkline, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
 
 const sumMacros = (meals) => meals.reduce((a, m) => {
   m.items.forEach((it) => {
@@ -21,6 +21,8 @@ export default function Dashboard() {
   const [log, setLog] = useState(null);
   const [meals, setMeals] = useState([]);
   const [quickWt, setQuickWt] = useState("");
+  const [trend, setTrend] = useState([]);
+  const [savedFlash, setSavedFlash] = useState(false);
 
   const dayPlan = getDayPlan(date);
   const week = getWeekNum(date);
@@ -29,9 +31,17 @@ export default function Dashboard() {
   const macros = sumMacros(meals);
 
   const load = async () => {
-    const [l, m] = await Promise.all([api.get(`/logs/${date}`), api.get(`/meals?date=${date}`)]);
+    const d = new Date(date);
+    const from = new Date(d.getTime() - 13 * 86400000).toISOString().slice(0, 10);
+    const [l, m, range] = await Promise.all([
+      api.get(`/logs/${date}`),
+      api.get(`/meals?date=${date}`),
+      api.get(`/logs?from=${from}&to=${date}`)
+    ]);
     setLog(l); setMeals(m);
+    setTrend((range || []).map((r) => r.weight_kg).filter((v) => v != null));
     if (l?.weight_kg) setQuickWt(String(l.weight_kg));
+    else setQuickWt("");
   };
   useEffect(() => { load(); }, [date]);
 
@@ -40,6 +50,9 @@ export default function Dashboard() {
     if (!v) return;
     const l = await api.put(`/logs/${date}`, { weight_kg: v, fasting_type: dayPlan.eating });
     setLog(l);
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 600);
+    load();
   };
 
   const sw = user?.start_weight || PLAN.startWeight;
@@ -56,6 +69,13 @@ export default function Dashboard() {
 
   return (
     <div className="page">
+      {/* Phase strip */}
+      <div className="flex items-center gap-2 px-1">
+        <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">P{phase.id}/4</div>
+        <PhaseStrip phases={PLAN.phases} currentPhase={phase.id} />
+        <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">W{week}</div>
+      </div>
+
       {/* Hero */}
       <div className="hero-glow rounded-xl overflow-hidden">
         <div className="px-4 pt-3 flex items-center justify-between">
@@ -70,13 +90,16 @@ export default function Dashboard() {
           <div className="font-display text-signal leading-[.9] text-[clamp(3rem,13vw,4.6rem)] tracking-[-0.025em] [text-shadow:0_0_40px_rgba(212,255,58,.4)] flex items-baseline gap-1 tabular-nums" style={{ fontWeight: 700, fontVariationSettings: '"SOFT" 100, "opsz" 96' }}>
             {cur.toFixed(1)}<span className="text-[.32em] text-ink2">{t("dashboard.kg")}</span>
           </div>
-          <div className="mt-2 mono text-[.78rem] text-ink">
-            <span className="text-mute">{t("dashboard.target")}:</span> {tw}{t("dashboard.kg")} ·{" "}
-            <span className="text-mute">Δ</span> {(cur - tw).toFixed(1)}{t("dashboard.kg")}
+          <div className="mt-2 flex items-end justify-between gap-4">
+            <div className="mono text-[.78rem] text-ink">
+              <span className="text-mute">{t("dashboard.target")}:</span> {tw}{t("dashboard.kg")} ·{" "}
+              <span className="text-mute">Δ</span> {(cur - tw).toFixed(1)}{t("dashboard.kg")}
+            </div>
+            {trend.length >= 2 && <div className="flex-shrink-0 opacity-90"><Sparkline values={trend} width={120} height={30} /></div>}
           </div>
         </div>
         <div className="h-[6px] bg-bg2 relative">
-          <div className="h-full bg-signal" style={{ width: `${pct}%`, boxShadow: "0 0 20px theme(colors.signal)" }} />
+          <div className="h-full bg-signal" style={{ width: `${pct}%`, boxShadow: "0 0 20px rgba(212,255,58,.6)" }} />
         </div>
         <div className="px-4 py-2 flex justify-between mono text-[.66rem] uppercase tracking-[.14em] text-mute border-t border-dashed border-line2">
           <span>{pct}% · {t("dashboard.progress_to_goal")}</span>
@@ -90,7 +113,7 @@ export default function Dashboard() {
         <div className="flex gap-2">
           <input className="input flex-1 mono text-lg text-signal" type="number" step="0.1"
             value={quickWt} onChange={(e) => setQuickWt(e.target.value)} placeholder="00.0" />
-          <button className="btn-primary" onClick={saveWeight}>✓</button>
+          <button className={`btn-primary ${savedFlash ? "flash-ok" : ""}`} onClick={saveWeight}>✓</button>
         </div>
       </div>
 
@@ -107,20 +130,23 @@ export default function Dashboard() {
             <Ring value={macros.kcal} target={target.kcal || 1} size={118} stroke={9}
               over={target.kcal > 0 && macros.kcal > target.kcal}
               unit="kcal" label={`${Math.max(0, target.kcal - Math.round(macros.kcal))} left`} />
-            <div className="flex-1 flex flex-col gap-[10px] min-w-0">
+            <div className="flex-1 grid grid-cols-3 gap-2">
               {[
-                { k: "protein", v: macros.protein, t: target.protein, tone: "signal" },
-                { k: "carbs",   v: macros.carbs,   t: target.carbs,   tone: "cool" },
-                { k: "fat",     v: macros.fat,     t: target.fat,     tone: "signal" }
-              ].map((m) => (
-                <div key={m.k}>
-                  <div className="flex justify-between mono text-[.62rem] uppercase tracking-[.16em] mb-[3px]">
-                    <span className="text-ink2">{t(`dashboard.${m.k}`)}</span>
-                    <span className="text-mute">{Math.round(m.v)}<span className="opacity-60">/{m.t}</span>g</span>
+                { k: "protein", v: macros.protein, t: target.protein, color: "#d4ff3a" },
+                { k: "carbs",   v: macros.carbs,   t: target.carbs,   color: "#5ec8ff" },
+                { k: "fat",     v: macros.fat,     t: target.fat,     color: "#ffb454" }
+              ].map((m) => {
+                const pct = m.t > 0 ? (m.v / m.t) : 0;
+                const over = pct > 1;
+                const c = over ? "#ff3d3d" : m.color;
+                return (
+                  <div key={m.k} className="flex flex-col items-center">
+                    <MiniRing value={m.v} target={m.t} color={c} size={54} stroke={5} />
+                    <div className="mono text-[.56rem] text-mute uppercase tracking-[.18em] mt-1">{t(`dashboard.${m.k}`)}</div>
+                    <div className="mono text-[.62rem] text-ink tabular-nums">{Math.round(m.v)}<span className="text-mute opacity-70">/{m.t}g</span></div>
                   </div>
-                  <Bar value={m.v} target={m.t || 1} tone={m.tone} />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -129,13 +155,17 @@ export default function Dashboard() {
       {/* Today plan */}
       <div className="section-label">{t("dashboard.today_plan")}</div>
       <div className="grid grid-cols-2 gap-[10px]">
-        <Link to="/training" className="card p-4 hover:border-line2 transition">
-          <div className="card-title mb-1">{t("nav.training")}</div>
-          <div className="mono font-bold text-xl text-ink">
-            {dayPlan.type === "rest" ? "—" : dayPlan.type}
+        <Link to="/training" className="card p-4 hover:border-line2 transition flex items-center gap-3">
+          <div className="shrink-0">
+            {dayPlan.type === "rest"
+              ? <div className="w-[34px] h-[34px] rounded-full border border-dashed border-line2 grid place-items-center text-mute mono text-xs">z</div>
+              : <DayGlyph type={dayPlan.type} size={34} />}
           </div>
-          <div className="mono text-[.7rem] text-mute uppercase tracking-[.14em] mt-1">
-            {dayPlan.type === "rest" ? t("training.rest") : t(`training.day_${dayPlan.type.toLowerCase()}`)}
+          <div className="flex-1 min-w-0">
+            <div className="card-title mb-1">{t("nav.training")}</div>
+            <div className="mono text-[.7rem] text-mute uppercase tracking-[.14em] mt-1 truncate">
+              {dayPlan.type === "rest" ? t("training.rest") : t(`training.day_${dayPlan.type.toLowerCase()}`)}
+            </div>
           </div>
         </Link>
         <Link to="/log" className="card p-4 hover:border-line2 transition">
