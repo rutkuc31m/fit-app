@@ -111,12 +111,21 @@ export default function Log() {
         }}
         onPhoto={(food) => {
           const f = food || {};
-          setDraft((d) => ({
-            ...(d || emptyItem),
-            name: [f.brand, f.name].filter(Boolean).join(" — ") || "photo item",
-            _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g },
-            _analyzing: false
-          }));
+          setDraft((d) => {
+            if (!d) return d;
+            const amt = d.amount_g || 100;
+            const k = amt / 100;
+            return {
+              ...d,
+              name: [f.brand, f.name].filter(Boolean).join(" — ") || "photo item",
+              _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g },
+              kcal: +((f.kcal_100g || 0) * k).toFixed(1),
+              protein_g: +((f.protein_100g || 0) * k).toFixed(1),
+              carbs_g: +((f.carbs_100g || 0) * k).toFixed(1),
+              fat_g: +((f.fat_100g || 0) * k).toFixed(1),
+              _analyzing: false
+            };
+          });
         }}
         onError={(msg) => {
           setDraft((d) => ({ ...(d || emptyItem), name: `err: ${msg}`, _analyzing: false }));
