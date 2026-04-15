@@ -160,7 +160,7 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
       </div>
 
       <div className="p-4 flex flex-col items-center gap-2">
-        {err && <div className="mono text-xs text-warn text-center">{err}</div>}
+        {err && <div className="mono text-sm text-warn text-center bg-warn/10 border border-warn/40 rounded-lg px-3 py-2 w-full break-all">ERR: {err}</div>}
         {!err && (
           <div className="mono text-[.66rem] text-mute uppercase tracking-[.14em] text-center">
             {mode === "barcode" ? t("log.scan_hint") : (busy ? t("log.analyzing") : t("log.photo_hint"))}
