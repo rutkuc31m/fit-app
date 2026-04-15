@@ -105,21 +105,21 @@ export default function Log() {
       ))}
 
       {scanOpen && <BarcodeScanner
-        onCapture={() => {
+        onDetected={(code) => {
           setScanOpen(false);
-          setDraft({ ...emptyItem, name: "analyzing…", _analyzing: true });
-        }}
-        onPhoto={(food) => {
-          const f = food || {};
-          setDraft((d) => ({
-            ...(d || emptyItem),
-            name: [f.brand, f.name].filter(Boolean).join(" — ") || "photo item",
-            _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g },
-            _analyzing: false
-          }));
-        }}
-        onError={(msg) => {
-          setDraft((d) => ({ ...(d || emptyItem), name: `err: ${msg}`, _analyzing: false }));
+          setDraft({ ...emptyItem, barcode: code, name: `looking up ${code}…` });
+          api.get(`/foods/barcode/${code}`)
+            .then((food) => {
+              const f = food || {};
+              setDraft((d) => ({
+                ...(d || emptyItem),
+                name: [f.brand, f.name].filter(Boolean).join(" — ") || code,
+                _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g }
+              }));
+            })
+            .catch((e) => {
+              setDraft((d) => ({ ...(d || emptyItem), name: `err: ${e.message || String(e)}` }));
+            });
         }}
         onClose={() => setScanOpen(false)} />}
 
