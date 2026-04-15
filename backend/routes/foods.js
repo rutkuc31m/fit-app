@@ -42,37 +42,31 @@ r.get("/barcode/:code", async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// Photo → Claude vision → nutrition per 100g
+// Photo → Gemini vision → nutrition per 100g
 r.post("/analyze-photo", async (req, res, next) => {
   try {
     const { image } = req.body || {};
     if (!image || typeof image !== "string") return res.status(400).json({ error: "no_image" });
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(503).json({ error: "ai_not_configured" });
 
-    const prompt = `You are analyzing a photo of a food product (likely showing packaging or the food itself).
-Identify the product and estimate nutrition per 100g. If a nutrition label is visible, read it directly.
+    const prompt = `Analyze this food photo. If a nutrition label is visible, read it directly. Otherwise estimate for the identified food.
 Respond with ONLY a JSON object, no prose, no markdown fences:
 {"name": string, "brand": string|null, "kcal_100g": number, "protein_100g": number, "carbs_100g": number, "fat_100g": number, "confidence": "high"|"medium"|"low"}
-If you cannot identify a food at all, return {"error": "not_food"}.`;
+If the photo contains no food, return {"error": "not_food"}.`;
 
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const resp = await fetch(url, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01"
-      },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 512,
-        messages: [{
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: image } },
-            { type: "text", text: prompt }
+        contents: [{
+          parts: [
+            { inline_data: { mime_type: "image/jpeg", data: image } },
+            { text: prompt }
           ]
-        }]
+        }],
+        generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
       })
     });
     if (!resp.ok) {
@@ -80,7 +74,7 @@ If you cannot identify a food at all, return {"error": "not_food"}.`;
       return res.status(502).json({ error: "ai_error", detail: txt.slice(0, 300) });
     }
     const data = await resp.json();
-    const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+    const text = ((data.candidates?.[0]?.content?.parts || []).map((p) => p.text).join("") || "").trim();
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) return res.status(422).json({ error: "ai_parse_failed", raw: text.slice(0, 300) });
     let parsed;
