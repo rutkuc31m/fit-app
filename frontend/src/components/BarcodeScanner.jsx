@@ -48,6 +48,8 @@ export default function BarcodeScanner({ onPhoto, onClose }) {
       const dataUrl = c.toDataURL("image/jpeg", 0.82);
       const b64 = dataUrl.split(",")[1];
       const result = await api.post("/foods/analyze-photo", { image: b64 }, { timeoutMs: 60000 });
+      try { streamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
+      streamRef.current = null;
       setDone(true);
       try { cbRef.current.onPhoto(result); } catch {}
     } catch (e) {
