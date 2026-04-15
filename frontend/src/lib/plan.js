@@ -3,13 +3,13 @@ export const PLAN = {
   startDate: "2026-04-20",
   endDate: "2026-10-19",
   startWeight: 95,
-  targetWeight: 72,
+  targetWeight: 75,
   heightCm: 177,
   phases: [
-    { id: 1, nameKey: "phase1", weeks: [1, 4],   from: 95, to: 89, color: "#4a9e3f" },
-    { id: 2, nameKey: "phase2", weeks: [5, 12],  from: 89, to: 80, color: "#3f8ae0" },
-    { id: 3, nameKey: "phase3", weeks: [13, 20], from: 80, to: 74, color: "#e0c93f" },
-    { id: 4, nameKey: "phase4", weeks: [21, 26], from: 74, to: 72, color: "#e06c3f" }
+    { id: 1, nameKey: "phase1", weeks: [1, 4],   from: 95, to: 90, color: "#4a9e3f" },
+    { id: 2, nameKey: "phase2", weeks: [5, 12],  from: 90, to: 82, color: "#3f8ae0" },
+    { id: 3, nameKey: "phase3", weeks: [13, 20], from: 82, to: 77, color: "#e0c93f" },
+    { id: 4, nameKey: "phase4", weeks: [21, 26], from: 77, to: 75, color: "#e06c3f" }
   ],
   // Weekly pattern by getDay() (0=Sun..6=Sat). ADF-hybrid.
   weeklyPattern: {
