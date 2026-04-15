@@ -121,10 +121,11 @@ export default function Log() {
         onDetected={onBarcode}
         onPhoto={(food) => {
           setScanOpen(false);
+          const f = food || {};
           setDraft({
             ...emptyItem,
-            name: [food.brand, food.name].filter(Boolean).join(" — ") || "photo item",
-            _per100: { kcal: food.kcal_100g, p: food.protein_100g, c: food.carbs_100g, f: food.fat_100g }
+            name: [f.brand, f.name].filter(Boolean).join(" — ") || "photo item",
+            _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g }
           });
         }}
         onClose={() => setScanOpen(false)} />}

@@ -105,8 +105,9 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
       c.getContext("2d").drawImage(v, 0, 0, w, h);
       const dataUrl = c.toDataURL("image/jpeg", 0.82);
       const b64 = dataUrl.split(",")[1];
-      const result = await api.post("/foods/analyze-photo", { image: b64 });
-      onPhoto(result);
+      const result = await api.post("/foods/analyze-photo", { image: b64 }, { timeoutMs: 60000 });
+      try { cbRef.current.onPhoto(result); } catch {}
+      setDone(true);
     } catch (e) {
       setErr(e.message || String(e));
     } finally { setBusy(false); }
