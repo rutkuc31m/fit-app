@@ -26,19 +26,6 @@ export default function Log() {
   const deleteMeal = async (id) => { await api.del(`/meals/${id}`); load(); };
   const deleteItem = async (id) => { await api.del(`/meals/items/${id}`); load(); };
 
-  const onBarcode = async (code) => {
-    setScanOpen(false);
-    setDraft({ ...emptyItem, barcode: code, name: code });
-    try {
-      const food = await api.get(`/foods/barcode/${code}`);
-      setDraft((d) => d ? {
-        ...d,
-        name: [food.brand, food.name].filter(Boolean).join(" — ") || code,
-        _per100: { kcal: food.kcal_100g, p: food.protein_100g, c: food.carbs_100g, f: food.fat_100g }
-      } : d);
-    } catch {}
-  };
-
   const updateAmount = (g) => {
     if (!draft?._per100) return setDraft({ ...draft, amount_g: g });
     const factor = g / 100;
@@ -118,7 +105,6 @@ export default function Log() {
       ))}
 
       {scanOpen && <BarcodeScanner
-        onDetected={onBarcode}
         onPhoto={(food) => {
           setScanOpen(false);
           const f = food || {};
