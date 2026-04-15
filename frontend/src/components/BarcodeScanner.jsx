@@ -115,7 +115,7 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
   if (done) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-bg/95 backdrop-blur-lg flex flex-col">
+    <div className="fixed inset-0 z-[60] bg-bg/95 backdrop-blur-lg flex flex-col pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-between p-4 border-b border-line">
         <div className="mono text-xs caps text-signal pulse-dot">
           {mode === "barcode" ? t("log.scan_barcode") : t("log.photo_analyze")}
