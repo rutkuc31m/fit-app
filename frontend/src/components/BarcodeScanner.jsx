@@ -139,10 +139,11 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
 
       <div className="flex-1 flex items-center justify-center p-4">
         {mode === "barcode" ? (
-          <div id={regionId} className="w-full max-w-md rounded-xl overflow-hidden border border-signald shadow-glow" />
+          <div id={regionId} className="w-full max-w-md min-h-[60vh] rounded-xl overflow-hidden border border-signald shadow-glow bg-bg2" />
         ) : (
-          <div className="relative w-full max-w-md aspect-[3/4] rounded-xl overflow-hidden border border-signald shadow-glow bg-bg2">
-            <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover" />
+          <div onClick={snap} role="button" aria-label="capture"
+               className="relative w-full max-w-md aspect-[3/4] rounded-xl overflow-hidden border border-signald shadow-glow bg-bg2 cursor-pointer active:scale-[.98] transition">
+            <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
             <div className="absolute inset-4 border border-signal/40 rounded-lg pointer-events-none" />
             <span className="bk tl absolute top-2 left-2 w-3 h-3 border-t border-l border-signal" />
             <span className="bk tr absolute top-2 right-2 w-3 h-3 border-t border-r border-signal" />
@@ -157,17 +158,12 @@ export default function BarcodeScanner({ onDetected, onPhoto, onClose }) {
         )}
       </div>
 
-      <div className="p-4 flex flex-col items-center gap-3">
+      <div className="p-4 flex flex-col items-center gap-2">
         {err && <div className="mono text-xs text-warn text-center">{err}</div>}
         {!err && (
           <div className="mono text-[.66rem] text-mute uppercase tracking-[.14em] text-center">
-            {mode === "barcode" ? t("log.scan_hint") : t("log.photo_hint")}
+            {mode === "barcode" ? t("log.scan_hint") : (busy ? t("log.analyzing") : t("log.photo_hint"))}
           </div>
-        )}
-        {mode === "photo" && (
-          <button className="btn-primary px-6 py-3" onClick={snap} disabled={busy}>
-            {busy ? "…" : t("log.capture")}
-          </button>
         )}
       </div>
     </div>
