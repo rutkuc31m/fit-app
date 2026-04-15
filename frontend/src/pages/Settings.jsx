@@ -42,9 +42,12 @@ export default function Settings() {
           <input className="input mono" type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} />
         </label>
         <div className="grid grid-cols-3 gap-2">
-          {[["start_weight", "start_weight"], ["target_weight", "target_weight"], ["height_cm", "height"]].map(([k, tk]) => (
+          {[["start_weight", "start_weight", "kg"], ["target_weight", "target_weight", "kg"], ["height_cm", "height", "cm"]].map(([k, tk, unit]) => (
             <label key={k} className="flex flex-col gap-1 justify-end">
-              <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em] min-h-[26px] flex items-end leading-tight">{t(`settings.${tk}`)}</span>
+              <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em] leading-tight flex flex-col">
+                <span>{t(`settings.${tk}`)}</span>
+                <span className="text-mute/60">({unit})</span>
+              </span>
               <input className="input mono" type="number" step="0.1" value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: +e.target.value })} />
             </label>
           ))}
