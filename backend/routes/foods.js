@@ -50,10 +50,11 @@ r.post("/analyze-photo", async (req, res, next) => {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(503).json({ error: "ai_not_configured" });
 
-    const prompt = `Analyze this food photo. If a nutrition label is visible, read it directly. Otherwise estimate for the identified food.
+    const prompt = `Analyze this food photo. If nutrition label visible, read it. Otherwise use your knowledge of the identified product (brand + name) to provide typical per-100g macros.
+CRITICAL: kcal_100g, protein_100g, carbs_100g, fat_100g MUST be non-zero positive numbers. Never return 0 or null for macros — always estimate based on product category if exact values unknown (e.g. butter cookies ~470kcal, 6g protein, 70g carbs, 18g fat per 100g).
 Respond with ONLY a JSON object, no prose, no markdown fences:
 {"name": string, "brand": string|null, "kcal_100g": number, "protein_100g": number, "carbs_100g": number, "fat_100g": number, "confidence": "high"|"medium"|"low"}
-If the photo contains no food, return {"error": "not_food"}.`;
+If the photo contains no food at all, return {"error": "not_food"}.`;
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${encodeURIComponent(apiKey)}`;
     const resp = await fetch(url, {
@@ -75,6 +76,7 @@ If the photo contains no food, return {"error": "not_food"}.`;
     }
     const data = await resp.json();
     const text = ((data.candidates?.[0]?.content?.parts || []).map((p) => p.text).join("") || "").trim();
+    console.log("[gemini] raw:", text.slice(0, 500));
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) return res.status(422).json({ error: "ai_parse_failed", raw: text.slice(0, 300) });
     let parsed;
