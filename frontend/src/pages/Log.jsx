@@ -124,7 +124,7 @@ export default function Log() {
         onClose={() => setScanOpen(false)} />}
 
       {draft && activeMeal && (
-        <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-end md:items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+80px)]">
           <div className="card w-full max-w-md p-4 flex flex-col gap-3">
             <div className="section-label">{t("log.add_item")}</div>
             <input className="input" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
