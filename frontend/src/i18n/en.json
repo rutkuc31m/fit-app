@@ -41,8 +41,8 @@
   },
   "settings": {
     "title": "Settings", "profile": "Profile", "language": "Language",
-    "start_date": "Start date", "start_weight": "Start weight (kg)",
-    "target_weight": "Target weight (kg)", "height": "Height (cm)",
+    "start_date": "Start date", "start_weight": "Start weight",
+    "target_weight": "Target weight", "height": "Height",
     "save": "Save", "saved": "Saved"
   },
   "common": {

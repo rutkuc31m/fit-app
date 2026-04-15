@@ -41,8 +41,8 @@
   },
   "settings": {
     "title": "Einstellungen", "profile": "Profil", "language": "Sprache",
-    "start_date": "Startdatum", "start_weight": "Startgewicht (kg)",
-    "target_weight": "Zielgewicht (kg)", "height": "Größe (cm)",
+    "start_date": "Startdatum", "start_weight": "Startgewicht",
+    "target_weight": "Zielgewicht", "height": "Größe",
     "save": "Speichern", "saved": "Gespeichert"
   },
   "common": {
