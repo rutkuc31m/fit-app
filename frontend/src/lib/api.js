@@ -26,7 +26,8 @@ async function request(path, opts = {}) {
   if (!res.ok) {
     let body = null;
     try { body = await res.json(); } catch {}
-    throw new Error(body?.error || `http_${res.status}`);
+    const msg = body?.error ? (body.detail ? `${body.error}: ${body.detail}` : body.error) : `http_${res.status}`;
+    throw new Error(msg);
   }
   return res.status === 204 ? null : res.json();
 }
