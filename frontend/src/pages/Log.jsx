@@ -14,6 +14,9 @@ export default function Log() {
   const [scanOpen, setScanOpen] = useState(false);
   const [activeMeal, setActiveMeal] = useState(null);
   const [draft, setDraft] = useState(null); // item being edited
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
   const load = async () => setMeals(await api.get(`/meals?date=${date}`));
   useEffect(() => { load(); }, [date]);
@@ -36,6 +39,41 @@ export default function Log() {
       carbs_g: +((draft._per100.c || 0) * factor).toFixed(1),
       fat_g: +((draft._per100.f || 0) * factor).toFixed(1)
     });
+  };
+
+  useEffect(() => {
+    if (!draft || search.trim().length < 2) { setResults([]); return; }
+    setSearching(true);
+    const h = setTimeout(async () => {
+      try { setResults(await api.get(`/foods/search?q=${encodeURIComponent(search.trim())}`)); }
+      catch { setResults([]); }
+      finally { setSearching(false); }
+    }, 350);
+    return () => clearTimeout(h);
+  }, [search, draft]);
+
+  const pickResult = async (r) => {
+    let item = r;
+    if (item.kcal_100g == null || item.protein_100g == null) {
+      try { item = await api.post("/foods/lookup-name", { name: r.name, brand: r.brand }); item.barcode = r.barcode; }
+      catch {}
+    }
+    setDraft((d) => {
+      if (!d) return d;
+      const amt = d.amount_g || 100;
+      const k = amt / 100;
+      return {
+        ...d,
+        name: [item.brand, item.name].filter(Boolean).join(" — ") || r.name,
+        barcode: item.barcode || null,
+        _per100: { kcal: item.kcal_100g, p: item.protein_100g, c: item.carbs_100g, f: item.fat_100g },
+        kcal: +((item.kcal_100g || 0) * k).toFixed(1),
+        protein_g: +((item.protein_100g || 0) * k).toFixed(1),
+        carbs_g: +((item.carbs_100g || 0) * k).toFixed(1),
+        fat_g: +((item.fat_100g || 0) * k).toFixed(1),
+      };
+    });
+    setSearch(""); setResults([]);
   };
 
   const saveDraft = async () => {
@@ -142,6 +180,26 @@ export default function Log() {
               </div>
             )}
             <input className="input" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <div className="relative">
+              <input className="input" placeholder="search product…" value={search} onChange={(e) => setSearch(e.target.value)} />
+              {(searching || results.length > 0) && (
+                <div className="absolute left-0 right-0 top-full mt-1 z-10 card max-h-60 overflow-y-auto">
+                  {searching && <div className="px-3 py-2 mono text-[.66rem] text-mute">searching…</div>}
+                  {!searching && results.length === 0 && search.trim().length >= 2 && (
+                    <div className="px-3 py-2 mono text-[.66rem] text-mute">no matches</div>
+                  )}
+                  {results.map((r, i) => (
+                    <button key={i} type="button" onClick={() => pickResult(r)}
+                      className="w-full text-left px-3 py-2 border-b border-line last:border-0 hover:bg-bg2">
+                      <div className="text-sm text-ink truncate">{r.name}</div>
+                      <div className="mono text-[.62rem] text-mute truncate">
+                        {r.brand || "—"} {r.kcal_100g ? `· ${Math.round(r.kcal_100g)} kcal/100g` : "· no macros (AI fallback)"}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1">
                 <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.amount_g")}</span>
