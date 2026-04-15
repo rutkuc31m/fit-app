@@ -111,10 +111,12 @@ export default function Log() {
           api.get(`/foods/barcode/${code}`)
             .then((food) => {
               const f = food || {};
+              const hasNutrition = [f.kcal_100g, f.protein_100g, f.carbs_100g, f.fat_100g].some((v) => v != null);
               setDraft((d) => ({
                 ...(d || emptyItem),
                 name: [f.brand, f.name].filter(Boolean).join(" — ") || code,
-                _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g }
+                _per100: hasNutrition ? { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g } : undefined,
+                _noData: !hasNutrition
               }));
             })
             .catch((e) => {
@@ -127,6 +129,11 @@ export default function Log() {
         <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+80px)]">
           <div className="card w-full max-w-md p-4 flex flex-col gap-3">
             <div className="section-label">{t("log.add_item")}</div>
+            {draft._noData && (
+              <div className="mono text-[.62rem] text-warn uppercase tracking-[.14em] bg-warn/10 border border-warn/40 rounded-lg px-3 py-2">
+                no nutrition data — enter manually
+              </div>
+            )}
             <input className="input" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1">
