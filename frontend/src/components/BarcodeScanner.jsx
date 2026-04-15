@@ -3,15 +3,15 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { Icon } from "./ui";
 
-export default function BarcodeScanner({ onPhoto, onClose }) {
+export default function BarcodeScanner({ onPhoto, onCapture, onError, onClose }) {
   const { t } = useTranslation();
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
-  const cbRef = useRef({ onPhoto, onClose });
-  cbRef.current = { onPhoto, onClose };
+  const cbRef = useRef({ onPhoto, onCapture, onError, onClose });
+  cbRef.current = { onPhoto, onCapture, onError, onClose };
 
   useEffect(() => {
     setErr(null);
@@ -32,29 +32,28 @@ export default function BarcodeScanner({ onPhoto, onClose }) {
     };
   }, []);
 
-  const snap = async () => {
+  const snap = () => {
     if (busy) return;
     const v = videoRef.current;
     if (!v || !v.videoWidth) return setErr("camera_not_ready");
     setBusy(true); setErr(null);
-    try {
-      const maxW = 1280;
-      const scale = Math.min(1, maxW / v.videoWidth);
-      const w = Math.round(v.videoWidth * scale);
-      const h = Math.round(v.videoHeight * scale);
-      const c = document.createElement("canvas");
-      c.width = w; c.height = h;
-      c.getContext("2d").drawImage(v, 0, 0, w, h);
-      const dataUrl = c.toDataURL("image/jpeg", 0.82);
-      const b64 = dataUrl.split(",")[1];
-      const result = await api.post("/foods/analyze-photo", { image: b64 }, { timeoutMs: 60000 });
-      try { streamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
-      streamRef.current = null;
-      setDone(true);
-      try { cbRef.current.onPhoto(result); } catch {}
-    } catch (e) {
-      setErr(e.message || String(e));
-    } finally { setBusy(false); }
+    const maxW = 1280;
+    const scale = Math.min(1, maxW / v.videoWidth);
+    const w = Math.round(v.videoWidth * scale);
+    const h = Math.round(v.videoHeight * scale);
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    c.getContext("2d").drawImage(v, 0, 0, w, h);
+    const dataUrl = c.toDataURL("image/jpeg", 0.82);
+    const b64 = dataUrl.split(",")[1];
+    // Close scanner NOW so user sees progress in draft modal. API runs in background.
+    try { streamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
+    streamRef.current = null;
+    setDone(true);
+    try { cbRef.current.onCapture?.(); } catch {}
+    api.post("/foods/analyze-photo", { image: b64 }, { timeoutMs: 60000 })
+      .then((result) => { try { cbRef.current.onPhoto(result); } catch {} })
+      .catch((e) => { try { cbRef.current.onError?.(e.message || String(e)); } catch {} });
   };
 
   if (done) return null;

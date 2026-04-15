@@ -105,14 +105,21 @@ export default function Log() {
       ))}
 
       {scanOpen && <BarcodeScanner
-        onPhoto={(food) => {
+        onCapture={() => {
           setScanOpen(false);
+          setDraft({ ...emptyItem, name: "analyzing…", _analyzing: true });
+        }}
+        onPhoto={(food) => {
           const f = food || {};
-          setDraft({
-            ...emptyItem,
+          setDraft((d) => ({
+            ...(d || emptyItem),
             name: [f.brand, f.name].filter(Boolean).join(" — ") || "photo item",
-            _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g }
-          });
+            _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g },
+            _analyzing: false
+          }));
+        }}
+        onError={(msg) => {
+          setDraft((d) => ({ ...(d || emptyItem), name: `err: ${msg}`, _analyzing: false }));
         }}
         onClose={() => setScanOpen(false)} />}
 
