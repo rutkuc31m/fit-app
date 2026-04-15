@@ -28,17 +28,15 @@ export default function Log() {
 
   const onBarcode = async (code) => {
     setScanOpen(false);
+    setDraft({ ...emptyItem, barcode: code, name: code });
     try {
       const food = await api.get(`/foods/barcode/${code}`);
-      setDraft({
-        ...emptyItem,
-        barcode: code,
+      setDraft((d) => d ? {
+        ...d,
         name: [food.brand, food.name].filter(Boolean).join(" — ") || code,
         _per100: { kcal: food.kcal_100g, p: food.protein_100g, c: food.carbs_100g, f: food.fat_100g }
-      });
-    } catch {
-      setDraft({ ...emptyItem, barcode: code, name: code });
-    }
+      } : d);
+    } catch {}
   };
 
   const updateAmount = (g) => {
