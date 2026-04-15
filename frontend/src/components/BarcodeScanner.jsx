@@ -41,14 +41,17 @@ export default function BarcodeScanner({ onDetected, onClose }) {
       (text) => {
         if (detectedRef.current) return;
         detectedRef.current = true;
-        // Stop camera sync so iOS doesn't keep feed visible while we close.
         try {
           const ve = document.querySelector(`#${regionId} video`);
           if (ve?.srcObject) ve.srcObject.getTracks().forEach((t) => t.stop());
         } catch {}
         scanner.stop().catch(() => {});
-        setDone(true);
-        try { cbRef.current.onDetected(text); } catch {}
+        // Defer state updates into main event loop — html5-qrcode callback
+        // can fire from inside rAF where React 18 batching misbehaves on iOS.
+        setTimeout(() => {
+          setDone(true);
+          try { cbRef.current.onDetected(text); } catch (e) { alert("onDetected err: " + (e.message || e)); }
+        }, 0);
       },
       () => {}
     ).catch((e) => setErr(e.message || String(e)));
