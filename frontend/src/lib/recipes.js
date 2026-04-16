@@ -1,6 +1,6 @@
 // OMAD recipes — single big meal hits the day's kcal target.
 // Two modes: OMAD (~1800kcal training-day) and LOW (~1300kcal rest-day, lower carb).
-// Style: high-protein, high-fiber, healthy fats. Mediterranean / clean bowl format.
+// Style: gluten-free, high-protein, high-fiber, healthy fats. Mediterranean / clean bowl format.
 
 export const RECIPES = [
   // ─── OMAD · ~1800 kcal · 150P / 115C / 75F ───
@@ -74,7 +74,7 @@ export const RECIPES = [
       { item: "broccoli",       g: 200, cat: "produce" },
       { item: "edamame",        g: 100, cat: "produce" },
       { item: "bell_pepper",    g: 120, cat: "produce" },
-      { item: "soy_sauce",      g: 20,  cat: "pantry" },
+      { item: "tamari_gf",      g: 20,  cat: "pantry" },
       { item: "sesame_oil",     g: 12,  cat: "pantry" },
       { item: "olive_oil",      g: 10,  cat: "pantry" },
       { item: "garlic",         g: 10,  cat: "produce" }
@@ -216,7 +216,7 @@ export const INGREDIENT_NAMES = {
   tofu_firm:         { en: "Firm tofu",           de: "Tofu (fest)" },
   rice_brown_dry:    { en: "Brown rice (dry)",    de: "Vollkornreis (trocken)" },
   edamame:           { en: "Edamame",             de: "Edamame" },
-  soy_sauce:         { en: "Soy sauce",           de: "Sojasauce" },
+  tamari_gf:         { en: "Soy sauce",           de: "Sojasauce" },
   sesame_oil:        { en: "Sesame oil",          de: "Sesamöl" },
   avocado:           { en: "Avocado",             de: "Avocado" },
   salad_mix:         { en: "Salad mix",           de: "Blattsalat-Mix" },
