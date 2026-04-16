@@ -13,18 +13,18 @@ export const PLAN = {
   ],
   // Weekly pattern by getDay() (0=Sun..6=Sat). ADF-hybrid.
   weeklyPattern: {
-    1: { type: "A",    eating: "IF" },
+    1: { type: "A",    eating: "OMAD" },
     2: { type: "rest", eating: "FAST" },
-    3: { type: "B",    eating: "IF" },
-    4: { type: "rest", eating: "IF_LOW" },
-    5: { type: "C",    eating: "IF" },
+    3: { type: "B",    eating: "OMAD" },
+    4: { type: "rest", eating: "LOW" },
+    5: { type: "C",    eating: "OMAD" },
     6: { type: "rest", eating: "FAST" },
-    0: { type: "rest", eating: "IF_LOW" }
+    0: { type: "rest", eating: "LOW" }
   },
   eatingTargets: {
-    IF:     { kcal: 1800, protein: 150, carbs: 115, fat: 75 },
-    IF_LOW: { kcal: 1300, protein: 130, carbs: 60,  fat: 65 },
-    FAST:   { kcal: 0,    protein: 0,   carbs: 0,   fat: 0 }
+    OMAD: { kcal: 1800, protein: 150, carbs: 115, fat: 75 },
+    LOW:  { kcal: 1300, protein: 130, carbs: 60,  fat: 65 },
+    FAST: { kcal: 0,    protein: 0,   carbs: 0,   fat: 0 }
   },
   training: {
     A: {
@@ -79,4 +79,4 @@ export const getDayPlan = (dateStr = todayStr()) => {
   return PLAN.weeklyPattern[dow];
 };
 
-export const getEatingTarget = (eating) => PLAN.eatingTargets[eating] || PLAN.eatingTargets.IF_LOW;
+export const getEatingTarget = (eating) => PLAN.eatingTargets[eating] || PLAN.eatingTargets.LOW;

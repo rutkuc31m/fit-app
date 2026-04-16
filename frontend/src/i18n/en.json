@@ -4,7 +4,7 @@
     "title": "Meal plan", "tab_today": "Today", "tab_week": "Week", "tab_shop": "Shopping",
     "eating_today": "Eating mode today", "target": "Target", "fast_day": "Fasting day", "fast_hint": "No meals planned. Hydrate well.",
     "ingredients": "Ingredients", "steps": "Steps",
-    "slot_breakfast": "Breakfast", "slot_lunch": "Lunch", "slot_dinner": "Dinner",
+    "the_meal": "Today's meal",
     "shop_hint": "Aggregated for the next 7 days. Tap to check off."
   },
   "auth": {

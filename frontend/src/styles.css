@@ -206,7 +206,7 @@
     background-image: repeating-linear-gradient(135deg, rgba(212,255,58,.08) 0 2px, transparent 2px 6px);
   }
 
-  /* Chip (fuel/eating badges: IF, FAST, IF_LOW, rest, A/B/C) */
+  /* Chip (fuel/eating badges: OMAD, FAST, LOW, rest, A/B/C) */
   .chip {
     @apply mono text-[.62rem] caps px-[6px] py-[2px] rounded-[4px] border inline-flex items-center gap-1;
   }

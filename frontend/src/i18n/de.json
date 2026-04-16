@@ -4,7 +4,7 @@
     "title": "Essensplan", "tab_today": "Heute", "tab_week": "Woche", "tab_shop": "Einkauf",
     "eating_today": "Essmodus heute", "target": "Ziel", "fast_day": "Fastentag", "fast_hint": "Keine Mahlzeiten geplant. Viel trinken.",
     "ingredients": "Zutaten", "steps": "Schritte",
-    "slot_breakfast": "Frühstück", "slot_lunch": "Mittag", "slot_dinner": "Abend",
+    "the_meal": "Mahlzeit heute",
     "shop_hint": "Zusammenfassung für die nächsten 7 Tage. Tippen zum Abhaken."
   },
   "auth": {

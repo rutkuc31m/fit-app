@@ -55,10 +55,10 @@ export default function Recipes() {
             <div key={r.id + i} className="card overflow-hidden">
               <div className="px-4 py-3 border-b border-line flex justify-between items-baseline">
                 <div>
-                  <div className="mono text-[.62rem] text-mute uppercase tracking-[.18em]">{t(`recipes.slot_${r.slot}`)}</div>
+                  <div className="mono text-[.62rem] text-mute uppercase tracking-[.18em]">{t("recipes.the_meal")}</div>
                   <div className="text-sm text-ink mt-[2px]">{r.name[lang]}</div>
                 </div>
-                <div className="mono text-sm text-signal font-bold tabular-nums">{r.kcal}</div>
+                <div className="mono text-sm text-signal font-bold tabular-nums">{r.kcal} kcal</div>
               </div>
               <div className="px-4 py-2 mono text-[.64rem] text-ink2 flex gap-3">
                 <span>P{r.p}</span><span className="text-cool">C{r.c}</span><span className="text-warn">F{r.f}</span>
@@ -107,8 +107,8 @@ export default function Recipes() {
                   ? <div className="mono text-[.66rem] text-mute">{t("recipes.fast_day")}</div>
                   : rs.map((r, j) => (
                       <div key={j} className="flex justify-between mono text-[.7rem] py-[2px]">
-                        <span className="text-ink2"><span className="text-mute">[{t(`recipes.slot_${r.slot}`).slice(0, 1)}]</span> {r.name[lang]}</span>
-                        <span className="text-mute tabular-nums">{r.kcal}</span>
+                        <span className="text-ink2 truncate pr-2">{r.name[lang]}</span>
+                        <span className="text-mute tabular-nums shrink-0">{r.kcal}</span>
                       </div>
                     ))}
               </div>

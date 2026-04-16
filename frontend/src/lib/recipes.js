@@ -1,163 +1,187 @@
-// Curated high-protein, high-fiber, healthy-fat recipes
-// Macros are approximate per serving as listed.
+// OMAD recipes — single big meal hits the day's kcal target.
+// Two modes: OMAD (~1800kcal training-day) and LOW (~1300kcal rest-day, lower carb).
+// Style: high-protein, high-fiber, healthy fats. Mediterranean / clean bowl format.
 
 export const RECIPES = [
-  // ─── IF · BREAKFAST (~500kcal · 35P/45C/18F) ───
+  // ─── OMAD · ~1800 kcal · 150P / 115C / 75F ───
   {
-    id: "skyr_bowl", mode: "IF", slot: "breakfast",
-    name: { en: "Skyr Power Bowl", de: "Skyr Power Bowl" },
-    kcal: 480, p: 38, c: 52, f: 14,
+    id: "omad_chicken_quinoa", mode: "OMAD",
+    name: { en: "Chicken Quinoa Power Plate", de: "Hähnchen Quinoa Power-Teller" },
+    kcal: 1810, p: 152, c: 118, f: 72,
     ingredients: [
-      { item: "skyr_natural", g: 250, cat: "dairy" },
-      { item: "oats_rolled",  g: 40,  cat: "pantry" },
-      { item: "blueberries",  g: 80,  cat: "produce" },
-      { item: "walnuts",      g: 15,  cat: "pantry" },
-      { item: "honey",        g: 10,  cat: "pantry" }
-    ],
-    steps: { en: ["Mix skyr + oats", "Top with berries, walnuts, honey"], de: ["Skyr + Haferflocken mischen", "Mit Beeren, Walnüssen und Honig toppen"] }
-  },
-  {
-    id: "egg_white_omelette", mode: "IF", slot: "breakfast",
-    name: { en: "Egg White Veggie Omelette", de: "Eiweiß-Gemüse-Omelett" },
-    kcal: 510, p: 42, c: 38, f: 20,
-    ingredients: [
-      { item: "egg_whites",     g: 200, cat: "dairy" },
-      { item: "eggs_whole",     g: 100, cat: "dairy" },
-      { item: "spinach",        g: 80,  cat: "produce" },
-      { item: "feta",           g: 40,  cat: "dairy" },
-      { item: "bread_wholegrain", g: 60, cat: "bakery" },
-      { item: "olive_oil",      g: 8,   cat: "pantry" }
-    ],
-    steps: { en: ["Sauté spinach", "Pour egg mix", "Crumble feta", "Serve with toast"], de: ["Spinat anbraten", "Eimasse darüber gießen", "Feta zerbröseln", "Mit Toast servieren"] }
-  },
-
-  // ─── IF · LUNCH (~700kcal · 55P/55C/25F) ───
-  {
-    id: "chicken_quinoa", mode: "IF", slot: "lunch",
-    name: { en: "Chicken Quinoa Bowl", de: "Hähnchen Quinoa Bowl" },
-    kcal: 720, p: 58, c: 60, f: 22,
-    ingredients: [
-      { item: "chicken_breast", g: 180, cat: "meat" },
-      { item: "quinoa_dry",     g: 70,  cat: "pantry" },
-      { item: "broccoli",       g: 150, cat: "produce" },
-      { item: "bell_pepper",    g: 100, cat: "produce" },
-      { item: "olive_oil",      g: 12,  cat: "pantry" },
+      { item: "chicken_breast", g: 350, cat: "meat" },
+      { item: "quinoa_dry",     g: 110, cat: "pantry" },
+      { item: "broccoli",       g: 200, cat: "produce" },
+      { item: "bell_pepper",    g: 150, cat: "produce" },
+      { item: "avocado",        g: 100, cat: "produce" },
+      { item: "feta",           g: 50,  cat: "dairy" },
+      { item: "olive_oil",      g: 20,  cat: "pantry" },
+      { item: "walnuts",        g: 20,  cat: "pantry" },
       { item: "lemon",          g: 30,  cat: "produce" }
     ],
-    steps: { en: ["Cook quinoa", "Roast veg with oil", "Grill chicken", "Combine + lemon"], de: ["Quinoa kochen", "Gemüse mit Öl rösten", "Hähnchen grillen", "Vermengen + Zitrone"] }
+    steps: {
+      en: ["Cook quinoa in salted water", "Roast veg with olive oil 18min", "Grill chicken 6min/side, slice", "Plate quinoa + veg + chicken", "Top with avocado, feta, walnuts, lemon"],
+      de: ["Quinoa in Salzwasser kochen", "Gemüse mit Olivenöl 18 Min rösten", "Hähnchen 6 Min/Seite grillen, schneiden", "Quinoa + Gemüse + Hähnchen anrichten", "Mit Avocado, Feta, Walnüssen, Zitrone toppen"]
+    }
   },
   {
-    id: "lentil_feta", mode: "IF", slot: "lunch",
-    name: { en: "Lentil Feta Bowl", de: "Linsen Feta Bowl" },
-    kcal: 690, p: 50, c: 70, f: 20,
+    id: "omad_salmon_sweetpotato", mode: "OMAD",
+    name: { en: "Salmon Sweet Potato Bowl", de: "Lachs Süßkartoffel Bowl" },
+    kcal: 1790, p: 148, c: 110, f: 78,
     ingredients: [
-      { item: "lentils_dry",    g: 90,  cat: "pantry" },
-      { item: "chicken_breast", g: 120, cat: "meat" },
-      { item: "feta",           g: 60,  cat: "dairy" },
-      { item: "tomato",         g: 150, cat: "produce" },
-      { item: "cucumber",       g: 100, cat: "produce" },
-      { item: "olive_oil",      g: 10,  cat: "pantry" }
-    ],
-    steps: { en: ["Boil lentils", "Pan chicken", "Toss with veg + feta + oil"], de: ["Linsen kochen", "Hähnchen in Pfanne braten", "Mit Gemüse, Feta und Öl mischen"] }
-  },
-
-  // ─── IF · DINNER (~600kcal · 50P/35C/30F) ───
-  {
-    id: "salmon_sweetpotato", mode: "IF", slot: "dinner",
-    name: { en: "Salmon + Sweet Potato", de: "Lachs + Süßkartoffel" },
-    kcal: 620, p: 48, c: 42, f: 28,
-    ingredients: [
-      { item: "salmon_fillet",  g: 180, cat: "meat" },
-      { item: "sweet_potato",   g: 200, cat: "produce" },
+      { item: "salmon_fillet",  g: 350, cat: "meat" },
+      { item: "sweet_potato",   g: 350, cat: "produce" },
+      { item: "spinach",        g: 200, cat: "produce" },
       { item: "broccoli",       g: 150, cat: "produce" },
-      { item: "olive_oil",      g: 10,  cat: "pantry" }
+      { item: "avocado",        g: 100, cat: "produce" },
+      { item: "olive_oil",      g: 18,  cat: "pantry" },
+      { item: "walnuts",        g: 20,  cat: "pantry" },
+      { item: "garlic",         g: 10,  cat: "produce" },
+      { item: "lemon",          g: 30,  cat: "produce" }
     ],
-    steps: { en: ["Roast sweet potato", "Steam broccoli", "Pan salmon 4min/side"], de: ["Süßkartoffel rösten", "Brokkoli dämpfen", "Lachs 4 Min/Seite anbraten"] }
+    steps: {
+      en: ["Roast sweet potato cubes 25min", "Steam broccoli", "Wilt spinach with garlic + oil", "Pan salmon 4min/side", "Plate everything, top avocado + walnuts + lemon"],
+      de: ["Süßkartoffelwürfel 25 Min rösten", "Brokkoli dämpfen", "Spinat mit Knoblauch + Öl dünsten", "Lachs 4 Min/Seite anbraten", "Alles anrichten, mit Avocado + Walnüssen + Zitrone toppen"]
+    }
   },
   {
-    id: "turkey_chili", mode: "IF", slot: "dinner",
-    name: { en: "Turkey Bean Chili", de: "Pute Bohnen Chili" },
-    kcal: 580, p: 52, c: 48, f: 18,
+    id: "omad_turkey_chili", mode: "OMAD",
+    name: { en: "Turkey Bean Chili Bowl", de: "Pute Bohnen Chili Bowl" },
+    kcal: 1820, p: 158, c: 120, f: 70,
     ingredients: [
-      { item: "turkey_ground",  g: 180, cat: "meat" },
-      { item: "kidney_beans",   g: 150, cat: "pantry" },
-      { item: "tomato_canned",  g: 200, cat: "pantry" },
-      { item: "onion",          g: 80,  cat: "produce" },
-      { item: "olive_oil",      g: 8,   cat: "pantry" },
+      { item: "turkey_ground",  g: 350, cat: "meat" },
+      { item: "kidney_beans",   g: 200, cat: "pantry" },
+      { item: "tomato_canned",  g: 250, cat: "pantry" },
+      { item: "rice_brown_dry", g: 90,  cat: "pantry" },
+      { item: "onion",          g: 100, cat: "produce" },
+      { item: "bell_pepper",    g: 150, cat: "produce" },
+      { item: "avocado",        g: 100, cat: "produce" },
+      { item: "olive_oil",      g: 18,  cat: "pantry" },
       { item: "spice_chili",    g: 5,   cat: "pantry" }
     ],
-    steps: { en: ["Sauté onion", "Brown turkey", "Add beans + tomato + spice", "Simmer 20min"], de: ["Zwiebel anbraten", "Putenhack scharf anbraten", "Bohnen + Tomate + Gewürz dazu", "20 Min köcheln"] }
+    steps: {
+      en: ["Cook brown rice", "Sauté onion + pepper", "Brown turkey", "Add beans + tomato + chili spice", "Simmer 25min", "Serve over rice with avocado"],
+      de: ["Vollkornreis kochen", "Zwiebel + Paprika anbraten", "Putenhack scharf anbraten", "Bohnen + Tomate + Chili dazu", "25 Min köcheln", "Über Reis mit Avocado servieren"]
+    }
   },
   {
-    id: "tofu_stirfry", mode: "IF", slot: "dinner",
-    name: { en: "Tofu Brown-Rice Stir-fry", de: "Tofu Vollkornreis Pfanne" },
-    kcal: 610, p: 38, c: 60, f: 22,
+    id: "omad_beef_rice", mode: "OMAD",
+    name: { en: "Beef Brown-Rice Bowl", de: "Rind Vollkornreis Bowl" },
+    kcal: 1830, p: 155, c: 115, f: 75,
     ingredients: [
-      { item: "tofu_firm",      g: 200, cat: "produce" },
-      { item: "rice_brown_dry", g: 70,  cat: "pantry" },
+      { item: "beef_strips",    g: 320, cat: "meat" },
+      { item: "rice_brown_dry", g: 100, cat: "pantry" },
+      { item: "broccoli",       g: 200, cat: "produce" },
+      { item: "edamame",        g: 100, cat: "produce" },
       { item: "bell_pepper",    g: 120, cat: "produce" },
-      { item: "edamame",        g: 80,  cat: "produce" },
-      { item: "soy_sauce",      g: 15,  cat: "pantry" },
-      { item: "sesame_oil",     g: 10,  cat: "pantry" }
-    ],
-    steps: { en: ["Cook rice", "Cube + sear tofu", "Stir-fry veg + edamame", "Toss with soy + oil"], de: ["Reis kochen", "Tofu würfeln + scharf anbraten", "Gemüse + Edamame anbraten", "Mit Sojasauce + Öl mischen"] }
-  },
-
-  // ─── IF_LOW · LUNCH (~600kcal · 60P/25C/30F) ───
-  {
-    id: "chicken_salad_avocado", mode: "IF_LOW", slot: "lunch",
-    name: { en: "Chicken Avocado Salad", de: "Hähnchen Avocado Salat" },
-    kcal: 590, p: 55, c: 22, f: 32,
-    ingredients: [
-      { item: "chicken_breast", g: 180, cat: "meat" },
-      { item: "avocado",        g: 100, cat: "produce" },
-      { item: "salad_mix",      g: 120, cat: "produce" },
-      { item: "tomato",         g: 100, cat: "produce" },
-      { item: "olive_oil",      g: 12,  cat: "pantry" },
-      { item: "lemon",          g: 20,  cat: "produce" }
-    ],
-    steps: { en: ["Grill chicken", "Toss greens + avocado + tomato", "Dress oil + lemon"], de: ["Hähnchen grillen", "Salat + Avocado + Tomate mischen", "Mit Öl + Zitrone anmachen"] }
-  },
-  {
-    id: "tuna_chickpea", mode: "IF_LOW", slot: "lunch",
-    name: { en: "Tuna Chickpea Plate", de: "Thunfisch Kichererbsen" },
-    kcal: 560, p: 58, c: 35, f: 22,
-    ingredients: [
-      { item: "tuna_can",       g: 160, cat: "pantry" },
-      { item: "chickpeas",      g: 120, cat: "pantry" },
-      { item: "cucumber",       g: 120, cat: "produce" },
-      { item: "red_onion",      g: 30,  cat: "produce" },
-      { item: "olive_oil",      g: 10,  cat: "pantry" }
-    ],
-    steps: { en: ["Drain tuna + chickpeas", "Chop veg", "Mix + drizzle oil"], de: ["Thunfisch + Kichererbsen abtropfen", "Gemüse hacken", "Mischen + mit Öl beträufeln"] }
-  },
-
-  // ─── IF_LOW · DINNER (~700kcal · 70P/35C/35F) ───
-  {
-    id: "salmon_cauli", mode: "IF_LOW", slot: "dinner",
-    name: { en: "Salmon + Cauliflower Mash", de: "Lachs + Blumenkohlpüree" },
-    kcal: 680, p: 62, c: 28, f: 38,
-    ingredients: [
-      { item: "salmon_fillet",  g: 220, cat: "meat" },
-      { item: "cauliflower",    g: 300, cat: "produce" },
-      { item: "spinach",        g: 100, cat: "produce" },
-      { item: "olive_oil",      g: 12,  cat: "pantry" },
+      { item: "soy_sauce",      g: 20,  cat: "pantry" },
+      { item: "sesame_oil",     g: 12,  cat: "pantry" },
+      { item: "olive_oil",      g: 10,  cat: "pantry" },
       { item: "garlic",         g: 10,  cat: "produce" }
     ],
-    steps: { en: ["Steam + mash cauli", "Wilt spinach with garlic", "Pan salmon 4min/side"], de: ["Blumenkohl dämpfen + stampfen", "Spinat mit Knoblauch dünsten", "Lachs 4 Min/Seite anbraten"] }
+    steps: {
+      en: ["Cook brown rice", "Stir-fry veg + edamame in olive oil", "Sear beef strips with garlic 3min", "Toss with soy + sesame oil", "Serve over rice"],
+      de: ["Vollkornreis kochen", "Gemüse + Edamame in Olivenöl anbraten", "Rinderstreifen mit Knoblauch 3 Min scharf anbraten", "Mit Sojasauce + Sesamöl mischen", "Über Reis servieren"]
+    }
   },
   {
-    id: "beef_zoodles", mode: "IF_LOW", slot: "dinner",
-    name: { en: "Beef Zucchini Noodles", de: "Rind Zucchini-Nudeln" },
-    kcal: 720, p: 65, c: 30, f: 38,
+    id: "omad_tofu_lentil", mode: "OMAD",
+    name: { en: "Tofu Lentil Mediterranean Plate", de: "Tofu Linsen Mediterran-Teller" },
+    kcal: 1780, p: 145, c: 122, f: 72,
     ingredients: [
-      { item: "beef_strips",    g: 200, cat: "meat" },
-      { item: "zucchini",       g: 350, cat: "produce" },
-      { item: "tomato",         g: 150, cat: "produce" },
-      { item: "olive_oil",      g: 12,  cat: "pantry" },
-      { item: "parmesan",       g: 25,  cat: "dairy" }
+      { item: "tofu_firm",      g: 300, cat: "produce" },
+      { item: "lentils_dry",    g: 130, cat: "pantry" },
+      { item: "spinach",        g: 200, cat: "produce" },
+      { item: "tomato",         g: 200, cat: "produce" },
+      { item: "cucumber",       g: 150, cat: "produce" },
+      { item: "feta",           g: 60,  cat: "dairy" },
+      { item: "olive_oil",      g: 22,  cat: "pantry" },
+      { item: "walnuts",        g: 20,  cat: "pantry" },
+      { item: "lemon",          g: 30,  cat: "produce" },
+      { item: "garlic",         g: 10,  cat: "produce" }
     ],
-    steps: { en: ["Spiralize zucchini", "Sear beef strips", "Combine with tomato", "Top parmesan"], de: ["Zucchini in Spiralen schneiden", "Rinderstreifen scharf anbraten", "Mit Tomate vermengen", "Mit Parmesan toppen"] }
+    steps: {
+      en: ["Boil lentils 22min", "Cube + sear tofu with garlic", "Wilt spinach", "Chop tomato + cucumber salad", "Plate lentils + tofu + greens, top feta + walnuts + oil + lemon"],
+      de: ["Linsen 22 Min kochen", "Tofu würfeln + mit Knoblauch anbraten", "Spinat dünsten", "Tomate + Gurken-Salat hacken", "Linsen + Tofu + Grünes anrichten, mit Feta + Walnüssen + Öl + Zitrone toppen"]
+    }
+  },
+
+  // ─── LOW · ~1300 kcal · 130P / 60C / 65F (low-carb rest day) ───
+  {
+    id: "low_salmon_cauli", mode: "LOW",
+    name: { en: "Salmon + Cauliflower Mash", de: "Lachs + Blumenkohlpüree" },
+    kcal: 1320, p: 128, c: 55, f: 68,
+    ingredients: [
+      { item: "salmon_fillet",  g: 320, cat: "meat" },
+      { item: "cauliflower",    g: 400, cat: "produce" },
+      { item: "spinach",        g: 200, cat: "produce" },
+      { item: "avocado",        g: 80,  cat: "produce" },
+      { item: "olive_oil",      g: 18,  cat: "pantry" },
+      { item: "garlic",         g: 10,  cat: "produce" },
+      { item: "lemon",          g: 30,  cat: "produce" },
+      { item: "walnuts",        g: 15,  cat: "pantry" }
+    ],
+    steps: {
+      en: ["Steam cauliflower 12min, mash with oil", "Wilt spinach with garlic", "Pan salmon 4min/side", "Plate everything, top avocado + walnuts + lemon"],
+      de: ["Blumenkohl 12 Min dämpfen, mit Öl stampfen", "Spinat mit Knoblauch dünsten", "Lachs 4 Min/Seite anbraten", "Alles anrichten, mit Avocado + Walnüssen + Zitrone toppen"]
+    }
+  },
+  {
+    id: "low_beef_zoodles", mode: "LOW",
+    name: { en: "Beef Zucchini Noodles", de: "Rind Zucchini-Nudeln" },
+    kcal: 1290, p: 132, c: 50, f: 65,
+    ingredients: [
+      { item: "beef_strips",    g: 280, cat: "meat" },
+      { item: "zucchini",       g: 400, cat: "produce" },
+      { item: "tomato",         g: 200, cat: "produce" },
+      { item: "spinach",        g: 100, cat: "produce" },
+      { item: "parmesan",       g: 40,  cat: "dairy" },
+      { item: "olive_oil",      g: 18,  cat: "pantry" },
+      { item: "garlic",         g: 10,  cat: "produce" }
+    ],
+    steps: {
+      en: ["Spiralize zucchini", "Sear beef strips with garlic 3min", "Add tomato + spinach, simmer 5min", "Toss zoodles in pan briefly", "Top parmesan + oil"],
+      de: ["Zucchini in Spiralen schneiden", "Rinderstreifen mit Knoblauch 3 Min anbraten", "Tomate + Spinat dazu, 5 Min köcheln", "Zoodles kurz mitschwenken", "Mit Parmesan + Öl toppen"]
+    }
+  },
+  {
+    id: "low_chicken_avo_salad", mode: "LOW",
+    name: { en: "Big Chicken Avocado Salad", de: "Großer Hähnchen Avocado Salat" },
+    kcal: 1310, p: 130, c: 45, f: 72,
+    ingredients: [
+      { item: "chicken_breast", g: 320, cat: "meat" },
+      { item: "avocado",        g: 150, cat: "produce" },
+      { item: "salad_mix",      g: 200, cat: "produce" },
+      { item: "tomato",         g: 150, cat: "produce" },
+      { item: "cucumber",       g: 150, cat: "produce" },
+      { item: "feta",           g: 60,  cat: "dairy" },
+      { item: "olive_oil",      g: 22,  cat: "pantry" },
+      { item: "walnuts",        g: 20,  cat: "pantry" },
+      { item: "lemon",          g: 30,  cat: "produce" }
+    ],
+    steps: {
+      en: ["Grill chicken, slice", "Toss greens + tomato + cucumber + avocado", "Add chicken on top", "Crumble feta + walnuts", "Dress with oil + lemon"],
+      de: ["Hähnchen grillen, schneiden", "Salat + Tomate + Gurke + Avocado mischen", "Hähnchen darüber geben", "Feta + Walnüsse zerbröseln", "Mit Öl + Zitrone anmachen"]
+    }
+  },
+  {
+    id: "low_tuna_egg_plate", mode: "LOW",
+    name: { en: "Tuna Egg Mediterranean Plate", de: "Thunfisch Ei Mediterran-Teller" },
+    kcal: 1280, p: 135, c: 38, f: 68,
+    ingredients: [
+      { item: "tuna_can",       g: 250, cat: "pantry" },
+      { item: "eggs_whole",     g: 200, cat: "dairy" },
+      { item: "avocado",        g: 120, cat: "produce" },
+      { item: "salad_mix",      g: 150, cat: "produce" },
+      { item: "tomato",         g: 150, cat: "produce" },
+      { item: "olive_oil",      g: 20,  cat: "pantry" },
+      { item: "feta",           g: 50,  cat: "dairy" },
+      { item: "lemon",          g: 30,  cat: "produce" }
+    ],
+    steps: {
+      en: ["Hard-boil eggs 9min, halve", "Drain tuna", "Plate greens + tomato + avocado + tuna + eggs", "Top feta + oil + lemon"],
+      de: ["Eier 9 Min hart kochen, halbieren", "Thunfisch abtropfen", "Salat + Tomate + Avocado + Thunfisch + Eier anrichten", "Mit Feta + Öl + Zitrone toppen"]
+    }
   }
 ];
 
@@ -208,11 +232,11 @@ export const INGREDIENT_NAMES = {
 
 export const CAT_ORDER = ["produce", "meat", "dairy", "bakery", "pantry"];
 export const CAT_LABEL = {
-  produce: { en: "Produce",  de: "Obst & Gemüse" },
+  produce: { en: "Produce",   de: "Obst & Gemüse" },
   meat:    { en: "Meat/Fish", de: "Fleisch/Fisch" },
-  dairy:   { en: "Dairy",    de: "Milchprodukte" },
-  bakery:  { en: "Bakery",   de: "Backwaren" },
-  pantry:  { en: "Pantry",   de: "Vorrat" }
+  dairy:   { en: "Dairy",     de: "Milchprodukte" },
+  bakery:  { en: "Bakery",    de: "Backwaren" },
+  pantry:  { en: "Pantry",    de: "Vorrat" }
 };
 
 const dayHash = (dateStr) => {
@@ -221,20 +245,14 @@ const dayHash = (dateStr) => {
   return Math.abs(h);
 };
 
-const pickFromPool = (pool, dateStr, salt) =>
-  pool.length === 0 ? null : pool[(dayHash(dateStr + salt)) % pool.length];
-
-// Get day's recipe set based on eating mode (deterministic by date)
+// One meal per day (OMAD or LOW). FAST → no meal.
 export function getDayRecipes(dateStr, eating) {
   if (eating === "FAST") return [];
-  const slots = eating === "IF" ? ["breakfast", "lunch", "dinner"] : ["lunch", "dinner"];
-  return slots.map((slot) => {
-    const pool = RECIPES.filter((r) => r.mode === eating && r.slot === slot);
-    return pickFromPool(pool, dateStr, slot);
-  }).filter(Boolean);
+  const pool = RECIPES.filter((r) => r.mode === eating);
+  if (pool.length === 0) return [];
+  return [pool[dayHash(dateStr) % pool.length]];
 }
 
-// Aggregate ingredients across a list of recipes → grouped by cat
 export function buildShoppingList(recipes) {
   const totals = {};
   for (const r of recipes) {
@@ -253,7 +271,6 @@ export function buildShoppingList(recipes) {
   return grouped;
 }
 
-// Get all recipes for the next N days starting from dateStr (using weeklyPattern)
 export function getWeekRecipes(startDate, weeklyPattern, days = 7) {
   const all = [];
   const start = new Date(startDate);
