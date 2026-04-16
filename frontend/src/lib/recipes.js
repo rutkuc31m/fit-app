@@ -14,7 +14,7 @@ export const RECIPES = [
       { item: "walnuts",      g: 15,  cat: "pantry" },
       { item: "honey",        g: 10,  cat: "pantry" }
     ],
-    steps: ["Mix skyr + oats", "Top with berries, walnuts, honey"]
+    steps: { en: ["Mix skyr + oats", "Top with berries, walnuts, honey"], de: ["Skyr + Haferflocken mischen", "Mit Beeren, Walnüssen und Honig toppen"] }
   },
   {
     id: "egg_white_omelette", mode: "IF", slot: "breakfast",
@@ -28,7 +28,7 @@ export const RECIPES = [
       { item: "bread_wholegrain", g: 60, cat: "bakery" },
       { item: "olive_oil",      g: 8,   cat: "pantry" }
     ],
-    steps: ["Sauté spinach", "Pour egg mix", "Crumble feta", "Serve with toast"]
+    steps: { en: ["Sauté spinach", "Pour egg mix", "Crumble feta", "Serve with toast"], de: ["Spinat anbraten", "Eimasse darüber gießen", "Feta zerbröseln", "Mit Toast servieren"] }
   },
 
   // ─── IF · LUNCH (~700kcal · 55P/55C/25F) ───
@@ -44,7 +44,7 @@ export const RECIPES = [
       { item: "olive_oil",      g: 12,  cat: "pantry" },
       { item: "lemon",          g: 30,  cat: "produce" }
     ],
-    steps: ["Cook quinoa", "Roast veg with oil", "Grill chicken", "Combine + lemon"]
+    steps: { en: ["Cook quinoa", "Roast veg with oil", "Grill chicken", "Combine + lemon"], de: ["Quinoa kochen", "Gemüse mit Öl rösten", "Hähnchen grillen", "Vermengen + Zitrone"] }
   },
   {
     id: "lentil_feta", mode: "IF", slot: "lunch",
@@ -58,7 +58,7 @@ export const RECIPES = [
       { item: "cucumber",       g: 100, cat: "produce" },
       { item: "olive_oil",      g: 10,  cat: "pantry" }
     ],
-    steps: ["Boil lentils", "Pan chicken", "Toss with veg + feta + oil"]
+    steps: { en: ["Boil lentils", "Pan chicken", "Toss with veg + feta + oil"], de: ["Linsen kochen", "Hähnchen in Pfanne braten", "Mit Gemüse, Feta und Öl mischen"] }
   },
 
   // ─── IF · DINNER (~600kcal · 50P/35C/30F) ───
@@ -72,7 +72,7 @@ export const RECIPES = [
       { item: "broccoli",       g: 150, cat: "produce" },
       { item: "olive_oil",      g: 10,  cat: "pantry" }
     ],
-    steps: ["Roast sweet potato", "Steam broccoli", "Pan salmon 4min/side"]
+    steps: { en: ["Roast sweet potato", "Steam broccoli", "Pan salmon 4min/side"], de: ["Süßkartoffel rösten", "Brokkoli dämpfen", "Lachs 4 Min/Seite anbraten"] }
   },
   {
     id: "turkey_chili", mode: "IF", slot: "dinner",
@@ -86,7 +86,7 @@ export const RECIPES = [
       { item: "olive_oil",      g: 8,   cat: "pantry" },
       { item: "spice_chili",    g: 5,   cat: "pantry" }
     ],
-    steps: ["Sauté onion", "Brown turkey", "Add beans + tomato + spice", "Simmer 20min"]
+    steps: { en: ["Sauté onion", "Brown turkey", "Add beans + tomato + spice", "Simmer 20min"], de: ["Zwiebel anbraten", "Putenhack scharf anbraten", "Bohnen + Tomate + Gewürz dazu", "20 Min köcheln"] }
   },
   {
     id: "tofu_stirfry", mode: "IF", slot: "dinner",
@@ -100,7 +100,7 @@ export const RECIPES = [
       { item: "soy_sauce",      g: 15,  cat: "pantry" },
       { item: "sesame_oil",     g: 10,  cat: "pantry" }
     ],
-    steps: ["Cook rice", "Cube + sear tofu", "Stir-fry veg + edamame", "Toss with soy + oil"]
+    steps: { en: ["Cook rice", "Cube + sear tofu", "Stir-fry veg + edamame", "Toss with soy + oil"], de: ["Reis kochen", "Tofu würfeln + scharf anbraten", "Gemüse + Edamame anbraten", "Mit Sojasauce + Öl mischen"] }
   },
 
   // ─── IF_LOW · LUNCH (~600kcal · 60P/25C/30F) ───
@@ -116,7 +116,7 @@ export const RECIPES = [
       { item: "olive_oil",      g: 12,  cat: "pantry" },
       { item: "lemon",          g: 20,  cat: "produce" }
     ],
-    steps: ["Grill chicken", "Toss greens + avocado + tomato", "Dress oil + lemon"]
+    steps: { en: ["Grill chicken", "Toss greens + avocado + tomato", "Dress oil + lemon"], de: ["Hähnchen grillen", "Salat + Avocado + Tomate mischen", "Mit Öl + Zitrone anmachen"] }
   },
   {
     id: "tuna_chickpea", mode: "IF_LOW", slot: "lunch",
@@ -129,7 +129,7 @@ export const RECIPES = [
       { item: "red_onion",      g: 30,  cat: "produce" },
       { item: "olive_oil",      g: 10,  cat: "pantry" }
     ],
-    steps: ["Drain tuna + chickpeas", "Chop veg", "Mix + drizzle oil"]
+    steps: { en: ["Drain tuna + chickpeas", "Chop veg", "Mix + drizzle oil"], de: ["Thunfisch + Kichererbsen abtropfen", "Gemüse hacken", "Mischen + mit Öl beträufeln"] }
   },
 
   // ─── IF_LOW · DINNER (~700kcal · 70P/35C/35F) ───
@@ -144,7 +144,7 @@ export const RECIPES = [
       { item: "olive_oil",      g: 12,  cat: "pantry" },
       { item: "garlic",         g: 10,  cat: "produce" }
     ],
-    steps: ["Steam + mash cauli", "Wilt spinach with garlic", "Pan salmon 4min/side"]
+    steps: { en: ["Steam + mash cauli", "Wilt spinach with garlic", "Pan salmon 4min/side"], de: ["Blumenkohl dämpfen + stampfen", "Spinat mit Knoblauch dünsten", "Lachs 4 Min/Seite anbraten"] }
   },
   {
     id: "beef_zoodles", mode: "IF_LOW", slot: "dinner",
@@ -157,7 +157,7 @@ export const RECIPES = [
       { item: "olive_oil",      g: 12,  cat: "pantry" },
       { item: "parmesan",       g: 25,  cat: "dairy" }
     ],
-    steps: ["Spiralize zucchini", "Sear beef strips", "Combine with tomato", "Top parmesan"]
+    steps: { en: ["Spiralize zucchini", "Sear beef strips", "Combine with tomato", "Top parmesan"], de: ["Zucchini in Spiralen schneiden", "Rinderstreifen scharf anbraten", "Mit Tomate vermengen", "Mit Parmesan toppen"] }
   }
 ];
 

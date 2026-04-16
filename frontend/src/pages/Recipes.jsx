@@ -77,7 +77,7 @@ export default function Recipes() {
               <div className="px-4 py-2 border-t border-line">
                 <div className="card-title mb-2">{t("recipes.steps")}</div>
                 <ol className="list-decimal list-inside text-sm text-ink2 leading-relaxed marker:text-signal marker:font-bold">
-                  {r.steps.map((s, j) => <li key={j}>{s}</li>)}
+                  {(r.steps[lang] || r.steps.en || r.steps).map((s, j) => <li key={j}>{s}</li>)}
                 </ol>
               </div>
             </div>
