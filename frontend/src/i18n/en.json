@@ -1,5 +1,12 @@
 {
-  "nav": { "today": "Today", "log": "Log", "training": "Training", "progress": "Progress", "settings": "Settings" },
+  "nav": { "today": "Today", "log": "Log", "recipes": "Meals", "training": "Train", "progress": "Stats", "settings": "Set" },
+  "recipes": {
+    "title": "Meal plan", "tab_today": "Today", "tab_week": "Week", "tab_shop": "Shopping",
+    "eating_today": "Eating mode today", "target": "Target", "fast_day": "Fasting day", "fast_hint": "No meals planned. Hydrate well.",
+    "ingredients": "Ingredients", "steps": "Steps",
+    "slot_breakfast": "Breakfast", "slot_lunch": "Lunch", "slot_dinner": "Dinner",
+    "shop_hint": "Aggregated for the next 7 days. Tap to check off."
+  },
   "auth": {
     "login": "Log in", "register": "Register", "email": "Email", "password": "Password", "name": "Name",
     "or_register": "No account? Register", "or_login": "Have an account? Log in", "logout": "Log out",

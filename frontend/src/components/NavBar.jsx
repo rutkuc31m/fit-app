@@ -5,6 +5,7 @@ import { Icon } from "./ui";
 const items = [
   { to: "/",         k: "nav.today",    i: Icon.home },
   { to: "/log",      k: "nav.log",      i: Icon.utensils },
+  { to: "/recipes",  k: "nav.recipes",  i: Icon.book },
   { to: "/training", k: "nav.training", i: Icon.dumbbell },
   { to: "/progress", k: "nav.progress", i: Icon.chart },
   { to: "/settings", k: "nav.settings", i: Icon.cog }
@@ -15,7 +16,7 @@ export default function NavBar() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-bg/92 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
       <div className="absolute top-0 left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-line2 to-transparent" />
-      <div className="max-w-[680px] mx-auto grid grid-cols-5">
+      <div className="max-w-[680px] mx-auto grid grid-cols-6">
         {items.map(({ to, k, i: Ic }) => (
           <NavLink key={to} to={to} end={to === "/"}
             className={({ isActive }) =>

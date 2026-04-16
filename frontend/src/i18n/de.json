@@ -1,5 +1,12 @@
 {
-  "nav": { "today": "Heute", "log": "Log", "training": "Training", "progress": "Fortschritt", "settings": "Einstellungen" },
+  "nav": { "today": "Heute", "log": "Log", "recipes": "Essen", "training": "Train", "progress": "Stats", "settings": "Set" },
+  "recipes": {
+    "title": "Essensplan", "tab_today": "Heute", "tab_week": "Woche", "tab_shop": "Einkauf",
+    "eating_today": "Essmodus heute", "target": "Ziel", "fast_day": "Fastentag", "fast_hint": "Keine Mahlzeiten geplant. Viel trinken.",
+    "ingredients": "Zutaten", "steps": "Schritte",
+    "slot_breakfast": "Frühstück", "slot_lunch": "Mittag", "slot_dinner": "Abend",
+    "shop_hint": "Zusammenfassung für die nächsten 7 Tage. Tippen zum Abhaken."
+  },
   "auth": {
     "login": "Anmelden", "register": "Registrieren", "email": "E-Mail", "password": "Passwort", "name": "Name",
     "or_register": "Kein Konto? Registrieren", "or_login": "Konto vorhanden? Anmelden", "logout": "Abmelden",

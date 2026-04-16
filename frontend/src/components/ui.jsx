@@ -27,7 +27,9 @@ export const Icon = {
   logout:  (p) => <Svg {...p} d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />,
   chev:    (p) => <Svg {...p} d="M9 6l6 6-6 6" />,
   moon:    (p) => <Svg {...p} d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />,
-  drop:    (p) => <Svg {...p} d="M12 2s7 8 7 13a7 7 0 0 1-14 0c0-5 7-13 7-13z" />
+  drop:    (p) => <Svg {...p} d="M12 2s7 8 7 13a7 7 0 0 1-14 0c0-5 7-13 7-13z" />,
+  book:    (p) => <Svg {...p} d={<><path d="M4 4a2 2 0 0 1 2-2h12v18H6a2 2 0 0 0-2 2zM4 20v2h14" /><path d="M8 6h6M8 10h6" /></>} />,
+  cart:    (p) => <Svg {...p} d={<><circle cx="9" cy="20" r="1.4" /><circle cx="17" cy="20" r="1.4" /><path d="M2 3h3l3 12h11l2-8H6" /></>} />
 };
 
 /* ─────────── Bracket corners wrapper ─────────── */
