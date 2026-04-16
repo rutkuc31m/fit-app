@@ -216,7 +216,7 @@ export const INGREDIENT_NAMES = {
   tofu_firm:         { en: "Firm tofu",           de: "Tofu (fest)" },
   rice_brown_dry:    { en: "Brown rice (dry)",    de: "Vollkornreis (trocken)" },
   edamame:           { en: "Edamame",             de: "Edamame" },
-  tamari_gf:         { en: "Soy sauce",           de: "Sojasauce" },
+  tamari_gf:         { en: "Tamari (GF soy sauce)", de: "Tamari (GF Sojasauce)" },
   sesame_oil:        { en: "Sesame oil",          de: "Sesamöl" },
   avocado:           { en: "Avocado",             de: "Avocado" },
   salad_mix:         { en: "Salad mix",           de: "Blattsalat-Mix" },
