@@ -4,11 +4,15 @@ import db from "./db.js";
 import { QUOTES } from "./quotes.js";
 
 // ─── VAPID config ───
-// Run `node -e "console.log(require('web-push').generateVAPIDKeys())"` to generate.
-// Keep PRIVATE key in VM env. PUBLIC key can be hardcoded or env.
-export const VAPID_PUBLIC  = process.env.FIT_VAPID_PUBLIC  || "BK1GzZm3tJk4i3jFhWXhCGgHs07n449o-QrejjxNsnY-ZlMDnpnlVR8SMF6Y_Xdads2yy9BNmE6_H_BOgPyggbc";
-const VAPID_PRIVATE = process.env.FIT_VAPID_PRIVATE || "rQYR7JkW0dpZYyqd67_l74mmnHSWV_owQVZhx35Wx6k";
+// Keys live ONLY in VM env (systemd drop-in). No fallbacks in source.
+// Generate: npx web-push generate-vapid-keys
+export const VAPID_PUBLIC  = process.env.FIT_VAPID_PUBLIC;
+const VAPID_PRIVATE = process.env.FIT_VAPID_PRIVATE;
 const VAPID_SUBJECT = process.env.FIT_VAPID_SUBJECT || "mailto:admin@rutkuc.com";
+
+if (!VAPID_PUBLIC || !VAPID_PRIVATE) {
+  throw new Error("FIT_VAPID_PUBLIC and FIT_VAPID_PRIVATE env vars required — set via systemd drop-in");
+}
 
 webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 
