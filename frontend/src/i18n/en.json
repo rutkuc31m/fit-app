@@ -30,6 +30,7 @@
     "scan_hint": "Point camera at barcode", "not_found": "Product not found",
     "totals": "Totals",
     "mode_barcode": "Barcode", "mode_photo": "Photo",
+    "mode_gram": "Grams", "mode_piece": "Pieces",
     "photo_analyze": "Photo → AI",
     "photo_hint": "Fit label or product in frame, tap capture",
     "capture": "Capture", "analyzing": "Analyzing…"

@@ -30,6 +30,7 @@
     "scan_hint": "Kamera auf Barcode richten", "not_found": "Produkt nicht gefunden",
     "totals": "Gesamt",
     "mode_barcode": "Barcode", "mode_photo": "Foto",
+    "mode_gram": "Gramm", "mode_piece": "Stück",
     "photo_analyze": "Foto → KI",
     "photo_hint": "Etikett oder Produkt ins Bild, auf Aufnahme tippen",
     "capture": "Aufnehmen", "analyzing": "Analysiere…"

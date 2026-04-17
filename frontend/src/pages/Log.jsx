@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { api } from "../lib/api";
 import { todayStr } from "../lib/plan";
+import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
 import BarcodeScanner from "../components/BarcodeScanner";
 import { Empty, Icon } from "../components/ui";
 
@@ -17,6 +19,10 @@ export default function Log() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [mode, setMode] = useState("gram"); // gram | piece
+  const [pieceFood, setPieceFood] = useState(null);
+  const [pieces, setPieces] = useState(1);
+  const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
 
   const load = async () => setMeals(await api.get(`/meals?date=${date}`));
   useEffect(() => { load(); }, [date]);
@@ -76,10 +82,24 @@ export default function Log() {
     setSearch(""); setResults([]);
   };
 
+  const pickPieceFood = (food) => {
+    setPieceFood(food);
+    setPieces(1);
+    const scaled = scaleByPieces(food, 1);
+    setDraft((d) => ({ ...(d || emptyItem), ...scaled, name: food.name[lang], barcode: null }));
+  };
+
+  const updatePieces = (n) => {
+    if (!pieceFood || n < 0) return;
+    setPieces(n);
+    const scaled = scaleByPieces(pieceFood, n);
+    setDraft((d) => ({ ...(d || emptyItem), ...scaled, name: pieceFood.name[lang], barcode: null }));
+  };
+
   const saveDraft = async () => {
-    const { _per100, _analyzing, _noData, ...clean } = draft;
+    const { _per100, _analyzing, _noData, _pieces, _pieceFoodId, _gPerPiece, ...clean } = draft;
     await api.post(`/meals/${activeMeal}/items`, clean);
-    setDraft(null); setActiveMeal(null); load();
+    setDraft(null); setActiveMeal(null); setMode("gram"); setPieceFood(null); setPieces(1); load();
   };
 
   const totals = meals.reduce((a, m) => {
@@ -173,15 +193,58 @@ export default function Log() {
 
       {draft && activeMeal && (
         <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+80px)]">
-          <div className="card w-full max-w-md p-4 flex flex-col gap-3 relative">
+          <div className="card w-full max-w-md p-4 flex flex-col gap-3 relative max-h-[88vh] overflow-y-auto">
             <div className="section-label">{t("log.add_item")}</div>
+
+            {/* Mode toggle: Gram | Stück */}
+            <div className="card p-1 flex gap-1">
+              {["gram", "piece"].map((k) => (
+                <button key={k} onClick={() => setMode(k)}
+                  className={`flex-1 mono text-[.66rem] caps py-[8px] rounded-lg transition ${mode === k ? "bg-signal text-[#0a0c00] font-bold" : "text-ink2 hover:bg-bg2"}`}>
+                  {t(`log.mode_${k}`)}
+                </button>
+              ))}
+            </div>
+
             {draft._noData && (
               <div className="mono text-[.62rem] text-warn uppercase tracking-[.14em] bg-warn/10 border border-warn/40 rounded-lg px-3 py-2">
                 no nutrition data — enter manually
               </div>
             )}
             <input className="input" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-            <div className="relative">
+
+            {mode === "piece" && (
+              <>
+                {pieceFood ? (
+                  <div className="card p-3 border-line2">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="text-sm text-ink">{pieceFood.name[lang]}</div>
+                      <button className="mono text-[.6rem] text-mute hover:text-warn uppercase tracking-[.14em]" onClick={() => { setPieceFood(null); setPieces(1); }}>change</button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button className="step-btn" onClick={() => updatePieces(Math.max(0, pieces - 1))}>−</button>
+                      <input type="number" step="0.5" className="input mono text-center text-lg text-signal flex-1" value={pieces} onChange={(e) => updatePieces(+e.target.value || 0)} />
+                      <button className="step-btn" onClick={() => updatePieces(pieces + 1)}>+</button>
+                      <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">×{pieceFood.g_per_piece}g</span>
+                    </div>
+                    <div className="mt-2 mono text-[.66rem] text-ink2 text-center">
+                      ≈ {draft.amount_g}g · {Math.round(draft.kcal)} kcal · P{Math.round(draft.protein_g)} C{Math.round(draft.carbs_g)} F{Math.round(draft.fat_g)}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 max-h-[280px] overflow-y-auto">
+                    {COMMON_FOODS.map((f) => (
+                      <button key={f.id} onClick={() => pickPieceFood(f)}
+                        className="card p-2 text-center hover:border-signal/50 transition flex flex-col gap-[2px]">
+                        <div className="text-[.72rem] text-ink leading-tight truncate">{f.name[lang]}</div>
+                        <div className="mono text-[.55rem] text-mute">~{f.g_per_piece}g</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+            {mode === "gram" && <div className="relative">
               <input className="input" placeholder="search product…" value={search} onChange={(e) => setSearch(e.target.value)} />
               {(searching || results.length > 0) && (
                 <div className="absolute left-0 right-0 top-full mt-1 z-30 card max-h-60 overflow-y-auto shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)]">
@@ -200,7 +263,7 @@ export default function Log() {
                   ))}
                 </div>
               )}
-            </div>
+            </div>}
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1">
                 <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.amount_g")}</span>
@@ -224,7 +287,7 @@ export default function Log() {
               </label>
             </div>
             <div className="flex gap-2 mt-1">
-              <button className="btn flex-1" onClick={() => setDraft(null)}>{t("log.cancel")}</button>
+              <button className="btn flex-1" onClick={() => { setDraft(null); setMode("gram"); setPieceFood(null); setPieces(1); }}>{t("log.cancel")}</button>
               <button className="btn-primary flex-1" onClick={saveDraft}>{t("log.save")}</button>
             </div>
           </div>
