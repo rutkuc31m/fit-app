@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
+import { getActiveRestrictions, getStepTarget, getCardioProtocol } from "../lib/protocols";
 import { Ring, Brackets, Empty, Icon, Sparkline, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
 
 const sumMacros = (meals) => meals.reduce((a, m) => {
@@ -29,6 +30,9 @@ export default function Dashboard() {
   const phase = getPhase(week);
   const target = getEatingTarget(dayPlan.eating);
   const macros = sumMacros(meals);
+  const restrictions = getActiveRestrictions(week);
+  const stepTarget = getStepTarget(week);
+  const cardio = getCardioProtocol(week);
 
   const load = async () => {
     const d = new Date(date);
@@ -172,6 +176,60 @@ export default function Dashboard() {
           <div className="card-title mb-1">{t("nav.log")}</div>
           <div className="mono font-bold text-xl text-signal">{dayPlan.eating}</div>
           <div className="mono text-[.7rem] text-mute uppercase tracking-[.14em] mt-1">{target.kcal} kcal</div>
+          {target.windowStart && target.windowEnd && (
+            <div className="mono text-[.62rem] text-warn mt-[2px]">
+              {t("eating.omad_window", { start: target.windowStart, end: target.windowEnd })}
+            </div>
+          )}
+          {dayPlan.eating === "FAST" && (
+            <div className="mono text-[.62rem] text-mute mt-[2px]">{t("eating.fast_allowed")}</div>
+          )}
+        </Link>
+      </div>
+
+      {/* Step target + cardio chip */}
+      {stepTarget && (
+        <div className="card p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon.zap size={16} className="text-signal" />
+            <div className="mono text-[.7rem] text-ink uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
+          </div>
+          <div className="mono text-sm text-signal font-bold tabular-nums">{stepTarget.toLocaleString()}</div>
+        </div>
+      )}
+
+      {/* Active restriction banner */}
+      {restrictions.length > 0 && (
+        <div className="card p-3 border-warn/40 bg-warn/[.05]">
+          <div className="flex items-start gap-2">
+            <span className="mono text-[.7rem] text-warn font-bold">⚠</span>
+            <div className="flex-1">
+              <div className="mono text-[.66rem] text-warn uppercase tracking-[.14em] font-bold">
+                {t("restrictions.lower_back")}
+              </div>
+              <div className="mono text-[.62rem] text-ink2 mt-1 leading-relaxed">
+                {restrictions[0].description}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Habits + Check-in quick links */}
+      <div className="grid grid-cols-2 gap-[10px]">
+        <Link to="/habits" className="card p-3 hover:border-line2 transition flex items-center gap-2">
+          <Icon.check size={16} className="text-signal" />
+          <div>
+            <div className="card-title">{t("habits.title")}</div>
+            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("habits.morning")} · {t("habits.evening")}</div>
+          </div>
+        </Link>
+        <Link to="/checkin" className="card p-3 hover:border-line2 transition flex items-center gap-2">
+          <Icon.ruler size={16} className="text-signal" />
+          <div>
+            <div className="card-title">{t("checkin.title")}</div>
+            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">W{week}</div>
+          </div>
         </Link>
       </div>
 

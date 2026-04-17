@@ -9,6 +9,8 @@ import Training from "./pages/Training";
 import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
 import Recipes from "./pages/Recipes";
+import Habits from "./pages/Habits";
+import Checkin from "./pages/Checkin";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -29,6 +31,8 @@ export default function App() {
         <Route path="/recipes"  element={<Protected><Recipes /></Protected>} />
         <Route path="/training" element={<Protected><Training /></Protected>} />
         <Route path="/progress" element={<Protected><Progress /></Protected>} />
+        <Route path="/habits"   element={<Protected><Habits /></Protected>} />
+        <Route path="/checkin"  element={<Protected><Checkin /></Protected>} />
         <Route path="/settings" element={<Protected><Settings /></Protected>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

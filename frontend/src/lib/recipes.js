@@ -1,6 +1,9 @@
 // OMAD recipes — single big meal hits the day's kcal target.
 // Two modes: OMAD (~1800kcal training-day) and LOW (~1300kcal rest-day, lower carb).
 // Style: gluten-free, high-protein, high-fiber, healthy fats. Mediterranean / clean bowl format.
+// Whole library complies with: glutenFree, sugarFree (no added sugar), noPork.
+
+export const RECIPE_TAGS = { glutenFree: true, sugarFree: true, noPork: true };
 
 export const RECIPES = [
   // ─── OMAD · ~1800 kcal · 150P / 115C / 75F ───

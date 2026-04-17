@@ -153,6 +153,35 @@ CREATE TABLE IF NOT EXISTS progress_photos (
   path     TEXT NOT NULL,
   angle    TEXT
 );
+
+CREATE TABLE IF NOT EXISTS habit_logs (
+  user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date      TEXT NOT NULL,
+  habit_id  TEXT NOT NULL,
+  completed INTEGER DEFAULT 1,
+  PRIMARY KEY (user_id, date, habit_id)
+);
+CREATE INDEX IF NOT EXISTS idx_habit_user_date ON habit_logs(user_id, date);
 `);
+
+// ─── ALTER weekly_checkins to v2 schema (idempotent) ───
+const checkinCols = db.prepare("PRAGMA table_info(weekly_checkins)").all().map((c) => c.name);
+const addCol = (col, def) => {
+  if (!checkinCols.includes(col)) {
+    try { db.exec(`ALTER TABLE weekly_checkins ADD COLUMN ${col} ${def};`); } catch {}
+  }
+};
+addCol("waist_cm", "REAL");
+addCol("chest_cm", "REAL");
+addCol("arm_cm", "REAL");
+addCol("energy", "INTEGER");
+addCol("sleep_quality", "INTEGER");
+addCol("back_pain", "INTEGER");
+addCol("motivation", "INTEGER");
+addCol("adherence_pct", "INTEGER");
+addCol("notes", "TEXT");
+addCol("photo_front", "TEXT");
+addCol("photo_side", "TEXT");
+addCol("photo_back", "TEXT");
 
 export default db;

@@ -55,5 +55,43 @@
   "common": {
     "yes": "Yes", "no": "No", "loading": "Loading…", "error": "Error",
     "retry": "Retry", "close": "Close", "back": "Back"
+  },
+  "eating": {
+    "omad_window": "Window: {{start}}–{{end}}",
+    "low_window": "Window: {{start}}–{{end}}",
+    "pre_shake": "Post-workout shake",
+    "main_meal": "Main meal",
+    "fast_allowed": "Water, black coffee, green tea"
+  },
+  "training_v2": {
+    "substituted": "Substituted for back safety",
+    "core_rehab": "Core & Rehab",
+    "phase1_note": "Phase 1: back-safe modifications active"
+  },
+  "cardio": {
+    "step_target": "Step target",
+    "liss_today": "LISS today",
+    "hiit_today": "HIIT today",
+    "football_locked": "Football unlocks in Phase 3 (week 13)",
+    "football_mode": "Football mode"
+  },
+  "habits": {
+    "title": "Habits",
+    "morning": "Morning", "throughout": "Throughout the day", "evening": "Evening",
+    "weekly": "This week", "streak": "{{count}} day streak",
+    "completion": "{{done}}/{{total}}"
+  },
+  "checkin": {
+    "title": "Weekly Check-in",
+    "reminder": "Monday morning — fasted, before food or coffee",
+    "back_pain": "Back stiffness",
+    "adherence": "Plan adherence",
+    "what_worked": "What worked / what struggled",
+    "save": "Save check-in",
+    "front": "Front", "side": "Side", "back": "Back"
+  },
+  "restrictions": {
+    "lower_back": "Lower back protection active",
+    "see_doctor": "See a doctor if: radiating pain, numbness, night pain"
   }
 }

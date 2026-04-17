@@ -55,5 +55,43 @@
   "common": {
     "yes": "Ja", "no": "Nein", "loading": "Lädt…", "error": "Fehler",
     "retry": "Erneut", "close": "Schließen", "back": "Zurück"
+  },
+  "eating": {
+    "omad_window": "Fenster: {{start}}–{{end}}",
+    "low_window": "Fenster: {{start}}–{{end}}",
+    "pre_shake": "Post-Workout Shake",
+    "main_meal": "Hauptmahlzeit",
+    "fast_allowed": "Wasser, schwarzer Kaffee, grüner Tee"
+  },
+  "training_v2": {
+    "substituted": "Ersetzt für Rückenschutz",
+    "core_rehab": "Core & Reha",
+    "phase1_note": "Phase 1: Rücken-sichere Modifikationen aktiv"
+  },
+  "cardio": {
+    "step_target": "Schrittziel",
+    "liss_today": "LISS heute",
+    "hiit_today": "HIIT heute",
+    "football_locked": "Fußball ab Phase 3 (Woche 13)",
+    "football_mode": "Fußball-Modus"
+  },
+  "habits": {
+    "title": "Gewohnheiten",
+    "morning": "Morgens", "throughout": "Im Laufe des Tages", "evening": "Abends",
+    "weekly": "Diese Woche", "streak": "{{count}} Tage Streak",
+    "completion": "{{done}}/{{total}}"
+  },
+  "checkin": {
+    "title": "Wöchentlicher Check-in",
+    "reminder": "Montag morgens — nüchtern, vor Essen oder Kaffee",
+    "back_pain": "Rückensteifigkeit",
+    "adherence": "Plan-Treue",
+    "what_worked": "Was hat geklappt / was war schwer",
+    "save": "Check-in speichern",
+    "front": "Vorne", "side": "Seite", "back": "Rücken"
+  },
+  "restrictions": {
+    "lower_back": "Unterer Rücken-Schutz aktiv",
+    "see_doctor": "Arzt aufsuchen bei: ausstrahlendem Schmerz, Taubheit, Nachtschmerz"
   }
 }

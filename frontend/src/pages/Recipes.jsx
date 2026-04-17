@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
-import { todayStr, getDayPlan, PLAN } from "../lib/plan";
-import { getDayRecipes, getWeekRecipes, buildShoppingList, INGREDIENT_NAMES, CAT_ORDER, CAT_LABEL } from "../lib/recipes";
+import { todayStr, getDayPlan, getEatingTarget, PLAN } from "../lib/plan";
+import { getDayRecipes, getWeekRecipes, buildShoppingList, INGREDIENT_NAMES, CAT_ORDER, CAT_LABEL, RECIPE_TAGS } from "../lib/recipes";
 import { Empty, Icon, Brackets } from "../components/ui";
 
 export default function Recipes() {
@@ -14,6 +14,7 @@ export default function Recipes() {
   const dayPlan = getDayPlan(date);
 
   const todayRecipes = useMemo(() => getDayRecipes(date, dayPlan.eating), [date, dayPlan.eating]);
+  const target = getEatingTarget(dayPlan.eating);
   const weekRecipes  = useMemo(() => getWeekRecipes(date, PLAN.weeklyPattern, 7), [date]);
   const shopping     = useMemo(() => buildShoppingList(weekRecipes), [weekRecipes]);
 
@@ -37,17 +38,44 @@ export default function Recipes() {
       {tab === "today" && (
         <>
           <Brackets>
-            <div className="card p-3 flex items-center justify-between">
-              <div>
-                <div className="card-title">{t("recipes.eating_today")}</div>
-                <div className="mono text-xl text-signal font-bold mt-1">{dayPlan.eating}</div>
+            <div className="card p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="card-title">{t("recipes.eating_today")}</div>
+                  <div className="mono text-xl text-signal font-bold mt-1">{dayPlan.eating}</div>
+                </div>
+                <div className="text-right">
+                  <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("recipes.target")}</div>
+                  <div className="mono text-sm text-ink">{todayRecipes.reduce((a, r) => a + r.kcal, 0)} kcal</div>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("recipes.target")}</div>
-                <div className="mono text-sm text-ink">{todayRecipes.reduce((a, r) => a + r.kcal, 0)} kcal</div>
+              {target.windowStart && target.windowEnd && (
+                <div className="mt-2 mono text-[.66rem] text-warn uppercase tracking-[.14em]">
+                  {t("eating.omad_window", { start: target.windowStart, end: target.windowEnd })}
+                </div>
+              )}
+              <div className="mt-2 flex flex-wrap gap-1">
+                {RECIPE_TAGS.glutenFree && <span className="chip chip-signal">GF</span>}
+                {RECIPE_TAGS.sugarFree && <span className="chip chip-signal">no sugar</span>}
+                {RECIPE_TAGS.noPork && <span className="chip chip-signal">no pork</span>}
               </div>
             </div>
           </Brackets>
+
+          {dayPlan.eating === "OMAD" && target.preShake && (
+            <div className="card p-3 border-line2">
+              <div className="flex justify-between items-baseline">
+                <div className="card-title">{t("eating.pre_shake")}</div>
+                <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{target.preShake.time}</div>
+              </div>
+              <div className="mono text-[.7rem] text-ink2 mt-1">{target.preShake.kcal} kcal · {target.preShake.protein}g protein</div>
+              <div className="mono text-[.62rem] text-mute mt-1">{target.preShake.note}</div>
+            </div>
+          )}
+
+          {dayPlan.eating === "OMAD" && todayRecipes.length > 0 && (
+            <div className="section-label">{t("eating.main_meal")}</div>
+          )}
 
           {todayRecipes.length === 0 ? (
             <Empty icon={<Icon.moon size={22} />} label={t("recipes.fast_day")} hint={t("recipes.fast_hint")} />

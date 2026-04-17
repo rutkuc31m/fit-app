@@ -1,33 +1,86 @@
 import { Router } from "express";
+import { writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
 import db from "../db.js";
 import { requireAuth } from "../auth.js";
 
 const r = Router();
 r.use(requireAuth);
 
+const PHOTO_DIR = process.env.FIT_PHOTO_DIR || "./data/photos";
+mkdirSync(PHOTO_DIR, { recursive: true });
+
+const V2_FIELDS = [
+  "date", "avg_weight", "weight_change", "training_done", "avg_steps",
+  "avg_kcal", "avg_protein_g", "challenges", "adjustments",
+  "waist_cm", "chest_cm", "arm_cm", "energy", "sleep_quality",
+  "back_pain", "motivation", "adherence_pct", "notes",
+  "photo_front", "photo_side", "photo_back"
+];
+
 r.get("/", (req, res) => {
   res.json(db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? ORDER BY week_number ASC").all(req.user.id));
 });
 
+r.get("/:week", (req, res) => {
+  const week = parseInt(req.params.week, 10);
+  const row = db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
+  res.json(row || null);
+});
+
 r.put("/:week", (req, res) => {
   const week = parseInt(req.params.week, 10);
-  const { date, avg_weight, weight_change, training_done, avg_steps, avg_kcal, avg_protein_g, challenges, adjustments } = req.body || {};
+  const body = req.body || {};
   const existing = db.prepare("SELECT id FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
+
+  const provided = V2_FIELDS.filter((f) => body[f] !== undefined);
+
   if (existing) {
-    db.prepare(`UPDATE weekly_checkins SET
-      date = COALESCE(?, date), avg_weight = COALESCE(?, avg_weight),
-      weight_change = COALESCE(?, weight_change), training_done = COALESCE(?, training_done),
-      avg_steps = COALESCE(?, avg_steps), avg_kcal = COALESCE(?, avg_kcal),
-      avg_protein_g = COALESCE(?, avg_protein_g),
-      challenges = COALESCE(?, challenges), adjustments = COALESCE(?, adjustments)
-      WHERE id = ?`).run(date, avg_weight, weight_change, training_done, avg_steps, avg_kcal, avg_protein_g, challenges, adjustments, existing.id);
+    if (provided.length === 0) return res.json(db.prepare("SELECT * FROM weekly_checkins WHERE id = ?").get(existing.id));
+    const setClause = provided.map((f) => `${f} = ?`).join(", ");
+    const values = provided.map((f) => body[f]);
+    values.push(existing.id);
+    db.prepare(`UPDATE weekly_checkins SET ${setClause} WHERE id = ?`).run(...values);
   } else {
-    db.prepare(`INSERT INTO weekly_checkins
-      (user_id, week_number, date, avg_weight, weight_change, training_done, avg_steps, avg_kcal, avg_protein_g, challenges, adjustments)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(req.user.id, week, date, avg_weight, weight_change, training_done, avg_steps, avg_kcal, avg_protein_g, challenges, adjustments);
+    const cols = ["user_id", "week_number", ...provided];
+    const vals = [req.user.id, week, ...provided.map((f) => body[f])];
+    const placeholders = cols.map(() => "?").join(", ");
+    db.prepare(`INSERT INTO weekly_checkins (${cols.join(", ")}) VALUES (${placeholders})`).run(...vals);
   }
   res.json(db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week));
+});
+
+// POST /api/checkins/:week/photo  — body { angle: "front"|"side"|"back", data_url: "data:image/jpeg;base64,..." }
+r.post("/:week/photo", (req, res) => {
+  const week = parseInt(req.params.week, 10);
+  const { angle, data_url } = req.body || {};
+  if (!angle || !["front", "side", "back"].includes(angle)) return res.status(400).json({ error: "bad_angle" });
+  if (!data_url || !data_url.startsWith("data:image/")) return res.status(400).json({ error: "bad_data" });
+
+  const m = data_url.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!m) return res.status(400).json({ error: "bad_format" });
+  const ext = m[1] === "jpeg" ? "jpg" : m[1];
+  const buf = Buffer.from(m[2], "base64");
+  const fname = `u${req.user.id}_w${week}_${angle}_${Date.now()}.${ext}`;
+  const userDir = join(PHOTO_DIR, String(req.user.id));
+  if (!existsSync(userDir)) mkdirSync(userDir, { recursive: true });
+  writeFileSync(join(userDir, fname), buf);
+  const relPath = `/photos/${req.user.id}/${fname}`;
+
+  // upsert into weekly_checkins
+  const col = `photo_${angle}`;
+  const existing = db.prepare("SELECT id FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
+  if (existing) {
+    db.prepare(`UPDATE weekly_checkins SET ${col} = ? WHERE id = ?`).run(relPath, existing.id);
+  } else {
+    db.prepare(`INSERT INTO weekly_checkins (user_id, week_number, ${col}) VALUES (?, ?, ?)`)
+      .run(req.user.id, week, relPath);
+  }
+  // also add to progress_photos for history
+  db.prepare("INSERT INTO progress_photos (user_id, date, path, angle) VALUES (?, ?, ?, ?)")
+    .run(req.user.id, new Date().toISOString().slice(0, 10), relPath, angle);
+
+  res.json({ angle, path: relPath });
 });
 
 export default r;
