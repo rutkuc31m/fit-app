@@ -80,34 +80,191 @@ export default function Dashboard() {
         <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">W{week}</div>
       </div>
 
-      {/* Hero */}
-      <div className="hero-glow rounded-xl overflow-hidden">
-        <div className="px-4 pt-3 flex items-center justify-between">
-          <div className="mono text-[.66rem] font-bold text-signal uppercase tracking-[.22em] flex items-center gap-[6px]">
-            <span className="pulse-dot" />{t(dayLabelKey)}
+      {/* Hero — Transformation Telemetry */}
+      <div className="hero-glow rounded-xl overflow-hidden relative">
+        {/* Grid texture */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[.05]"
+          style={{
+            backgroundImage:
+              "linear-gradient(#d4ff3a 1px, transparent 1px), linear-gradient(90deg, #d4ff3a 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+            maskImage: "radial-gradient(ellipse at 50% 40%, black 20%, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 50% 40%, black 20%, transparent 80%)"
+          }}
+        />
+
+        {/* Phase edge accent */}
+        <div
+          className="absolute left-0 top-0 bottom-0 w-[3px] z-[2]"
+          style={{
+            background: `linear-gradient(180deg, ${phase.color} 0%, transparent 90%)`,
+            boxShadow: `0 0 18px ${phase.color}55`
+          }}
+        />
+
+        {/* Status strip */}
+        <div className="relative z-[2] px-4 pt-3 pb-1 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="pulse-dot" />
+            <span className="mono text-[.62rem] font-bold text-signal uppercase tracking-[.24em]">
+              {t(dayLabelKey)}
+            </span>
           </div>
-          <div className="mono text-[.66rem] text-ink2 uppercase tracking-[.14em]">
-            P{phase.id} · W{week}
+          <div className="flex items-center gap-[6px] mono text-[.6rem] uppercase tracking-[.18em]">
+            <span style={{ color: phase.color }} className="font-bold">P{phase.id}</span>
+            <span className="text-mute">·</span>
+            <span className="text-ink2">WK {week}</span>
           </div>
         </div>
-        <div className="px-4 pt-1 pb-4">
-          <div className="font-display text-signal leading-[.9] text-[clamp(3rem,13vw,4.6rem)] tracking-[-0.025em] [text-shadow:0_0_40px_rgba(212,255,58,.4)] flex items-baseline gap-1 tabular-nums" style={{ fontWeight: 700, fontVariationSettings: '"SOFT" 100, "opsz" 96' }}>
-            {cur.toFixed(1)}<span className="text-[.32em] text-ink2">{t("dashboard.kg")}</span>
+
+        {/* Narrative */}
+        <div className="relative z-[2] px-4 pt-2 pb-3">
+          <div
+            className="font-display text-[1.5rem] leading-[1.02] text-ink tracking-[-.02em]"
+            style={{ fontVariationSettings: '"SOFT" 100, "opsz" 96' }}
+          >
+            <span className="italic text-ink2 font-light">day </span>
+            <span className="text-signal tabular-nums font-normal not-italic">
+              {daysBetween(PLAN.startDate, date) + 1}
+            </span>
+            <span className="italic text-ink2 font-light"> of </span>
+            <span className="tabular-nums text-ink2 font-light not-italic">182</span>
           </div>
-          <div className="mt-2 flex items-end justify-between gap-4">
-            <div className="mono text-[.78rem] text-ink">
-              <span className="text-mute">{t("dashboard.target")}:</span> {tw}{t("dashboard.kg")} ·{" "}
-              <span className="text-mute">Δ</span> {(cur - tw).toFixed(1)}{t("dashboard.kg")}
+          <div className="mono text-[.64rem] text-mute uppercase tracking-[.18em] mt-[4px]">
+            <span className="text-[#ff4d6d]">{lost.toFixed(1)}kg</span>
+            <span className="mx-[6px] text-mute2">forged</span>
+            <span className="text-[#5ec8ff]">{daysLeft}d</span>
+            <span className="ml-[6px] text-mute2">remain</span>
+          </div>
+        </div>
+
+        {/* Journey bar */}
+        <div className="relative z-[2] px-5 pt-1 pb-[44px]">
+          <div className="relative h-[6px]">
+            <div className="absolute inset-x-0 top-[1px] h-[3px] rounded-full bg-bg2 overflow-hidden border border-line/60">
+              <div
+                className="absolute left-0 top-0 bottom-0 rounded-full transition-all duration-700"
+                style={{
+                  width: `${pct}%`,
+                  background:
+                    "linear-gradient(90deg, #ff4d6d 0%, #ff7a3d 35%, #ffb454 60%, #d4ff3a 100%)",
+                  boxShadow: "0 0 12px rgba(255,180,84,.55)"
+                }}
+              />
             </div>
-            {trend.length >= 2 && <div className="flex-shrink-0 opacity-90"><Sparkline values={trend} width={120} height={30} /></div>}
+
+            {/* Start marker */}
+            <div className="absolute left-0 -top-[2px]">
+              <div className="w-[7px] h-[7px] rounded-full bg-[#ff4d6d] ring-[3px] ring-[#ff4d6d]/15" />
+              <div className="mono text-[.52rem] text-[#ff4d6d]/90 uppercase tracking-[.16em] mt-[8px] tabular-nums">
+                {sw.toFixed(0)}
+              </div>
+              <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] -mt-[1px]">start</div>
+            </div>
+
+            {/* Current marker */}
+            <div className="absolute -top-[4px] -translate-x-1/2" style={{ left: `${pct}%` }}>
+              <div
+                className="w-[14px] h-[14px] rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle at 32% 28%, #fff0c8 0%, #ffb454 45%, #c86418 100%)",
+                  boxShadow:
+                    "0 0 0 3px rgba(255,180,84,.14), 0 0 16px rgba(255,180,84,.65)"
+                }}
+              />
+              <div className="absolute left-1/2 -translate-x-1/2 top-[18px] flex flex-col items-center">
+                <div className="mono text-[.52rem] text-[#ffb454] uppercase tracking-[.2em] font-bold">
+                  now
+                </div>
+                <div
+                  className="font-display italic text-[.92rem] tabular-nums leading-none mt-[2px] whitespace-nowrap"
+                  style={{
+                    color: "#ffb454",
+                    fontVariationSettings: '"SOFT" 100, "opsz" 96',
+                    textShadow: "0 0 14px rgba(255,180,84,.4)"
+                  }}
+                >
+                  {cur.toFixed(1)}<span className="text-mute text-[.58rem] not-italic font-mono ml-[2px]">kg</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Target marker */}
+            <div className="absolute right-0 -top-[2px] flex flex-col items-end">
+              <div
+                className="w-[7px] h-[7px] rounded-full bg-signal ring-[3px] ring-signal/20"
+                style={{ boxShadow: "0 0 10px rgba(212,255,58,.8)" }}
+              />
+              <div className="mono text-[.52rem] text-signal uppercase tracking-[.16em] mt-[8px] tabular-nums">
+                {tw.toFixed(0)}
+              </div>
+              <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] -mt-[1px]">
+                target
+              </div>
+            </div>
           </div>
         </div>
-        <div className="h-[6px] bg-bg2 relative">
-          <div className="h-full bg-signal" style={{ width: `${pct}%`, boxShadow: "0 0 20px rgba(212,255,58,.6)" }} />
-        </div>
-        <div className="px-4 py-2 flex justify-between mono text-[.66rem] uppercase tracking-[.14em] text-mute border-t border-dashed border-line2">
-          <span>{pct}% · {t("dashboard.progress_to_goal")}</span>
-          <span>{daysLeft} {t("dashboard.days_left")}</span>
+
+        {/* 14-day arc */}
+        {trend.length >= 2 && (
+          <div className="relative z-[2] px-4 pt-[10px] pb-[10px] border-t border-line/40">
+            <div className="flex items-baseline justify-between mb-[6px]">
+              <div className="mono text-[.56rem] text-mute uppercase tracking-[.22em]">14-day arc</div>
+              <div className="mono text-[.6rem] tabular-nums">
+                <span className="text-mute">Δ target </span>
+                <span
+                  style={{ fontWeight: 700 }}
+                  className={cur - tw > 0 ? "text-warn" : "text-signal"}
+                >
+                  {cur - tw > 0 ? "+" : ""}{(cur - tw).toFixed(1)}
+                </span>
+                <span className="text-mute"> kg</span>
+              </div>
+            </div>
+            <div className="overflow-hidden -mx-1 opacity-90">
+              <Sparkline values={trend} width={360} height={38} />
+            </div>
+          </div>
+        )}
+
+        {/* Vitals strip */}
+        <div className="relative z-[2] grid grid-cols-3 border-t border-line/50">
+          <div className="px-3 py-[10px] text-center relative">
+            <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">kg lost</div>
+            <div
+              className="font-display tabular-nums leading-none mt-[5px] text-[1.1rem]"
+              style={{ color: "#ff4d6d", fontWeight: 500, fontVariationSettings: '"SOFT" 80, "opsz" 96' }}
+            >
+              {lost.toFixed(1)}
+            </div>
+            <div className="absolute right-0 top-[10px] bottom-[10px] w-px bg-line/60" />
+          </div>
+          <div className="px-3 py-[10px] text-center relative">
+            <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">journey</div>
+            <div
+              className="font-display tabular-nums leading-none mt-[5px] text-[1.1rem]"
+              style={{
+                color: "#d4ff3a",
+                fontWeight: 500,
+                fontVariationSettings: '"SOFT" 80, "opsz" 96',
+                textShadow: "0 0 18px rgba(212,255,58,.55)"
+              }}
+            >
+              {pct}<span className="text-mute text-[.68rem] font-light">%</span>
+            </div>
+            <div className="absolute right-0 top-[10px] bottom-[10px] w-px bg-line/60" />
+          </div>
+          <div className="px-3 py-[10px] text-center">
+            <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">days left</div>
+            <div
+              className="font-display tabular-nums leading-none mt-[5px] text-[1.1rem]"
+              style={{ color: "#5ec8ff", fontWeight: 500, fontVariationSettings: '"SOFT" 80, "opsz" 96' }}
+            >
+              {daysLeft}
+            </div>
+          </div>
         </div>
       </div>
 

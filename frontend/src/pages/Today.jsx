@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { todayStr, fmtDate } from "../lib/plan";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
+import { quoteForDate } from "../lib/quotes";
+import { requestNotifyPermission, getTodayScheduledTime } from "../lib/notify";
 import { Icon, Empty } from "../components/ui";
 
 // ─── Accelerometer pedometer (mobile browsers) ───
@@ -84,7 +86,17 @@ export default function Today() {
   const [stepsLogged, setStepsLogged] = useState(0);
   const [stepInput, setStepInput] = useState("");
   const [savedFlash, setSavedFlash] = useState(false);
+  const [notifyStatus, setNotifyStatus] = useState(
+    typeof Notification !== "undefined" ? Notification.permission : "unsupported"
+  );
   const pedo = useStepCounter();
+  const quote = useMemo(() => quoteForDate(date), [date]);
+  const scheduledPing = getTodayScheduledTime();
+
+  const askNotify = async () => {
+    const res = await requestNotifyPermission();
+    setNotifyStatus(res);
+  };
 
   const day = useMemo(
     () => FULL_SCHEDULE.days.find((d) => d.date === date),
@@ -186,6 +198,34 @@ export default function Today() {
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">kcal</div>
         </div>
       </div>
+
+      {/* Quote of the day */}
+      <div className="card p-4 relative overflow-hidden" style={{
+        background: "linear-gradient(135deg, rgba(212,255,58,.06) 0%, rgba(94,200,255,.04) 100%)"
+      }}>
+        <div className="absolute top-2 left-3 mono text-[2.5rem] leading-none text-signal/30 select-none">"</div>
+        <div className="pl-6 pt-1">
+          <div className="mono text-[.78rem] text-ink leading-snug italic">{quote.q}</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-2">— {quote.a}</div>
+        </div>
+      </div>
+
+      {/* Notification prompt (only if today + not granted) */}
+      {date === todayStr() && notifyStatus !== "granted" && notifyStatus !== "unsupported" && (
+        <button
+          onClick={askNotify}
+          className="card p-3 w-full text-left hover:border-line2 transition flex items-center gap-2"
+        >
+          <span className="pulse-dot bg-signal" />
+          <div className="flex-1">
+            <div className="card-title">Enable daily reminder</div>
+            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
+              Random time 07:00–21:00 · today {scheduledPing}
+            </div>
+          </div>
+          <Icon.chev size={14} className="text-mute" />
+        </button>
+      )}
 
       {/* Quick chips */}
       <div className="grid grid-cols-3 gap-[10px]">
