@@ -31,6 +31,7 @@
     "totals": "Gesamt",
     "mode_barcode": "Barcode", "mode_photo": "Foto",
     "mode_gram": "Gramm", "mode_piece": "Stück",
+    "today": "Heute", "yesterday": "Gestern",
     "photo_analyze": "Foto → KI",
     "photo_hint": "Etikett oder Produkt ins Bild, auf Aufnahme tippen",
     "capture": "Aufnehmen", "analyzing": "Analysiere…"

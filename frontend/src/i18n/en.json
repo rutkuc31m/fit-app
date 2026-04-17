@@ -31,6 +31,7 @@
     "totals": "Totals",
     "mode_barcode": "Barcode", "mode_photo": "Photo",
     "mode_gram": "Grams", "mode_piece": "Pieces",
+    "today": "Today", "yesterday": "Yesterday",
     "photo_analyze": "Photo → AI",
     "photo_hint": "Fit label or product in frame, tap capture",
     "capture": "Capture", "analyzing": "Analyzing…"

@@ -11,7 +11,8 @@ const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, 
 
 export default function Log() {
   const { t } = useTranslation();
-  const [date] = useState(todayStr());
+  const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
+  const [date, setDate] = useState(todayStr());
   const [meals, setMeals] = useState([]);
   const [scanOpen, setScanOpen] = useState(false);
   const [activeMeal, setActiveMeal] = useState(null);
@@ -22,7 +23,21 @@ export default function Log() {
   const [mode, setMode] = useState("gram"); // gram | piece
   const [pieceFood, setPieceFood] = useState(null);
   const [pieces, setPieces] = useState(1);
-  const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
+
+  const shiftDate = (delta) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + delta);
+    setDate(d.toISOString().slice(0, 10));
+  };
+  const isToday = date === todayStr();
+  const dateLabel = (() => {
+    const d = new Date(date);
+    const today = new Date(todayStr());
+    const diff = Math.round((d - today) / 86400000);
+    if (diff === 0) return t("log.today");
+    if (diff === -1) return t("log.yesterday");
+    return d.toLocaleDateString(lang, { weekday: "short", day: "2-digit", month: "2-digit" });
+  })();
 
   const load = async () => setMeals(await api.get(`/meals?date=${date}`));
   useEffect(() => { load(); }, [date]);
@@ -112,6 +127,25 @@ export default function Log() {
       <div className="flex items-center justify-between">
         <div className="section-label flex-1">{t("log.title")}</div>
         <button className="btn-primary" onClick={addMeal}>{t("log.add_meal")}</button>
+      </div>
+
+      {/* Date navigator */}
+      <div className="card p-2 flex items-center gap-2">
+        <button className="btn-icon" aria-label="prev day" onClick={() => shiftDate(-1)}>
+          <Icon.chev size={16} className="rotate-180" />
+        </button>
+        <div className="flex-1 text-center">
+          <div className="mono text-sm text-ink font-bold tabular-nums">{dateLabel}</div>
+          <div className="mono text-[.6rem] text-mute tabular-nums">{date}</div>
+        </div>
+        <button className="btn-icon" aria-label="next day" onClick={() => shiftDate(1)} disabled={isToday}>
+          <Icon.chev size={16} className={isToday ? "opacity-30" : ""} />
+        </button>
+        {!isToday && (
+          <button className="mono text-[.6rem] text-signal uppercase tracking-[.14em] px-2 hover:text-ink" onClick={() => setDate(todayStr())}>
+            {t("log.today")}
+          </button>
+        )}
       </div>
 
       <div className="card p-4">
