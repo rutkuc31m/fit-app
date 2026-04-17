@@ -1,9 +1,63 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { todayStr, fmtDate } from "../lib/plan";
 import FULL_SCHEDULE from "../lib/daily_schedule";
+import { api } from "../lib/api";
 import { Icon, Empty } from "../components/ui";
+
+// ─── Accelerometer pedometer (mobile browsers) ───
+// Peak-detection on vertical accel magnitude — coarse but workable.
+function useStepCounter() {
+  const [steps, setSteps] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [supported, setSupported] = useState(true);
+  const lastPeakRef = useRef(0);
+  const handlerRef = useRef(null);
+
+  const start = async () => {
+    if (typeof DeviceMotionEvent === "undefined") {
+      setSupported(false);
+      return;
+    }
+    if (typeof DeviceMotionEvent.requestPermission === "function") {
+      try {
+        const res = await DeviceMotionEvent.requestPermission();
+        if (res !== "granted") { setSupported(false); return; }
+      } catch { setSupported(false); return; }
+    }
+    const onMotion = (e) => {
+      const a = e.accelerationIncludingGravity || e.acceleration;
+      if (!a) return;
+      const mag = Math.sqrt((a.x || 0) ** 2 + (a.y || 0) ** 2 + (a.z || 0) ** 2);
+      const now = Date.now();
+      // Threshold ~12 m/s² with 350ms debounce — empirical walking cadence
+      if (mag > 12 && now - lastPeakRef.current > 350) {
+        lastPeakRef.current = now;
+        setSteps((s) => s + 1);
+      }
+    };
+    handlerRef.current = onMotion;
+    window.addEventListener("devicemotion", onMotion);
+    setRunning(true);
+  };
+
+  const stop = () => {
+    if (handlerRef.current) {
+      window.removeEventListener("devicemotion", handlerRef.current);
+      handlerRef.current = null;
+    }
+    setRunning(false);
+  };
+
+  const reset = () => setSteps(0);
+
+  useEffect(() => () => {
+    if (handlerRef.current) window.removeEventListener("devicemotion", handlerRef.current);
+  }, []);
+
+  return { steps, running, supported, start, stop, reset };
+}
 
 const CAT_STYLE = {
   routine:    { dot: "#8a8f98", label: "ROUT" },
@@ -27,11 +81,42 @@ export default function Today() {
   const { t } = useTranslation();
   const [date, setDate] = useState(todayStr());
   const now = nowHHMM();
+  const [stepsLogged, setStepsLogged] = useState(0);
+  const [stepInput, setStepInput] = useState("");
+  const [savedFlash, setSavedFlash] = useState(false);
+  const pedo = useStepCounter();
 
   const day = useMemo(
     () => FULL_SCHEDULE.days.find((d) => d.date === date),
     [date]
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    api.get(`/logs/${date}`).then((l) => {
+      if (cancelled) return;
+      const v = l?.steps || 0;
+      setStepsLogged(v);
+      setStepInput(v ? String(v) : "");
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [date]);
+
+  const saveSteps = async (val) => {
+    const n = parseInt(val, 10);
+    if (!Number.isFinite(n) || n < 0) return;
+    await api.put(`/logs/${date}`, { steps: n });
+    setStepsLogged(n);
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 600);
+  };
+
+  const commitPedoToDay = async () => {
+    const n = stepsLogged + pedo.steps;
+    await saveSteps(n);
+    setStepInput(String(n));
+    pedo.reset();
+  };
 
   const shiftDate = (delta) => {
     const d = new Date(date);
@@ -116,6 +201,61 @@ export default function Today() {
           <div className="mono text-sm text-ink font-bold tabular-nums">{day.sleepHours}h</div>
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">sleep</div>
         </div>
+      </div>
+
+      {/* Step counter */}
+      <div className="card p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
+            Steps · {stepsLogged.toLocaleString()} / {day.stepTarget.toLocaleString()}
+          </div>
+          {savedFlash && <div className="mono text-[.58rem] text-signal uppercase tracking-[.14em]">✓ saved</div>}
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-2 bg-bg2 rounded overflow-hidden mb-3">
+          <div
+            className="h-full bg-signal transition-all"
+            style={{ width: `${Math.min(100, Math.round((stepsLogged / day.stepTarget) * 100))}%` }}
+          />
+        </div>
+
+        {/* Manual input */}
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            type="number"
+            inputMode="numeric"
+            className="input flex-1 mono text-sm"
+            placeholder="manual steps"
+            value={stepInput}
+            onChange={(e) => setStepInput(e.target.value)}
+          />
+          <button className="btn-ghost" onClick={() => saveSteps(stepInput)}>save</button>
+        </div>
+
+        {/* Pedometer (accelerometer-based) */}
+        {pedo.supported && date === todayStr() && (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 mono text-[.7rem] text-ink2">
+              {pedo.running
+                ? <>Counting… <span className="text-signal font-bold tabular-nums">+{pedo.steps}</span></>
+                : "Pedometer (phone in pocket)"}
+            </div>
+            {!pedo.running ? (
+              <button className="btn-ghost" onClick={pedo.start}>start</button>
+            ) : (
+              <>
+                <button className="btn-ghost" onClick={pedo.stop}>pause</button>
+                <button className="btn-ghost" onClick={commitPedoToDay} disabled={!pedo.steps}>+ log</button>
+              </>
+            )}
+          </div>
+        )}
+        {!pedo.supported && (
+          <div className="mono text-[.6rem] text-mute">
+            Pedometer not supported on this device — type manually
+          </div>
+        )}
       </div>
 
       {/* Restriction banner */}
