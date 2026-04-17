@@ -9,6 +9,8 @@ import trainingRoutes from "./routes/training.js";
 import measurementsRoutes from "./routes/measurements.js";
 import checkinsRoutes from "./routes/checkins.js";
 import habitsRoutes from "./routes/habits.js";
+import pushRoutes from "./routes/push.js";
+import { startPushScheduler } from "./push_worker.js";
 
 const app = express();
 const PORT = process.env.PORT || 8001;
@@ -28,10 +30,14 @@ app.use("/api/training", trainingRoutes);
 app.use("/api/measurements", measurementsRoutes);
 app.use("/api/checkins", checkinsRoutes);
 app.use("/api/habits", habitsRoutes);
+app.use("/api/push", pushRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(500).json({ error: err.message || "server_error" });
 });
 
-app.listen(PORT, () => console.log(`fit-api :${PORT}`));
+app.listen(PORT, () => {
+  console.log(`fit-api :${PORT}`);
+  try { startPushScheduler(); } catch (e) { console.error("push scheduler failed:", e); }
+});

@@ -36,5 +36,5 @@ export const api = {
   get: (p) => request(p),
   post: (p, body, opts) => request(p, { method: "POST", body: JSON.stringify(body), ...(opts || {}) }),
   put: (p, body, opts) => request(p, { method: "PUT", body: JSON.stringify(body), ...(opts || {}) }),
-  del: (p) => request(p, { method: "DELETE" })
+  del: (p, body) => request(p, body ? { method: "DELETE", body: JSON.stringify(body) } : { method: "DELETE" })
 };

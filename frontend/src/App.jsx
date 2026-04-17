@@ -1,7 +1,5 @@
-import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./lib/auth.jsx";
-import { startDailyNotify } from "./lib/notify";
 import TopBar from "./components/TopBar";
 import NavBar from "./components/NavBar";
 import Login from "./pages/Login";
@@ -24,11 +22,6 @@ function Protected({ children }) {
 
 export default function App() {
   const { user } = useAuth();
-  useEffect(() => {
-    if (!user) return;
-    const stop = startDailyNotify();
-    return stop;
-  }, [user]);
   return (
     <>
       {user && <TopBar />}

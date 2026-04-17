@@ -162,6 +162,17 @@ CREATE TABLE IF NOT EXISTS habit_logs (
   PRIMARY KEY (user_id, date, habit_id)
 );
 CREATE INDEX IF NOT EXISTS idx_habit_user_date ON habit_logs(user_id, date);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id        INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint  TEXT NOT NULL UNIQUE,
+  p256dh    TEXT NOT NULL,
+  auth      TEXT NOT NULL,
+  ua        TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id);
 `);
 
 // ─── ALTER weekly_checkins to v2 schema (idempotent) ───

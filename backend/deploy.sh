@@ -15,7 +15,7 @@ fi
 # 2. App dir
 echo "[2/5] Setting up /opt/fitapi..."
 mkdir -p /opt/fitapi
-cp -r server.js db.js auth.js routes package.json /opt/fitapi/
+cp -r server.js db.js auth.js routes push_worker.js quotes.js package.json /opt/fitapi/
 cd /opt/fitapi
 npm install --omit=dev
 
@@ -41,6 +41,9 @@ Environment=FIT_DB=/opt/fitapi/data/fit.db
 Environment=JWT_SECRET=CHANGE_ME_ON_VM
 Environment=CORS_ORIGINS=https://fit.rutkuc.com
 Environment=PORT=8001
+Environment=FIT_VAPID_PUBLIC=BK1GzZm3tJk4i3jFhWXhCGgHs07n449o-QrejjxNsnY-ZlMDnpnlVR8SMF6Y_Xdads2yy9BNmE6_H_BOgPyggbc
+Environment=FIT_VAPID_PRIVATE=rQYR7JkW0dpZYyqd67_l74mmnHSWV_owQVZhx35Wx6k
+Environment=FIT_VAPID_SUBJECT=mailto:admin@rutkuc.com
 ExecStart=/usr/bin/node /opt/fitapi/server.js
 Restart=always
 RestartSec=5

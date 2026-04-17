@@ -7,6 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.js",
+      injectRegister: "auto",
       manifest: {
         name: "FitApp",
         short_name: "FitApp",
@@ -21,18 +25,8 @@ export default defineConfig({
           { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }
         ]
       },
-      workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
-        cleanupOutdatedCaches: true,
-        navigateFallbackDenylist: [/^\/api/],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.fit\.rutkuc\.com\/.*/,
-            handler: "NetworkFirst",
-            options: { cacheName: "api", networkTimeoutSeconds: 4 }
-          }
-        ]
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,html,svg,png,webmanifest}"]
       }
     })
   ],

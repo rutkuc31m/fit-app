@@ -1,96 +1,67 @@
-// Daily random-time notification (7:00–21:00 window).
-// Web limitation: notifications fire only while the tab/PWA is alive.
-// Strategy: pick a random minute in window per day, persist in localStorage,
-// check every 30s; if current time passed and not yet fired → fire + mark fired.
+// Web Push subscription helper.
+// Backend handles scheduling (random time 07:00–21:00 each day) + sending via VAPID.
+// This module talks to the SW PushManager and backend /api/push/subscribe.
 
-import { quoteForDate } from "./quotes";
-import { todayStr } from "./plan";
+import { api } from "./api";
 
-const KEY_TIME  = "fit.notify.time";   // "YYYY-MM-DD|HH:MM"
-const KEY_FIRED = "fit.notify.fired";  // "YYYY-MM-DD"
-
-const HOUR_START = 7;   // 07:00
-const HOUR_END   = 21;  // 21:00 (exclusive-ish, last minute = 20:59)
-
-const pickRandomTimeFor = (date) => {
-  const totalMinutes = (HOUR_END - HOUR_START) * 60; // 14h = 840 min
-  const offset = Math.floor(Math.random() * totalMinutes);
-  const h = HOUR_START + Math.floor(offset / 60);
-  const m = offset % 60;
-  return `${date}|${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+const urlBase64ToUint8Array = (b64) => {
+  const padding = "=".repeat((4 - (b64.length % 4)) % 4);
+  const base64 = (b64 + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
 };
 
-const getScheduledTimeToday = () => {
-  const date = todayStr();
-  const raw = localStorage.getItem(KEY_TIME);
-  if (raw && raw.startsWith(date + "|")) return raw.split("|")[1];
-  const fresh = pickRandomTimeFor(date);
-  localStorage.setItem(KEY_TIME, fresh);
-  return fresh.split("|")[1];
-};
+export const pushSupported = () =>
+  typeof window !== "undefined" &&
+  "serviceWorker" in navigator &&
+  "PushManager" in window &&
+  "Notification" in window;
 
-const nowHHMM = () => {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-};
-
-const fireNotification = () => {
-  if (!("Notification" in window)) return;
-  if (Notification.permission !== "granted") return;
-  const { q, a } = quoteForDate(todayStr());
-  try {
-    new Notification("Fit · Daily push", {
-      body: `"${q}" — ${a}`,
-      icon: "/icon-192.png",
-      tag: "fit-daily",
-      lang: "en"
-    });
-  } catch {
-    // Some mobile browsers require ServiceWorkerRegistration.showNotification
-    if (navigator.serviceWorker?.ready) {
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.showNotification("Fit · Daily push", {
-          body: `"${q}" — ${a}`,
-          icon: "/icon-192.png",
-          tag: "fit-daily"
-        });
-      });
-    }
-  }
-};
-
-export const requestNotifyPermission = async () => {
-  if (!("Notification" in window)) return "unsupported";
-  if (Notification.permission === "granted") return "granted";
+export const getPushStatus = async () => {
+  if (!pushSupported()) return "unsupported";
   if (Notification.permission === "denied") return "denied";
-  return await Notification.requestPermission();
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (sub) return "subscribed";
+  if (Notification.permission === "granted") return "granted";
+  return "default";
 };
 
-// Call once from app root. Returns cleanup fn.
-export const startDailyNotify = () => {
-  let intervalId = null;
+export const subscribeToPush = async () => {
+  if (!pushSupported()) throw new Error("unsupported");
 
-  const tick = () => {
-    if (!("Notification" in window) || Notification.permission !== "granted") return;
-    const date = todayStr();
-    const fired = localStorage.getItem(KEY_FIRED);
-    if (fired === date) return;
-    const scheduled = getScheduledTimeToday();
-    if (nowHHMM() >= scheduled) {
-      fireNotification();
-      localStorage.setItem(KEY_FIRED, date);
-    }
-  };
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") throw new Error(perm);
 
-  tick();
-  intervalId = setInterval(tick, 30 * 1000); // 30s resolution
+  const { key } = await api.get("/push/public-key");
+  const reg = await navigator.serviceWorker.ready;
 
-  return () => { if (intervalId) clearInterval(intervalId); };
+  // Drop any stale sub first
+  const existing = await reg.pushManager.getSubscription();
+  if (existing) await existing.unsubscribe().catch(() => {});
+
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(key)
+  });
+
+  const json = sub.toJSON();
+  await api.post("/push/subscribe", {
+    endpoint: json.endpoint,
+    keys: json.keys
+  });
+  return "subscribed";
 };
 
-// For debug / preview
-export const getTodayScheduledTime = () => {
-  try { return getScheduledTimeToday(); } catch { return null; }
+export const unsubscribeFromPush = async () => {
+  if (!pushSupported()) return;
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (!sub) return;
+  await api.del("/push/subscribe", { endpoint: sub.endpoint }).catch(() => {});
+  await sub.unsubscribe().catch(() => {});
 };
 
-export const fireTestNotification = () => fireNotification();
+export const sendTestPush = () => api.post("/push/test", {});

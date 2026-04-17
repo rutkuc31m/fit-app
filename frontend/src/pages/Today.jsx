@@ -5,7 +5,7 @@ import { todayStr, fmtDate } from "../lib/plan";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { quoteForDate } from "../lib/quotes";
-import { requestNotifyPermission, getTodayScheduledTime } from "../lib/notify";
+import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
 import { Icon, Empty } from "../components/ui";
 
 // ─── Accelerometer pedometer (mobile browsers) ───
@@ -86,16 +86,31 @@ export default function Today() {
   const [stepsLogged, setStepsLogged] = useState(0);
   const [stepInput, setStepInput] = useState("");
   const [savedFlash, setSavedFlash] = useState(false);
-  const [notifyStatus, setNotifyStatus] = useState(
-    typeof Notification !== "undefined" ? Notification.permission : "unsupported"
-  );
+  const [pushStatus, setPushStatus] = useState("default");
+  const [pushBusy, setPushBusy] = useState(false);
   const pedo = useStepCounter();
   const quote = useMemo(() => quoteForDate(date), [date]);
-  const scheduledPing = getTodayScheduledTime();
 
-  const askNotify = async () => {
-    const res = await requestNotifyPermission();
-    setNotifyStatus(res);
+  useEffect(() => { getPushStatus().then(setPushStatus); }, []);
+
+  const onSubscribe = async () => {
+    setPushBusy(true);
+    try {
+      const s = await subscribeToPush();
+      setPushStatus(s);
+    } catch (e) {
+      setPushStatus(e.message || "denied");
+    } finally {
+      setPushBusy(false);
+    }
+  };
+  const onUnsubscribe = async () => {
+    setPushBusy(true);
+    try { await unsubscribeFromPush(); setPushStatus("default"); }
+    finally { setPushBusy(false); }
+  };
+  const onTest = async () => {
+    try { await sendTestPush(); } catch (e) { console.error(e); }
   };
 
   const day = useMemo(
@@ -210,21 +225,32 @@ export default function Today() {
         </div>
       </div>
 
-      {/* Notification prompt (only if today + not granted) */}
-      {date === todayStr() && notifyStatus !== "granted" && notifyStatus !== "unsupported" && (
-        <button
-          onClick={askNotify}
-          className="card p-3 w-full text-left hover:border-line2 transition flex items-center gap-2"
-        >
-          <span className="pulse-dot bg-signal" />
-          <div className="flex-1">
-            <div className="card-title">Enable daily reminder</div>
-            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
-              Random time 07:00–21:00 · today {scheduledPing}
+      {/* Push notification panel */}
+      {date === todayStr() && pushSupported() && (
+        <div className="card p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="pulse-dot" />
+            <div className="card-title flex-1">Daily push</div>
+            <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">
+              {pushStatus === "subscribed" ? "on" : pushStatus === "denied" ? "blocked" : "off"}
             </div>
           </div>
-          <Icon.chev size={14} className="text-mute" />
-        </button>
+          <div className="mono text-[.62rem] text-mute mb-2">
+            Random time 07:00–21:00 · quote + reminder, sent from server
+          </div>
+          {pushStatus === "subscribed" ? (
+            <div className="flex gap-2">
+              <button className="btn-ghost flex-1" onClick={onTest} disabled={pushBusy}>send test</button>
+              <button className="btn-ghost flex-1" onClick={onUnsubscribe} disabled={pushBusy}>disable</button>
+            </div>
+          ) : pushStatus === "denied" ? (
+            <div className="mono text-[.6rem] text-warn">Permission blocked — enable in browser settings</div>
+          ) : (
+            <button className="btn-primary w-full" onClick={onSubscribe} disabled={pushBusy}>
+              {pushBusy ? "…" : "enable push"}
+            </button>
+          )}
+        </div>
       )}
 
       {/* Quick chips */}
