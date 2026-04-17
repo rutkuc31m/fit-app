@@ -163,30 +163,23 @@ export default function Dashboard() {
               <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] -mt-[1px]">start</div>
             </div>
 
-            {/* Current marker */}
-            <div className="absolute -top-[4px] -translate-x-1/2" style={{ left: `${pct}%` }}>
+            {/* Current marker — elegant, no dominant weight number */}
+            <div className="absolute -top-[3px] -translate-x-1/2" style={{ left: `${pct}%` }}>
               <div
-                className="w-[14px] h-[14px] rounded-full"
+                className="w-[11px] h-[11px] rounded-full"
                 style={{
                   background:
                     "radial-gradient(circle at 32% 28%, #fff0c8 0%, #ffb454 45%, #c86418 100%)",
                   boxShadow:
-                    "0 0 0 3px rgba(255,180,84,.14), 0 0 16px rgba(255,180,84,.65)"
+                    "0 0 0 3px rgba(255,180,84,.12), 0 0 14px rgba(255,180,84,.55)"
                 }}
               />
-              <div className="absolute left-1/2 -translate-x-1/2 top-[18px] flex flex-col items-center">
-                <div className="mono text-[.52rem] text-[#ffb454] uppercase tracking-[.2em] font-bold">
-                  now
+              <div className="absolute left-1/2 -translate-x-1/2 top-[14px] flex flex-col items-center">
+                <div className="mono text-[.52rem] text-[#ffb454] uppercase tracking-[.2em] tabular-nums">
+                  {lost > 0 ? `−${lost.toFixed(1)}` : "—"}
                 </div>
-                <div
-                  className="font-display italic text-[.92rem] tabular-nums leading-none mt-[2px] whitespace-nowrap"
-                  style={{
-                    color: "#ffb454",
-                    fontVariationSettings: '"SOFT" 100, "opsz" 96',
-                    textShadow: "0 0 14px rgba(255,180,84,.4)"
-                  }}
-                >
-                  {cur.toFixed(1)}<span className="text-mute text-[.58rem] not-italic font-mono ml-[2px]">kg</span>
+                <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] -mt-[1px]">
+                  now
                 </div>
               </div>
             </div>
