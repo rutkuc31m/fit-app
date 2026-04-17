@@ -15,9 +15,10 @@ function WeightChart({ logs }) {
   const targetY = y(PLAN.targetWeight);
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-[180px]">
-      <line x1={pad} y1={targetY} x2={W - pad} y2={targetY} stroke="#9bc41a" strokeDasharray="3 4" strokeWidth="1" opacity=".55" />
-      <path d={d} stroke="#d4ff3a" strokeWidth="2" fill="none" filter="drop-shadow(0 0 6px rgba(212,255,58,.5))" />
-      {data.map((p, i) => <circle key={i} cx={x(i)} cy={y(p.w)} r="2.5" fill="#d4ff3a" />)}
+      <line x1={pad} y1={targetY} x2={W - pad} y2={targetY} stroke="#9bc41a" strokeDasharray="3 4" strokeWidth="1" opacity=".6" />
+      <text x={W - pad} y={targetY - 4} textAnchor="end" fontSize="9" fill="#9bc41a" fontFamily="'IBM Plex Mono', monospace" opacity=".7">TARGET {PLAN.targetWeight}kg</text>
+      <path d={d} stroke="#ff4d6d" strokeWidth="2" fill="none" filter="drop-shadow(0 0 6px rgba(255,77,109,.55))" />
+      {data.map((p, i) => <circle key={i} cx={x(i)} cy={y(p.w)} r="2.5" fill="#ff4d6d" />)}
     </svg>
   );
 }
@@ -45,7 +46,7 @@ export default function Progress() {
   const last = meas[meas.length - 1];
 
   return (
-    <div className="page">
+    <div className="page page-progress">
       <div className="section-label">{t("progress.weight_chart")}</div>
       <div className="card p-4"><WeightChart logs={logs} /></div>
 
@@ -71,7 +72,7 @@ export default function Progress() {
         <div className="card p-4 grid grid-cols-5 gap-2">
           {[["waist", last.waist_cm], ["chest", last.chest_cm], ["arm", last.arm_cm], ["hip", last.hip_cm], ["thigh", last.thigh_cm]].map(([k, v]) => (
             <div key={k} className="text-center">
-              <div className="mono text-sm font-bold text-signal">{v ?? "—"}</div>
+              <div className="mono text-sm font-bold text-cyan tabular-nums">{v ?? "—"}</div>
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-1">{t(`progress.${k}`)}</div>
             </div>
           ))}

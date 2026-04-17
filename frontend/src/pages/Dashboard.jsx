@@ -72,7 +72,7 @@ export default function Dashboard() {
     dayPlan.type !== "rest"   ? "dashboard.training_day" : "dashboard.rest_day";
 
   return (
-    <div className="page">
+    <div className="page page-dashboard">
       {/* Phase strip */}
       <div className="flex items-center gap-2 px-1">
         <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">P{phase.id}/4</div>

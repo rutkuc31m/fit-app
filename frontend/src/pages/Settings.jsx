@@ -30,7 +30,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="page">
+    <div className="page page-settings">
       <div className="section-label">{t("settings.profile")}</div>
       <div className="card p-4 flex flex-col gap-3">
         <label className="flex flex-col gap-1">

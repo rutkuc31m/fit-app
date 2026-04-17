@@ -91,7 +91,7 @@ export default function Training() {
         <div className="flex flex-col divide-y divide-line">
           {sets.map((s) => (
             <div key={s.id} className="px-4 py-2 flex items-center gap-2">
-              <span className="chip chip-signal w-7 justify-center">{s.set_number}</span>
+              <span className="chip chip-muscle w-7 justify-center">{s.set_number}</span>
               <input type="number" className="input mono flex-1 text-center" defaultValue={s.weight_kg || ""} placeholder="kg"
                 onBlur={(e) => e.target.value !== String(s.weight_kg || "") && updateSet(s, { weight_kg: +e.target.value })} />
               <span className="mono text-mute">×</span>
@@ -99,7 +99,7 @@ export default function Training() {
                 onBlur={(e) => e.target.value !== String(s.reps || "") && updateSet(s, { reps: +e.target.value })} />
             </div>
           ))}
-          <button className="mono text-xs caps text-signal py-3 hover:bg-surface2 transition flex items-center justify-center gap-2" onClick={() => addSet(ex)}>
+          <button className="mono text-xs caps text-amber py-3 hover:bg-surface2 transition flex items-center justify-center gap-2" onClick={() => addSet(ex)}>
             <Icon.plus size={14} /> {t("training.add_set")}
           </button>
         </div>
@@ -108,7 +108,7 @@ export default function Training() {
   };
 
   return (
-    <div className="page">
+    <div className="page page-training">
       <div className="section-label">
         {t("training.title")} · <span className="text-signal">{dayType}</span> · {t(`training.${day.nameKey}`)}
       </div>
@@ -119,12 +119,13 @@ export default function Training() {
 
       {/* Day C: cardio block on top */}
       {plan.type === "C" && cardio && (
-        <div className="card p-3">
-          <div className="flex justify-between items-baseline">
-            <div className="card-title">{t("cardio.liss_today")}</div>
-            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{cardio.liss?.durationMin}min · {cardio.liss?.intensity}</div>
+        <div className="card p-3 border-coral/30 relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-coral shadow-[0_0_10px_rgba(255,77,109,.5)]" />
+          <div className="flex justify-between items-baseline pl-2">
+            <div className="card-title text-coral">{t("cardio.liss_today")}</div>
+            <div className="mono text-[.62rem] text-coral/80 uppercase tracking-[.14em] tabular-nums">{cardio.liss?.durationMin}min · {cardio.liss?.intensity}</div>
           </div>
-          {cardio.liss?.notes && <div className="mono text-[.66rem] text-ink2 mt-1">{cardio.liss.notes}</div>}
+          {cardio.liss?.notes && <div className="mono text-[.66rem] text-ink2 mt-1 pl-2">{cardio.liss.notes}</div>}
         </div>
       )}
 
@@ -132,10 +133,10 @@ export default function Training() {
       {stepTarget && (
         <div className="card p-3 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Icon.zap size={16} className="text-signal" />
+            <Icon.zap size={16} className="text-amber" />
             <div className="mono text-[.7rem] text-ink uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
           </div>
-          <div className="mono text-sm text-signal font-bold tabular-nums">{stepTarget.toLocaleString()}</div>
+          <div className="mono text-sm text-amber font-bold tabular-nums">{stepTarget.toLocaleString()}</div>
         </div>
       )}
 

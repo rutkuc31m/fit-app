@@ -51,8 +51,9 @@ export default function Habits() {
     const done = !!logs[h.id];
     return (
       <button key={h.id} onClick={() => toggle(h.id)}
-        className={`w-full px-4 py-3 flex items-center gap-3 border-b border-line last:border-0 text-left transition ${done ? "bg-signal/[.04]" : "hover:bg-bg2"}`}>
-        <span className={`shrink-0 w-5 h-5 rounded border grid place-items-center ${done ? "bg-signal border-signal text-[#0a0c00]" : "border-line2"}`}>
+        className={`relative w-full px-4 py-3 flex items-center gap-3 border-b border-line last:border-0 text-left transition ${done ? "bg-lime/[.04]" : "hover:bg-bg2"}`}>
+        <span className={`absolute left-0 top-0 bottom-0 w-[2px] transition ${done ? "bg-lime shadow-[0_0_8px_rgba(212,255,58,.5)]" : "bg-amber/40"}`} />
+        <span className={`shrink-0 w-5 h-5 rounded border grid place-items-center transition ${done ? "bg-lime border-lime text-[#0a0c00]" : "border-amber/40 bg-amber/[.04]"}`}>
           {done && <Icon.check size={12} />}
         </span>
         <div className="flex-1 min-w-0">
@@ -63,19 +64,23 @@ export default function Habits() {
   };
 
   return (
-    <div className="page">
+    <div className="page page-habits">
       <div className="section-label">{t("habits.title")}</div>
 
       <Brackets>
         <div className="card p-4 flex items-center justify-between">
           <div>
             <div className="card-title">{t("habits.title")}</div>
-            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-1">
-              {t("habits.completion", { done: dailyDone, total: dailyTotal })}
+            <div className="mono text-[.62rem] uppercase tracking-[.14em] mt-1 tabular-nums">
+              <span className={dailyTotal > 0 && dailyDone === dailyTotal ? "text-lime" : dailyDone > 0 ? "text-amber" : "text-mute"}>
+                {dailyDone}
+              </span>
+              <span className="text-mute">/{dailyTotal}</span>
+              <span className="text-mute"> {t("habits.completion", { done: "", total: "" }).replace(/[0-9/]/g, "").trim()}</span>
             </div>
           </div>
           <div className="text-right">
-            <div className="font-display text-3xl text-signal leading-none tabular-nums" style={{ textShadow: "0 0 14px rgba(212,255,58,.5)" }}>
+            <div className="font-display text-3xl text-lime leading-none tabular-nums italic" style={{ textShadow: "0 0 14px rgba(212,255,58,.5)" }}>
               {streak}
             </div>
             <div className="mono text-[.58rem] text-mute uppercase tracking-[.18em] mt-1">{t("habits.streak", { count: streak })}</div>

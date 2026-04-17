@@ -10,10 +10,13 @@
     color: theme(colors.ink);
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
+    --page-glow-a: rgba(212,255,58,.06);
+    --page-glow-b: rgba(94,200,255,.035);
+    --page-glow-c: rgba(212,255,58,.03);
     background:
-      radial-gradient(1200px 600px at 20% -10%, rgba(212,255,58,.06), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, rgba(94,200,255,.035), transparent 60%),
-      radial-gradient(600px 800px at 50% 120%, rgba(212,255,58,.03), transparent 65%),
+      radial-gradient(1200px 600px at 20% -10%, var(--page-glow-a), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, var(--page-glow-b), transparent 60%),
+      radial-gradient(600px 800px at 50% 120%, var(--page-glow-c), transparent 65%),
       theme(colors.bg);
   }
   body::before {
@@ -173,9 +176,13 @@
     border-radius: inherit;
     transition: width .45s cubic-bezier(.2,.8,.2,1);
   }
-  .meter.over > span { background: #ff3d3d; box-shadow: 0 0 12px #ff3d3d; }
-  .meter.dim > span  { background: theme(colors.cool); box-shadow: 0 0 8px theme(colors.cool); }
-  .meter.warn > span { background: theme(colors.warn); box-shadow: 0 0 8px theme(colors.warn); }
+  .meter.over   > span { background: theme(colors.danger); box-shadow: 0 0 12px theme(colors.danger); }
+  .meter.dim    > span { background: theme(colors.cyan);   box-shadow: 0 0 8px  theme(colors.cyan);   }
+  .meter.warn   > span { background: theme(colors.warn);   box-shadow: 0 0 8px  theme(colors.warn);   }
+  .meter.heart  > span { background: theme(colors.coral);  box-shadow: 0 0 10px theme(colors.coral);  }
+  .meter.energy > span { background: theme(colors.amber);  box-shadow: 0 0 10px theme(colors.amber);  }
+  .meter.hydro  > span { background: theme(colors.cyan);   box-shadow: 0 0 8px  theme(colors.cyan);   }
+  .meter.muscle > span { background: theme(colors.lime);   box-shadow: 0 0 10px theme(colors.lime);   }
 
   /* Success flash — brief lime glow pulse on save */
   .flash-ok { animation: flashOk .55s ease-out; }
@@ -187,8 +194,8 @@
 
   /* Phase strip — 4 segmented bar */
   .phase-seg { @apply flex-1 h-[3px] rounded-full bg-bg2 border border-line relative overflow-hidden; }
-  .phase-seg.done { background: theme(colors.signal); border-color: theme(colors.signal); box-shadow: 0 0 8px rgba(212,255,58,.5); }
-  .phase-seg.now  { background: theme(colors.signal); border-color: theme(colors.signal); animation: phasePulse 1.8s ease-in-out infinite; }
+  .phase-seg.done { background: theme(colors.lime);  border-color: theme(colors.lime);  box-shadow: 0 0 8px rgba(212,255,58,.5); }
+  .phase-seg.now  { background: theme(colors.amber); border-color: theme(colors.amber); box-shadow: 0 0 8px rgba(255,180,84,.5); animation: phasePulse 1.8s ease-in-out infinite; }
   @keyframes phasePulse { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
 
   /* Tick line: animated dash stream (for active cards) */
@@ -210,10 +217,14 @@
   .chip {
     @apply mono text-[.62rem] caps px-[6px] py-[2px] rounded-[4px] border inline-flex items-center gap-1;
   }
-  .chip-signal { @apply border-signal/50 text-signal bg-signal/[.06]; }
-  .chip-cool   { @apply border-cool/50 text-cool bg-cool/[.06]; }
-  .chip-warn   { @apply border-warn/50 text-warn bg-warn/[.08]; }
-  .chip-mute   { @apply border-line2 text-mute bg-surface2/40; }
+  .chip-signal { @apply border-lime/50  text-lime  bg-lime/[.06];  }
+  .chip-muscle { @apply border-lime/50  text-lime  bg-lime/[.06];  }
+  .chip-heart  { @apply border-coral/50 text-coral bg-coral/[.06]; }
+  .chip-energy { @apply border-amber/50 text-amber bg-amber/[.08]; }
+  .chip-hydro  { @apply border-cyan/50  text-cyan  bg-cyan/[.06];  }
+  .chip-cool   { @apply border-cyan/50  text-cyan  bg-cyan/[.06];  }
+  .chip-warn   { @apply border-warn/50  text-warn  bg-warn/[.08];  }
+  .chip-mute   { @apply border-line2    text-mute  bg-surface2/40; }
 
   /* Stepper button (for set logging / numeric) */
   .step-btn {
@@ -224,5 +235,15 @@
   }
 
   /* Pretty focus rings for keyboard */
-  :focus-visible { outline: 1px solid theme(colors.signal); outline-offset: 2px; border-radius: 6px; }
+  :focus-visible { outline: 1px solid theme(colors.lime); outline-offset: 2px; border-radius: 6px; }
+
+  /* Per-page atmosphere — tints body radial glow via CSS vars (body:has walks down to .page-* descendant) */
+  body:has(.page-dashboard) { --page-glow-a: rgba(212,255,58,.07);  --page-glow-b: rgba(255,180,84,.035); --page-glow-c: rgba(212,255,58,.03);  }
+  body:has(.page-today)     { --page-glow-a: rgba(255,180,84,.06);  --page-glow-b: rgba(212,255,58,.03);  --page-glow-c: rgba(94,200,255,.02);  }
+  body:has(.page-log)       { --page-glow-a: rgba(255,180,84,.065); --page-glow-b: rgba(212,255,58,.025); --page-glow-c: rgba(255,77,109,.02);  }
+  body:has(.page-training)  { --page-glow-a: rgba(255,77,109,.06);  --page-glow-b: rgba(255,180,84,.03);  --page-glow-c: rgba(212,255,58,.015); }
+  body:has(.page-progress)  { --page-glow-a: rgba(255,77,109,.05);  --page-glow-b: rgba(212,255,58,.035); --page-glow-c: rgba(255,180,84,.02);  }
+  body:has(.page-habits)    { --page-glow-a: rgba(212,255,58,.07);  --page-glow-b: rgba(255,180,84,.025); --page-glow-c: rgba(212,255,58,.025); }
+  body:has(.page-checkin)   { --page-glow-a: rgba(94,200,255,.06);  --page-glow-b: rgba(255,77,109,.025); --page-glow-c: rgba(212,255,58,.015); }
+  body:has(.page-settings)  { --page-glow-a: rgba(212,255,58,.025); --page-glow-b: rgba(94,200,255,.02);  --page-glow-c: transparent;          }
 }

@@ -153,7 +153,7 @@ export default function Today() {
 
   if (!day) {
     return (
-      <div className="page">
+      <div className="page page-today">
         <Empty
           icon={<Icon.clock size={22} />}
           label="—"
@@ -176,7 +176,7 @@ export default function Today() {
   }
 
   return (
-    <div className="page">
+    <div className="page page-today">
       {/* Date nav */}
       <div className="flex items-center justify-between px-1">
         <button className="btn-ghost" onClick={() => shiftDate(-1)} aria-label="prev">
@@ -209,16 +209,16 @@ export default function Today() {
           </div>
         </div>
         <div className="text-right">
-          <div className="mono text-sm text-signal font-bold tabular-nums">{day.eating.targets.kcal}</div>
-          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">kcal</div>
+          <div className="mono text-sm text-amber font-bold tabular-nums">{day.eating.targets.kcal}</div>
+          <div className="mono text-[.58rem] text-amber/70 uppercase tracking-[.14em]">kcal</div>
         </div>
       </div>
 
-      {/* Quote of the day */}
+      {/* Quote of the day — journey gradient (coral → amber → lime) */}
       <div className="card p-4 relative overflow-hidden" style={{
-        background: "linear-gradient(135deg, rgba(212,255,58,.06) 0%, rgba(94,200,255,.04) 100%)"
+        background: "linear-gradient(135deg, rgba(255,77,109,.05) 0%, rgba(255,180,84,.05) 50%, rgba(212,255,58,.05) 100%)"
       }}>
-        <div className="absolute top-2 left-3 mono text-[2.5rem] leading-none text-signal/30 select-none">"</div>
+        <div className="absolute top-2 left-3 font-display text-[2.5rem] leading-none text-amber/40 select-none italic">"</div>
         <div className="pl-6 pt-1">
           <div className="mono text-[.78rem] text-ink leading-snug italic">{quote.q}</div>
           <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-2">— {quote.a}</div>
@@ -253,19 +253,19 @@ export default function Today() {
         </div>
       )}
 
-      {/* Quick chips */}
+      {/* Quick chips — semantic metric palette */}
       <div className="grid grid-cols-3 gap-[10px]">
-        <div className="card p-2 text-center">
-          <div className="mono text-sm text-ink font-bold tabular-nums">{day.stepTarget}</div>
-          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
+        <div className="card p-2 text-center border-amber/20">
+          <div className="mono text-sm text-amber font-bold tabular-nums">{day.stepTarget}</div>
+          <div className="mono text-[.58rem] text-amber/60 uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
         </div>
-        <div className="card p-2 text-center">
-          <div className="mono text-sm text-ink font-bold tabular-nums">{day.waterLiters}L</div>
-          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">water</div>
+        <div className="card p-2 text-center border-cyan/20">
+          <div className="mono text-sm text-cyan font-bold tabular-nums">{day.waterLiters}L</div>
+          <div className="mono text-[.58rem] text-cyan/60 uppercase tracking-[.14em]">water</div>
         </div>
-        <div className="card p-2 text-center">
-          <div className="mono text-sm text-ink font-bold tabular-nums">{day.sleepHours}h</div>
-          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">sleep</div>
+        <div className="card p-2 text-center border-cyan/20">
+          <div className="mono text-sm text-cyan font-bold tabular-nums">{day.sleepHours}h</div>
+          <div className="mono text-[.58rem] text-cyan/60 uppercase tracking-[.14em]">sleep</div>
         </div>
       </div>
 
@@ -278,10 +278,10 @@ export default function Today() {
           {savedFlash && <div className="mono text-[.58rem] text-signal uppercase tracking-[.14em]">✓ saved</div>}
         </div>
 
-        {/* Progress bar */}
+        {/* Progress bar — amber fill (energy) that brightens to lime at 100% */}
         <div className="h-2 bg-bg2 rounded overflow-hidden mb-3">
           <div
-            className="h-full bg-signal transition-all"
+            className={`h-full transition-all ${stepsLogged >= day.stepTarget ? "bg-lime shadow-[0_0_10px_rgba(212,255,58,.5)]" : "bg-amber shadow-[0_0_8px_rgba(255,180,84,.4)]"}`}
             style={{ width: `${Math.min(100, Math.round((stepsLogged / day.stepTarget) * 100))}%` }}
           />
         </div>
@@ -304,7 +304,7 @@ export default function Today() {
           <div className="flex items-center gap-2">
             <div className="flex-1 mono text-[.7rem] text-ink2">
               {pedo.running
-                ? <>Counting… <span className="text-signal font-bold tabular-nums">+{pedo.steps}</span></>
+                ? <>Counting… <span className="text-amber font-bold tabular-nums">+{pedo.steps}</span></>
                 : "Pedometer (phone in pocket)"}
             </div>
             {!pedo.running ? (
@@ -336,8 +336,8 @@ export default function Today() {
 
       {/* Checkpoint banner */}
       {day.isCheckpointDay && day.checkpoint && (
-        <Link to="/checkin" className="card p-3 border-signal/40 bg-signal/[.05] hover:border-signal/60 transition block">
-          <div className="mono text-[.62rem] text-signal uppercase tracking-[.14em] mb-1">
+        <Link to="/checkin" className="card p-3 border-cyan/40 bg-cyan/[.05] hover:border-cyan/60 transition block">
+          <div className="mono text-[.62rem] text-cyan uppercase tracking-[.14em] mb-1">
             {t("checkin.title")}
           </div>
           <div className="mono text-xs text-ink2">{day.checkpoint.tasks.join(" · ")}</div>
@@ -355,7 +355,7 @@ export default function Today() {
             <div
               key={`${item.time}-${i}`}
               className={`card p-2 flex items-start gap-2 transition ${
-                isCurrent ? "border-signal/60 bg-signal/[.06]" : ""
+                isCurrent ? "border-amber/60 bg-amber/[.06] shadow-[0_0_0_1px_rgba(255,180,84,.15)]" : ""
               } ${isPast ? "opacity-50" : ""}`}
             >
               <div className="mono text-[.7rem] text-ink tabular-nums w-11 shrink-0 pt-[2px]">

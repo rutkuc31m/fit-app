@@ -123,7 +123,7 @@ export default function Log() {
   }, { kcal: 0, protein: 0 });
 
   return (
-    <div className="page">
+    <div className="page page-log">
       <div className="flex items-center justify-between">
         <div className="section-label flex-1">{t("log.title")}</div>
         <button className="btn-primary" onClick={addMeal}>{t("log.add_meal")}</button>
@@ -151,10 +151,10 @@ export default function Log() {
       <div className="card p-4">
         <div className="flex justify-between items-baseline">
           <div className="card-title">{t("log.totals")}</div>
-          <div className="mono text-signal text-sm font-bold">{Math.round(totals.kcal)} kcal</div>
+          <div className="mono text-amber text-sm font-bold tabular-nums">{Math.round(totals.kcal)} <span className="text-amber/70 text-[.66rem]">kcal</span></div>
         </div>
         <div className="mt-2 mono text-xs text-ink2">
-          {t("log.protein")}: <span className="text-ink">{Math.round(totals.protein)}g</span>
+          <span className="text-lime">{t("log.protein")}</span>: <span className="text-ink tabular-nums">{Math.round(totals.protein)}g</span>
         </div>
       </div>
 
@@ -182,13 +182,13 @@ export default function Log() {
                 <div key={it.id} className="px-4 py-2 flex items-center justify-between">
                   <div className="min-w-0">
                     <div className="text-sm text-ink truncate">{it.name}</div>
-                    <div className="mono text-[.66rem] text-mute">
-                      {it.amount_g}g · P{Math.round(it.protein_g)} C{Math.round(it.carbs_g)} F{Math.round(it.fat_g)}
+                    <div className="mono text-[.66rem] text-mute tabular-nums">
+                      {it.amount_g}g · <span className="text-lime">P</span>{Math.round(it.protein_g)} <span className="text-amber">C</span>{Math.round(it.carbs_g)} <span className="text-coral">F</span>{Math.round(it.fat_g)}
                     </div>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="mono text-sm text-signal font-bold">{Math.round(it.kcal)}</div>
-                    <button className="text-mute hover:text-warn text-lg" onClick={() => deleteItem(it.id)}>×</button>
+                    <div className="mono text-sm text-amber font-bold tabular-nums">{Math.round(it.kcal)}</div>
+                    <button className="text-mute hover:text-danger text-lg" onClick={() => deleteItem(it.id)}>×</button>
                   </div>
                 </div>
               ))}
@@ -261,8 +261,8 @@ export default function Log() {
                       <button className="step-btn" onClick={() => updatePieces(pieces + 1)}>+</button>
                       <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">×{pieceFood.g_per_piece}g</span>
                     </div>
-                    <div className="mt-2 mono text-[.66rem] text-ink2 text-center">
-                      ≈ {draft.amount_g}g · {Math.round(draft.kcal)} kcal · P{Math.round(draft.protein_g)} C{Math.round(draft.carbs_g)} F{Math.round(draft.fat_g)}
+                    <div className="mt-2 mono text-[.66rem] text-ink2 text-center tabular-nums">
+                      ≈ {draft.amount_g}g · <span className="text-amber">{Math.round(draft.kcal)}</span> kcal · <span className="text-lime">P</span>{Math.round(draft.protein_g)} <span className="text-amber">C</span>{Math.round(draft.carbs_g)} <span className="text-coral">F</span>{Math.round(draft.fat_g)}
                     </div>
                   </div>
                 ) : (
@@ -304,19 +304,19 @@ export default function Log() {
                 <input className="input mono" type="number" value={draft.amount_g} onChange={(e) => updateAmount(+e.target.value)} />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.kcal")}</span>
+                <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.kcal")}</span>
                 <input className="input mono" type="number" value={draft.kcal} onChange={(e) => setDraft({ ...draft, kcal: +e.target.value })} />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.protein")}</span>
+                <span className="mono text-[.62rem] text-lime uppercase tracking-[.14em]">{t("log.protein")}</span>
                 <input className="input mono" type="number" value={draft.protein_g} onChange={(e) => setDraft({ ...draft, protein_g: +e.target.value })} />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.carbs")}</span>
+                <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.carbs")}</span>
                 <input className="input mono" type="number" value={draft.carbs_g} onChange={(e) => setDraft({ ...draft, carbs_g: +e.target.value })} />
               </label>
               <label className="flex flex-col gap-1 col-span-2">
-                <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.fat")}</span>
+                <span className="mono text-[.62rem] text-coral uppercase tracking-[.14em]">{t("log.fat")}</span>
                 <input className="input mono" type="number" value={draft.fat_g} onChange={(e) => setDraft({ ...draft, fat_g: +e.target.value })} />
               </label>
             </div>

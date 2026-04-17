@@ -22,6 +22,20 @@ const FIELD_TO_COL = {
 
 const PHOTO_FIELDS = { photo_front: "photo_front", photo_side: "photo_side", photo_back: "photo_back" };
 
+// Semantic color per field (muscle=lime, heart=coral, energy=amber, hydro=cyan)
+const FIELD_COLOR = {
+  weight: "cyan",
+  waist:  "cyan",
+  chest:  "cyan",
+  arm:    "cyan",
+  energy: "amber",
+  sleep_quality: "cyan",
+  back_pain: "coral",
+  motivation: "lime",
+  adherence_pct: "lime"
+};
+const colorOf = (id) => FIELD_COLOR[id] || "lime";
+
 export default function Checkin() {
   const { t } = useTranslation();
   const date = todayStr();
@@ -70,12 +84,12 @@ export default function Checkin() {
   };
 
   return (
-    <div className="page">
+    <div className="page page-checkin">
       <div className="section-label">{t("checkin.title")} · W{week}</div>
 
       <Brackets>
         <div className="card p-3 flex items-start gap-2">
-          <Icon.clock size={16} className="text-signal mt-[2px] shrink-0" />
+          <Icon.clock size={16} className="text-cyan mt-[2px] shrink-0" />
           <div className="mono text-[.7rem] text-ink2 leading-relaxed">{t("checkin.reminder")}</div>
         </div>
       </Brackets>
@@ -87,7 +101,7 @@ export default function Checkin() {
             <div key={f.id} className="card p-3">
               <div className="flex justify-between items-center">
                 <div className="card-title">{t(`checkin.${angleKey}`)}</div>
-                {data[f.id] && <span className="mono text-[.6rem] text-signal">✓</span>}
+                {data[f.id] && <span className="mono text-[.6rem] text-cyan">✓</span>}
               </div>
               {data[f.id] && (
                 <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 aspect-[3/4] max-h-[260px] grid place-items-center">
@@ -104,10 +118,11 @@ export default function Checkin() {
           );
         }
         if (f.type === "number") {
+          const c = colorOf(f.id);
           return (
             <div key={f.id} className="card p-3">
               <div className="card-title mb-2">{f.label}</div>
-              <input type="number" step="0.1" inputMode="decimal" className="input mono text-lg text-signal"
+              <input type="number" step="0.1" inputMode="decimal" className={`input mono text-lg text-${c}`}
                 value={data[f.id] ?? ""} onChange={(e) => setField(f.id, e.target.value === "" ? "" : +e.target.value)} />
             </div>
           );
@@ -116,11 +131,12 @@ export default function Checkin() {
           const max = f.id === "back_pain" ? 5 : 5;
           const min = f.id === "back_pain" ? 0 : 1;
           const cur = data[f.id];
+          const c = colorOf(f.id);
           return (
             <div key={f.id} className="card p-3">
               <div className="flex justify-between items-baseline mb-2">
                 <div className="card-title">{f.label}</div>
-                {cur != null && <div className="mono text-sm text-signal font-bold">{cur}</div>}
+                {cur != null && <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{cur}</div>}
               </div>
               <div className="flex gap-1">
                 {Array.from({ length: max - min + 1 }).map((_, i) => {
@@ -128,7 +144,7 @@ export default function Checkin() {
                   const active = cur === v;
                   return (
                     <button key={v} onClick={() => setField(f.id, v)}
-                      className={`flex-1 mono text-sm py-2 rounded-lg border transition ${active ? "bg-signal text-[#0a0c00] border-signal font-bold" : "border-line text-ink2 hover:border-line2"}`}>
+                      className={`flex-1 mono text-sm py-2 rounded-lg border transition ${active ? `bg-${c} text-[#0a0c00] border-${c} font-bold` : "border-line text-ink2 hover:border-line2"}`}>
                       {v}
                     </button>
                   );
@@ -138,14 +154,15 @@ export default function Checkin() {
           );
         }
         if (f.type === "percent") {
+          const c = colorOf(f.id);
           return (
             <div key={f.id} className="card p-3">
               <div className="flex justify-between items-baseline mb-2">
                 <div className="card-title">{f.label}</div>
-                <div className="mono text-sm text-signal font-bold">{data[f.id] ?? 0}%</div>
+                <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{data[f.id] ?? 0}%</div>
               </div>
               <input type="range" min="0" max="100" step="5" value={data[f.id] ?? 80}
-                onChange={(e) => setField(f.id, +e.target.value)} className="w-full accent-signal" />
+                onChange={(e) => setField(f.id, +e.target.value)} className={`w-full accent-${c}`} />
             </div>
           );
         }
