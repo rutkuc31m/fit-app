@@ -215,7 +215,15 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Habits + Check-in quick links */}
+      {/* Today timeline + Habits + Check-in quick links */}
+      <Link to="/today" className="card p-3 hover:border-line2 transition flex items-center gap-2">
+        <Icon.clock size={16} className="text-signal" />
+        <div className="flex-1">
+          <div className="card-title">Schedule</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">Hour-by-hour · D{daysBetween(PLAN.startDate, date) + 1}/182</div>
+        </div>
+        <Icon.chev size={14} className="text-mute" />
+      </Link>
       <div className="grid grid-cols-2 gap-[10px]">
         <Link to="/habits" className="card p-3 hover:border-line2 transition flex items-center gap-2">
           <Icon.check size={16} className="text-signal" />

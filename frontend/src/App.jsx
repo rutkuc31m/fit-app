@@ -11,6 +11,7 @@ import Settings from "./pages/Settings";
 import Recipes from "./pages/Recipes";
 import Habits from "./pages/Habits";
 import Checkin from "./pages/Checkin";
+import Today from "./pages/Today";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -27,6 +28,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
         <Route path="/"         element={<Protected><Dashboard /></Protected>} />
+        <Route path="/today"    element={<Protected><Today /></Protected>} />
         <Route path="/log"      element={<Protected><Log /></Protected>} />
         <Route path="/recipes"  element={<Protected><Recipes /></Protected>} />
         <Route path="/training" element={<Protected><Training /></Protected>} />
