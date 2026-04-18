@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { todayStr, fmtDate } from "../lib/plan";
+import { PLAN, todayStr, fmtDate } from "../lib/plan";
+import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { quoteForDate } from "../lib/quotes";
@@ -81,6 +82,7 @@ const nowHHMM = () => {
 
 export default function Today() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [date, setDate] = useState(todayStr());
   const now = nowHHMM();
   const [stepsLogged, setStepsLogged] = useState(0);
@@ -88,10 +90,27 @@ export default function Today() {
   const [savedFlash, setSavedFlash] = useState(false);
   const [pushStatus, setPushStatus] = useState("default");
   const [pushBusy, setPushBusy] = useState(false);
+  const [currentWeight, setCurrentWeight] = useState(null);
   const pedo = useStepCounter();
   const quote = useMemo(() => quoteForDate(date), [date]);
 
+  const sw = user?.start_weight || PLAN.startWeight;
+  const tw = user?.target_weight || PLAN.targetWeight;
+  const totalJourney = sw - tw;
+  const lost = currentWeight ? Math.max(0, sw - currentWeight) : 0;
+  const journeyPct = totalJourney > 0 ? Math.min(100, Math.round((lost / totalJourney) * 100)) : 0;
+
   useEffect(() => { getPushStatus().then(setPushStatus); }, []);
+
+  useEffect(() => {
+    const from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+    api.get(`/logs?from=${from}&to=${todayStr()}`)
+      .then((range) => {
+        const latest = [...(range || [])].reverse().find((r) => r.weight_kg != null);
+        if (latest) setCurrentWeight(latest.weight_kg);
+      })
+      .catch(() => {});
+  }, []);
 
   const onSubscribe = async () => {
     setPushBusy(true);
@@ -211,6 +230,32 @@ export default function Today() {
         <div className="text-right">
           <div className="mono text-sm text-amber font-bold tabular-nums">{day.eating.targets.kcal}</div>
           <div className="mono text-[.58rem] text-amber/70 uppercase tracking-[.14em]">kcal</div>
+        </div>
+      </div>
+
+      {/* Journey — target + lost */}
+      <div className="card p-3">
+        <div className="flex items-center justify-between mb-[6px]">
+          <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">journey</div>
+          <div className="mono text-[.62rem] uppercase tracking-[.14em] flex items-center gap-[6px]">
+            <span className="text-coral tabular-nums">−{lost.toFixed(1)}</span>
+            <span className="text-mute2">/</span>
+            <span className="text-lime tabular-nums">−{totalJourney.toFixed(0)}kg</span>
+          </div>
+        </div>
+        <div className="h-[3px] bg-bg2 rounded-full overflow-hidden border border-line/50">
+          <div
+            className="h-full transition-all duration-700"
+            style={{
+              width: `${journeyPct}%`,
+              background: "linear-gradient(90deg, #ff4d6d 0%, #ffb454 60%, #d4ff3a 100%)",
+              boxShadow: "0 0 8px rgba(255,180,84,.4)"
+            }}
+          />
+        </div>
+        <div className="mt-[6px] flex justify-between mono text-[.52rem] uppercase tracking-[.18em] tabular-nums">
+          <span className="text-mute">start {sw.toFixed(0)}</span>
+          <span className="text-lime">target {tw.toFixed(0)}</span>
         </div>
       </div>
 

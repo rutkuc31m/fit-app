@@ -5,7 +5,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
 import { getActiveRestrictions, getStepTarget, getCardioProtocol } from "../lib/protocols";
-import { Ring, Brackets, Empty, Icon, Sparkline, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
+import { Ring, Brackets, Empty, Icon, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
 
 const sumMacros = (meals) => meals.reduce((a, m) => {
   m.items.forEach((it) => {
@@ -22,7 +22,6 @@ export default function Dashboard() {
   const [log, setLog] = useState(null);
   const [meals, setMeals] = useState([]);
   const [quickWt, setQuickWt] = useState("");
-  const [trend, setTrend] = useState([]);
   const [savedFlash, setSavedFlash] = useState(false);
 
   const dayPlan = getDayPlan(date);
@@ -35,15 +34,11 @@ export default function Dashboard() {
   const cardio = getCardioProtocol(week);
 
   const load = async () => {
-    const d = new Date(date);
-    const from = new Date(d.getTime() - 13 * 86400000).toISOString().slice(0, 10);
-    const [l, m, range] = await Promise.all([
+    const [l, m] = await Promise.all([
       api.get(`/logs/${date}`),
-      api.get(`/meals?date=${date}`),
-      api.get(`/logs?from=${from}&to=${date}`)
+      api.get(`/meals?date=${date}`)
     ]);
     setLog(l); setMeals(m);
-    setTrend((range || []).map((r) => r.weight_kg).filter((v) => v != null));
     if (l?.weight_kg) setQuickWt(String(l.weight_kg));
     else setQuickWt("");
   };
@@ -131,11 +126,14 @@ export default function Dashboard() {
             <span className="italic text-ink2 font-light"> of </span>
             <span className="tabular-nums text-ink2 font-light not-italic">182</span>
           </div>
-          <div className="mono text-[.64rem] text-mute uppercase tracking-[.18em] mt-[4px]">
-            <span className="text-[#ff4d6d]">{lost.toFixed(1)}kg</span>
-            <span className="mx-[6px] text-mute2">forged</span>
-            <span className="text-[#5ec8ff]">{daysLeft}d</span>
-            <span className="ml-[6px] text-mute2">remain</span>
+          <div className="mono text-[.64rem] uppercase tracking-[.18em] mt-[4px] flex items-center gap-[8px]">
+            <span className="text-coral tabular-nums">−{lost.toFixed(1)}</span>
+            <span className="text-mute2">forged</span>
+            <span className="text-line2">/</span>
+            <span className="text-lime tabular-nums">−{(sw - tw).toFixed(1)}</span>
+            <span className="text-mute2">target</span>
+            <span className="text-line2 ml-auto">·</span>
+            <span className="text-cyan tabular-nums">{daysLeft}d</span>
           </div>
         </div>
 
@@ -154,13 +152,10 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Start marker */}
-            <div className="absolute left-0 -top-[2px]">
-              <div className="w-[7px] h-[7px] rounded-full bg-[#ff4d6d] ring-[3px] ring-[#ff4d6d]/15" />
-              <div className="mono text-[.52rem] text-[#ff4d6d]/90 uppercase tracking-[.16em] mt-[8px] tabular-nums">
-                {sw.toFixed(0)}
-              </div>
-              <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] -mt-[1px]">start</div>
+            {/* Start marker — just a dot */}
+            <div className="absolute left-0 -top-[2px] flex flex-col items-start">
+              <div className="w-[7px] h-[7px] rounded-full bg-coral ring-[3px] ring-coral/15" />
+              <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] mt-[10px]">start</div>
             </div>
 
             {/* Current marker — elegant, no dominant weight number */}
@@ -187,10 +182,10 @@ export default function Dashboard() {
             {/* Target marker */}
             <div className="absolute right-0 -top-[2px] flex flex-col items-end">
               <div
-                className="w-[7px] h-[7px] rounded-full bg-signal ring-[3px] ring-signal/20"
+                className="w-[7px] h-[7px] rounded-full bg-lime ring-[3px] ring-lime/20"
                 style={{ boxShadow: "0 0 10px rgba(212,255,58,.8)" }}
               />
-              <div className="mono text-[.52rem] text-signal uppercase tracking-[.16em] mt-[8px] tabular-nums">
+              <div className="mono text-[.52rem] text-lime uppercase tracking-[.16em] mt-[8px] tabular-nums">
                 {tw.toFixed(0)}
               </div>
               <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] -mt-[1px]">
@@ -200,65 +195,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 14-day arc */}
-        {trend.length >= 2 && (
-          <div className="relative z-[2] px-4 pt-[10px] pb-[10px] border-t border-line/40">
-            <div className="flex items-baseline justify-between mb-[6px]">
-              <div className="mono text-[.56rem] text-mute uppercase tracking-[.22em]">14-day arc</div>
-              <div className="mono text-[.6rem] tabular-nums">
-                <span className="text-mute">Δ target </span>
-                <span
-                  style={{ fontWeight: 700 }}
-                  className={cur - tw > 0 ? "text-warn" : "text-signal"}
-                >
-                  {cur - tw > 0 ? "+" : ""}{(cur - tw).toFixed(1)}
-                </span>
-                <span className="text-mute"> kg</span>
-              </div>
-            </div>
-            <div className="overflow-hidden -mx-1 opacity-90">
-              <Sparkline values={trend} width={360} height={38} />
-            </div>
-          </div>
-        )}
-
-        {/* Vitals strip */}
-        <div className="relative z-[2] grid grid-cols-3 border-t border-line/50">
-          <div className="px-3 py-[10px] text-center relative">
-            <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">kg lost</div>
-            <div
-              className="font-display tabular-nums leading-none mt-[5px] text-[1.1rem]"
-              style={{ color: "#ff4d6d", fontWeight: 500, fontVariationSettings: '"SOFT" 80, "opsz" 96' }}
-            >
-              {lost.toFixed(1)}
-            </div>
-            <div className="absolute right-0 top-[10px] bottom-[10px] w-px bg-line/60" />
-          </div>
-          <div className="px-3 py-[10px] text-center relative">
-            <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">journey</div>
-            <div
-              className="font-display tabular-nums leading-none mt-[5px] text-[1.1rem]"
-              style={{
-                color: "#d4ff3a",
-                fontWeight: 500,
-                fontVariationSettings: '"SOFT" 80, "opsz" 96',
-                textShadow: "0 0 18px rgba(212,255,58,.55)"
-              }}
-            >
-              {pct}<span className="text-mute text-[.68rem] font-light">%</span>
-            </div>
-            <div className="absolute right-0 top-[10px] bottom-[10px] w-px bg-line/60" />
-          </div>
-          <div className="px-3 py-[10px] text-center">
-            <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">days left</div>
-            <div
-              className="font-display tabular-nums leading-none mt-[5px] text-[1.1rem]"
-              style={{ color: "#5ec8ff", fontWeight: 500, fontVariationSettings: '"SOFT" 80, "opsz" 96' }}
-            >
-              {daysLeft}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Quick weigh-in */}
