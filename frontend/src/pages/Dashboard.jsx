@@ -133,7 +133,7 @@ export default function Dashboard() {
 
           <div className="flex-1 flex flex-col gap-3">
             <div>
-              <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">forged</div>
+              <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">lost</div>
               <div
                 className="font-display text-[1.5rem] text-coral leading-none tabular-nums mt-[3px]"
                 style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}
@@ -143,12 +143,12 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">target</div>
+              <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">to go</div>
               <div
                 className="font-display text-[1.5rem] text-lime leading-none tabular-nums mt-[3px]"
                 style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}
               >
-                −{(sw - tw).toFixed(1)}
+                −{Math.max(0, (sw - tw) - lost).toFixed(1)}
                 <span className="text-[.72rem] text-ink2 font-light ml-[4px]">kg</span>
               </div>
             </div>
