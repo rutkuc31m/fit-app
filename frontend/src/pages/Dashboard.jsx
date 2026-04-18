@@ -105,8 +105,7 @@ export default function Dashboard() {
             <svg viewBox="0 0 124 124" className="w-full h-full -rotate-90">
               <defs>
                 <linearGradient id="heroRing" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%"   stopColor="#ff375f" />
-                  <stop offset="55%"  stopColor="#ff9f0a" />
+                  <stop offset="0%"   stopColor="#ff9f0a" />
                   <stop offset="100%" stopColor="#30d158" />
                 </linearGradient>
               </defs>
@@ -117,7 +116,7 @@ export default function Dashboard() {
                 strokeLinecap="round"
                 strokeDasharray={2 * Math.PI * 54}
                 strokeDashoffset={(1 - pct / 100) * 2 * Math.PI * 54}
-                style={{ transition: "stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)", filter: "drop-shadow(0 0 6px rgba(255,159,10,.45))" }}
+                style={{ transition: "stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)", filter: "drop-shadow(0 0 6px rgba(48,209,88,.45))" }}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -131,26 +130,17 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col gap-3">
-            <div>
-              <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">lost</div>
-              <div
-                className="font-display text-[1.5rem] text-coral leading-none tabular-nums mt-[3px]"
-                style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}
-              >
-                −{lost.toFixed(1)}
-                <span className="text-[.72rem] text-ink2 font-light ml-[4px]">kg</span>
-              </div>
+          <div className="flex-1">
+            <div className="mono text-[.58rem] text-mute uppercase tracking-[.22em]">to go</div>
+            <div
+              className="font-display text-[2.4rem] text-lime leading-none tabular-nums mt-[4px]"
+              style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}
+            >
+              −{Math.max(0, (sw - tw) - lost).toFixed(1)}
+              <span className="text-[.9rem] text-ink2 font-light ml-[5px]">kg</span>
             </div>
-            <div>
-              <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">to go</div>
-              <div
-                className="font-display text-[1.5rem] text-lime leading-none tabular-nums mt-[3px]"
-                style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}
-              >
-                −{Math.max(0, (sw - tw) - lost).toFixed(1)}
-                <span className="text-[.72rem] text-ink2 font-light ml-[4px]">kg</span>
-              </div>
+            <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em] mt-2">
+              target <span className="text-lime tabular-nums">{tw.toFixed(0)}</span><span className="text-mute"> kg</span>
             </div>
           </div>
         </div>

@@ -68,7 +68,7 @@ const CAT_STYLE = {
   checkpoint: { dot: "#30d158", label: "CHK"  },
   exercise:   { dot: "#ff9f0a", label: "EXR"  },
   activity:   { dot: "#ff9f0a", label: "ACT"  },
-  cardio:     { dot: "#ff375f", label: "CAR"  },
+  cardio:     { dot: "#64d2ff", label: "CAR"  },
   training:   { dot: "#30d158", label: "GYM"  },
   nutrition:  { dot: "#ff9f0a", label: "EAT"  },
   family:     { dot: "#bf5af2", label: "FAM"  },
@@ -233,14 +233,12 @@ export default function Today() {
         </div>
       </div>
 
-      {/* Journey — target + lost */}
+      {/* Journey — to go */}
       <div className="card p-3">
         <div className="flex items-center justify-between mb-[6px]">
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">journey</div>
           <div className="mono text-[.62rem] uppercase tracking-[.14em] flex items-center gap-[6px]">
-            <span className="text-coral tabular-nums">−{lost.toFixed(1)}</span>
-            <span className="text-mute2">/</span>
-            <span className="text-lime tabular-nums">−{totalJourney.toFixed(0)}kg</span>
+            <span className="text-lime tabular-nums">−{Math.max(0, totalJourney - lost).toFixed(1)}kg to go</span>
           </div>
         </div>
         <div className="h-[3px] bg-bg2 rounded-full overflow-hidden border border-line/50">
@@ -248,8 +246,8 @@ export default function Today() {
             className="h-full transition-all duration-700"
             style={{
               width: `${journeyPct}%`,
-              background: "linear-gradient(90deg, #ff375f 0%, #ff9f0a 60%, #30d158 100%)",
-              boxShadow: "0 0 8px rgba(255,159,10,.4)"
+              background: "linear-gradient(90deg, #ff9f0a 0%, #30d158 100%)",
+              boxShadow: "0 0 8px rgba(48,209,88,.4)"
             }}
           />
         </div>
@@ -259,9 +257,9 @@ export default function Today() {
         </div>
       </div>
 
-      {/* Quote of the day — journey gradient (coral → amber → lime) */}
+      {/* Quote of the day — amber/lime subtle tint */}
       <div className="card p-4 relative overflow-hidden" style={{
-        background: "linear-gradient(135deg, rgba(255,55,95,.05) 0%, rgba(255,159,10,.05) 50%, rgba(48,209,88,.05) 100%)"
+        background: "linear-gradient(135deg, rgba(255,159,10,.04) 0%, rgba(48,209,88,.04) 100%)"
       }}>
         <div className="absolute top-2 left-3 font-display text-[2.5rem] leading-none text-amber/40 select-none italic">"</div>
         <div className="pl-6 pt-1">

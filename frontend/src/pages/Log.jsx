@@ -183,7 +183,7 @@ export default function Log() {
                   <div className="min-w-0">
                     <div className="text-sm text-ink truncate">{it.name}</div>
                     <div className="mono text-[.66rem] text-mute tabular-nums">
-                      {it.amount_g}g · <span className="text-lime">P</span>{Math.round(it.protein_g)} <span className="text-amber">C</span>{Math.round(it.carbs_g)} <span className="text-coral">F</span>{Math.round(it.fat_g)}
+                      {it.amount_g}g · <span className="text-lime">P</span>{Math.round(it.protein_g)} <span className="text-amber">C</span>{Math.round(it.carbs_g)} <span className="text-ink2">F</span>{Math.round(it.fat_g)}
                     </div>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
@@ -262,7 +262,7 @@ export default function Log() {
                       <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">×{pieceFood.g_per_piece}g</span>
                     </div>
                     <div className="mt-2 mono text-[.66rem] text-ink2 text-center tabular-nums">
-                      ≈ {draft.amount_g}g · <span className="text-amber">{Math.round(draft.kcal)}</span> kcal · <span className="text-lime">P</span>{Math.round(draft.protein_g)} <span className="text-amber">C</span>{Math.round(draft.carbs_g)} <span className="text-coral">F</span>{Math.round(draft.fat_g)}
+                      ≈ {draft.amount_g}g · <span className="text-amber">{Math.round(draft.kcal)}</span> kcal · <span className="text-lime">P</span>{Math.round(draft.protein_g)} <span className="text-amber">C</span>{Math.round(draft.carbs_g)} <span className="text-ink2">F</span>{Math.round(draft.fat_g)}
                     </div>
                   </div>
                 ) : (

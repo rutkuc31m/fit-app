@@ -17,8 +17,8 @@ function WeightChart({ logs }) {
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-[180px]">
       <line x1={pad} y1={targetY} x2={W - pad} y2={targetY} stroke="#248a3d" strokeDasharray="3 4" strokeWidth="1" opacity=".6" />
       <text x={W - pad} y={targetY - 4} textAnchor="end" fontSize="9" fill="#248a3d" fontFamily="'IBM Plex Mono', monospace" opacity=".7">TARGET {PLAN.targetWeight}kg</text>
-      <path d={d} stroke="#ff375f" strokeWidth="2" fill="none" filter="drop-shadow(0 0 6px rgba(255,55,95,.55))" />
-      {data.map((p, i) => <circle key={i} cx={x(i)} cy={y(p.w)} r="2.5" fill="#ff375f" />)}
+      <path d={d} stroke="#30d158" strokeWidth="2" fill="none" filter="drop-shadow(0 0 6px rgba(48,209,88,.5))" />
+      {data.map((p, i) => <circle key={i} cx={x(i)} cy={y(p.w)} r="2.5" fill="#30d158" />)}
     </svg>
   );
 }

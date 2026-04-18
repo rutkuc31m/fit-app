@@ -3,10 +3,13 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getDayPlan, getWeekNum, getExercisesForDay } from "../lib/plan";
 import { getCardioProtocol, getStepTarget } from "../lib/protocols";
+import { EXERCISES, getVideoUrl, MUSCLE_LABELS } from "../lib/exercises";
 import { Empty, Icon } from "../components/ui";
 
 export default function Training() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language || "tr").slice(0, 2);
+  const [openInfo, setOpenInfo] = useState({});
   const [date] = useState(todayStr());
   const plan = getDayPlan(date);
   const week = getWeekNum(date);
@@ -66,6 +69,11 @@ export default function Training() {
   const renderExerciseCard = (ex) => {
     const sets = setsFor(ex.id);
     const last = lastByEx[ex.id];
+    const libId = ex.substituted && EXERCISES[ex.id]?.phase1Alt ? EXERCISES[ex.id].phase1Alt : ex.id;
+    const lib = EXERCISES[libId];
+    const videoUrl = lib ? getVideoUrl(libId, lang) : null;
+    const isOpen = !!openInfo[ex.id];
+    const muscles = (lib?.targetMuscles || []).map((m) => MUSCLE_LABELS[m]?.[lang] || MUSCLE_LABELS[m]?.en || m);
     return (
       <div key={ex.id} className="card overflow-hidden">
         <div className="px-4 py-3 border-b border-line flex justify-between items-baseline gap-2">
@@ -74,19 +82,71 @@ export default function Training() {
             <div className="mono text-[.66rem] text-mute uppercase tracking-[.14em] mt-[2px]">
               {ex.sets}×{ex.reps}{ex.unit ? ex.unit : ""}
             </div>
+            {muscles.length > 0 && (
+              <div className="mono text-[.58rem] text-ink2 uppercase tracking-[.14em] mt-[3px] truncate">
+                {muscles.slice(0, 3).join(" · ")}
+              </div>
+            )}
             {ex.substituted && (
               <div className="mt-1 inline-flex items-center gap-1 mono text-[.55rem] uppercase tracking-[.14em] text-warn bg-warn/10 px-[6px] py-[2px] rounded">
                 ⚠ {t("training_v2.substituted")}
               </div>
             )}
           </div>
-          {last && (
-            <div className="mono text-[.62rem] text-ink2 text-right shrink-0">
-              <div className="text-mute uppercase tracking-[.14em]">{t("training.last_time")}</div>
-              <div>{last.map((r) => `${r.weight_kg || "-"}×${r.reps}`).join(" · ")}</div>
-            </div>
-          )}
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            {last && (
+              <div className="mono text-[.62rem] text-ink2 text-right">
+                <div className="text-mute uppercase tracking-[.14em]">{t("training.last_time")}</div>
+                <div>{last.map((r) => `${r.weight_kg || "-"}×${r.reps}`).join(" · ")}</div>
+              </div>
+            )}
+            {lib && (
+              <div className="flex items-center gap-1">
+                {videoUrl && (
+                  <a href={videoUrl} target="_blank" rel="noreferrer"
+                     className="mono text-[.58rem] uppercase tracking-[.14em] text-signal bg-surface2 hover:bg-surface3 px-[8px] py-[3px] rounded inline-flex items-center gap-1">
+                    ▶ Video
+                  </a>
+                )}
+                <button
+                  className="mono text-[.58rem] uppercase tracking-[.14em] text-ink2 bg-surface2 hover:bg-surface3 px-[8px] py-[3px] rounded"
+                  onClick={() => setOpenInfo((s) => ({ ...s, [ex.id]: !s[ex.id] }))}>
+                  {isOpen ? "−" : "i"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+
+        {isOpen && lib && (
+          <div className="px-4 py-3 border-b border-line bg-surface2/40 space-y-2">
+            {lib.formCues?.length > 0 && (
+              <div>
+                <div className="mono text-[.55rem] text-signal uppercase tracking-[.14em] mb-1">{t("training_v2.form_cues", "Form")}</div>
+                <ul className="text-[.72rem] text-ink2 space-y-[2px] list-disc pl-4">
+                  {lib.formCues.map((c, i) => <li key={i}>{c}</li>)}
+                </ul>
+              </div>
+            )}
+            {lib.commonMistakes?.length > 0 && (
+              <div>
+                <div className="mono text-[.55rem] text-warn uppercase tracking-[.14em] mb-1">{t("training_v2.mistakes", "Hatalar")}</div>
+                <ul className="text-[.72rem] text-ink2 space-y-[2px] list-disc pl-4">
+                  {lib.commonMistakes.map((c, i) => <li key={i}>{c}</li>)}
+                </ul>
+              </div>
+            )}
+            {lib.importance && (
+              <div className="mono text-[.62rem] text-amber bg-amber/10 px-2 py-1 rounded">★ {lib.importance}</div>
+            )}
+            {lib.beginnerAlt && (
+              <div className="text-[.68rem] text-ink2"><span className="text-mute mono uppercase tracking-[.14em] text-[.55rem] mr-1">Alt:</span>{lib.beginnerAlt}</div>
+            )}
+            {lib.phase1Note && !ex.substituted && (
+              <div className="text-[.62rem] text-warn">{lib.phase1Note}</div>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col divide-y divide-line">
           {sets.map((s) => (
@@ -119,11 +179,11 @@ export default function Training() {
 
       {/* Day C: cardio block on top */}
       {plan.type === "C" && cardio && (
-        <div className="card p-3 border-coral/30 relative overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-coral shadow-[0_0_10px_rgba(255,77,109,.5)]" />
+        <div className="card p-3 border-cyan/30 relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-cyan shadow-[0_0_10px_rgba(100,210,255,.5)]" />
           <div className="flex justify-between items-baseline pl-2">
-            <div className="card-title text-coral">{t("cardio.liss_today")}</div>
-            <div className="mono text-[.62rem] text-coral/80 uppercase tracking-[.14em] tabular-nums">{cardio.liss?.durationMin}min · {cardio.liss?.intensity}</div>
+            <div className="card-title text-cyan">{t("cardio.liss_today")}</div>
+            <div className="mono text-[.62rem] text-cyan/80 uppercase tracking-[.14em] tabular-nums">{cardio.liss?.durationMin}min · {cardio.liss?.intensity}</div>
           </div>
           {cardio.liss?.notes && <div className="mono text-[.66rem] text-ink2 mt-1 pl-2">{cardio.liss.notes}</div>}
         </div>
