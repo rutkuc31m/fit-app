@@ -1,10 +1,67 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getDayPlan, getWeekNum, getExercisesForDay } from "../lib/plan";
 import { getCardioProtocol, getStepTarget } from "../lib/protocols";
 import { EXERCISES, getVideoUrl, MUSCLE_LABELS } from "../lib/exercises";
 import { Empty, Icon } from "../components/ui";
+
+function RestTimer({ seconds, onClose }) {
+  const [left, setLeft] = useState(seconds);
+  const firedRef = useRef(false);
+  useEffect(() => {
+    if (left <= 0) {
+      if (!firedRef.current) {
+        firedRef.current = true;
+        try { navigator.vibrate?.([200, 100, 200, 100, 400]); } catch {}
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = 880; g.gain.value = 0.15;
+          o.start(); o.stop(ctx.currentTime + 0.3);
+        } catch {}
+      }
+      return;
+    }
+    const id = setTimeout(() => setLeft((n) => n - 1), 1000);
+    return () => clearTimeout(id);
+  }, [left]);
+  const mm = Math.floor(Math.max(0, left) / 60);
+  const ss = Math.max(0, left) % 60;
+  const done = left <= 0;
+  return (
+    <div className="fixed bottom-[76px] left-0 right-0 z-40 px-3 pointer-events-none">
+      <div className={`max-w-[680px] mx-auto card p-3 pointer-events-auto flex items-center gap-3 ${done ? "border-lime/60" : ""}`}
+           style={done ? { boxShadow: "0 0 24px -4px rgba(48,209,88,.6)" } : {}}>
+        <div className="relative w-[56px] h-[56px] shrink-0">
+          <svg viewBox="0 0 56 56" className="w-full h-full -rotate-90">
+            <circle cx="28" cy="28" r="24" stroke="#2c2c2e" strokeWidth="4" fill="none" />
+            <circle cx="28" cy="28" r="24" stroke={done ? "#30d158" : "#64d2ff"} strokeWidth="4" fill="none"
+              strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 24}
+              strokeDashoffset={(1 - Math.max(0, left) / seconds) * 2 * Math.PI * 24}
+              style={{ transition: "stroke-dashoffset 1s linear" }}
+            />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className={`mono text-[.58rem] uppercase tracking-[.2em] ${done ? "text-lime" : "text-cyan"}`}>
+            {done ? "rest done" : "rest"}
+          </div>
+          <div className="font-display text-[1.6rem] text-ink leading-none tabular-nums mt-[2px]"
+            style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+            {mm}:{String(ss).padStart(2, "0")}
+          </div>
+        </div>
+        <div className="flex gap-1">
+          {!done && <button className="btn-icon" onClick={() => setLeft((n) => n + 15)} title="+15s">+15</button>}
+          <button className="btn-icon" onClick={onClose} title="close"><Icon.close size={14} /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Training() {
   const { t, i18n } = useTranslation();
@@ -19,6 +76,7 @@ export default function Training() {
   const stepTarget = useMemo(() => getStepTarget(week), [week]);
   const [session, setSession] = useState(null);
   const [lastByEx, setLastByEx] = useState({});
+  const [rest, setRest] = useState(null); // { seconds } when active
 
   const mainExercises = day.exercises.filter((e) => !e.phase1Only);
   const coreExercises = day.exercises.filter((e) => e.phase1Only);
@@ -159,9 +217,14 @@ export default function Training() {
                 onBlur={(e) => e.target.value !== String(s.reps || "") && updateSet(s, { reps: +e.target.value })} />
             </div>
           ))}
-          <button className="mono text-xs caps text-amber py-3 hover:bg-surface2 transition flex items-center justify-center gap-2" onClick={() => addSet(ex)}>
-            <Icon.plus size={14} /> {t("training.add_set")}
-          </button>
+          <div className="flex divide-x divide-line">
+            <button className="flex-1 mono text-xs caps text-amber py-3 hover:bg-surface2 transition flex items-center justify-center gap-2" onClick={() => addSet(ex)}>
+              <Icon.plus size={14} /> {t("training.add_set")}
+            </button>
+            <button className="flex-1 mono text-xs caps text-cyan py-3 hover:bg-surface2 transition flex items-center justify-center gap-2" onClick={() => setRest({ seconds: 90, key: Date.now() })}>
+              <Icon.clock size={14} /> rest 90s
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -222,6 +285,8 @@ export default function Training() {
           {session.completed ? <span className="inline-flex items-center gap-2 justify-center"><Icon.check size={14} /> {t("training.complete")}</span> : t("training.complete")}
         </button>
       )}
+
+      {rest && <RestTimer key={rest.key} seconds={rest.seconds} onClose={() => setRest(null)} />}
     </div>
   );
 }

@@ -80,6 +80,94 @@ const nowHHMM = () => {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 };
 
+const hhmmToMin = (s) => {
+  if (!s) return 0;
+  const [h, m] = s.split(":").map(Number);
+  return h * 60 + m;
+};
+
+function FastingClock({ eating }) {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30000);
+    return () => clearInterval(id);
+  }, []);
+  const d = new Date();
+  const nowMin = d.getHours() * 60 + d.getMinutes();
+
+  if (!eating?.window) {
+    // FAST day — whole day fasting
+    return (
+      <div className="card p-3 relative overflow-hidden">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">fasting</div>
+            <div className="font-display text-[1.5rem] text-cyan leading-none tabular-nums mt-[2px]"
+              style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+              all day
+            </div>
+          </div>
+          <div className="mono text-[.62rem] text-cyan uppercase tracking-[.14em]">0 kcal</div>
+        </div>
+      </div>
+    );
+  }
+
+  const wStart = hhmmToMin(eating.window.start);
+  const wEnd = hhmmToMin(eating.window.end);
+  const inWindow = nowMin >= wStart && nowMin <= wEnd;
+  const beforeWindow = nowMin < wStart;
+
+  let label, value, unit, color;
+  if (inWindow) {
+    const mins = wEnd - nowMin;
+    label = "eat window · left";
+    value = `${Math.floor(mins / 60)}h ${mins % 60}m`;
+    color = "lime";
+  } else if (beforeWindow) {
+    const mins = wStart - nowMin;
+    label = "until eat window";
+    value = `${Math.floor(mins / 60)}h ${mins % 60}m`;
+    color = "cyan";
+  } else {
+    const mins = (24 * 60 - nowMin) + wStart;
+    label = "closed · next window";
+    value = `${Math.floor(mins / 60)}h ${mins % 60}m`;
+    color = "cyan";
+  }
+
+  // 24h bar with eat window highlighted
+  const nowPct = (nowMin / (24 * 60)) * 100;
+  const wStartPct = (wStart / (24 * 60)) * 100;
+  const wWidthPct = ((wEnd - wStart) / (24 * 60)) * 100;
+
+  return (
+    <div className="card p-3">
+      <div className="flex items-baseline justify-between mb-2">
+        <div>
+          <div className={`mono text-[.58rem] text-${color} uppercase tracking-[.2em]`}>{label}</div>
+          <div className={`font-display text-[1.5rem] text-${color} leading-none tabular-nums mt-[2px]`}
+            style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+            {value}
+          </div>
+        </div>
+        <div className="mono text-[.58rem] text-ink2 tabular-nums">
+          {eating.window.start}<span className="text-mute">–</span>{eating.window.end}
+        </div>
+      </div>
+      <div className="relative h-[6px] bg-bg2 rounded-full overflow-hidden border border-line/50">
+        <div className="absolute top-0 bottom-0 bg-cyan/40 border-l border-r border-cyan/70"
+             style={{ left: `${wStartPct}%`, width: `${wWidthPct}%` }} />
+        <div className="absolute top-[-2px] bottom-[-2px] w-[2px] bg-amber shadow-[0_0_6px_theme(colors.amber)]"
+             style={{ left: `${nowPct}%` }} />
+      </div>
+      <div className="mt-1 flex justify-between mono text-[.5rem] text-mute uppercase tracking-[.16em]">
+        <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Today() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -232,6 +320,9 @@ export default function Today() {
           <div className="mono text-[.58rem] text-amber/70 uppercase tracking-[.14em]">kcal</div>
         </div>
       </div>
+
+      {/* Fasting window clock */}
+      <FastingClock eating={day.eating} />
 
       {/* Journey — to go */}
       <div className="card p-3">
