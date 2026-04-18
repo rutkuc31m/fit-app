@@ -144,7 +144,7 @@ export default function Checkin() {
                   const active = cur === v;
                   return (
                     <button key={v} onClick={() => setField(f.id, v)}
-                      className={`flex-1 mono text-sm py-2 rounded-lg border transition ${active ? `bg-${c} text-[#0a0c00] border-${c} font-bold` : "border-line text-ink2 hover:border-line2"}`}>
+                      className={`flex-1 mono text-sm py-2 rounded-lg border transition ${active ? `bg-${c} text-[#000000] border-${c} font-bold` : "border-line text-ink2 hover:border-line2"}`}>
                       {v}
                     </button>
                   );

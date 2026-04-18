@@ -234,7 +234,7 @@ export default function Log() {
             <div className="card p-1 flex gap-1">
               {["gram", "piece"].map((k) => (
                 <button key={k} onClick={() => setMode(k)}
-                  className={`flex-1 mono text-[.66rem] caps py-[8px] rounded-lg transition ${mode === k ? "bg-signal text-[#0a0c00] font-bold" : "text-ink2 hover:bg-bg2"}`}>
+                  className={`flex-1 mono text-[.66rem] caps py-[8px] rounded-lg transition ${mode === k ? "bg-signal text-[#000000] font-bold" : "text-ink2 hover:bg-bg2"}`}>
                   {t(`log.mode_${k}`)}
                 </button>
               ))}

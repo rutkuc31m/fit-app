@@ -14,7 +14,7 @@ export default function TopBar() {
     <div className="sticky top-0 z-40 border-b border-line backdrop-blur-md bg-bg/85">
       <div className="max-w-[680px] mx-auto h-[52px] px-[16px] flex items-center gap-3">
         <div className="flex items-center gap-[9px] flex-1 min-w-0">
-          <div className="relative w-[24px] h-[24px] rounded-md bg-signal grid place-items-center text-[#0a0c00] mono font-bold text-[.72rem] shadow-[0_0_18px_-4px_theme(colors.signal)] shrink-0">
+          <div className="relative w-[24px] h-[24px] rounded-md bg-signal grid place-items-center text-[#000000] mono font-bold text-[.72rem] shadow-[0_0_18px_-4px_theme(colors.signal)] shrink-0">
             F
             <span className="absolute -top-[3px] -right-[3px] w-[6px] h-[6px] rounded-full bg-signal shadow-[0_0_8px_theme(colors.signal)] animate-[pulse_1.4s_ease-in-out_infinite]" />
           </div>

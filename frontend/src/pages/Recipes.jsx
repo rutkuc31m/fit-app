@@ -28,7 +28,7 @@ export default function Recipes() {
         {["today", "week", "shop"].map((k) => (
           <button key={k} onClick={() => setTab(k)}
             className={`flex-1 mono text-[.66rem] caps py-[10px] rounded-lg transition ${
-              tab === k ? "bg-signal text-[#0a0c00] font-bold" : "text-ink2 hover:bg-bg2"
+              tab === k ? "bg-signal text-[#000000] font-bold" : "text-ink2 hover:bg-bg2"
             }`}>
             {t(`recipes.tab_${k}`)}
           </button>

@@ -10,31 +10,12 @@
     color: theme(colors.ink);
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
-    --page-glow-a: rgba(212,255,58,.06);
-    --page-glow-b: rgba(94,200,255,.035);
-    --page-glow-c: rgba(212,255,58,.03);
+    --page-glow-a: rgba(48,209,88,.04);
+    --page-glow-b: rgba(100,210,255,.025);
     background:
-      radial-gradient(1200px 600px at 20% -10%, var(--page-glow-a), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, var(--page-glow-b), transparent 60%),
-      radial-gradient(600px 800px at 50% 120%, var(--page-glow-c), transparent 65%),
+      radial-gradient(900px 500px at 15% -10%, var(--page-glow-a), transparent 55%),
+      radial-gradient(700px 400px at 100% 0%, var(--page-glow-b), transparent 55%),
       theme(colors.bg);
-  }
-  body::before {
-    content: "";
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background-image:
-      linear-gradient(theme(colors.line) 1px, transparent 1px),
-      linear-gradient(90deg, theme(colors.line) 1px, transparent 1px);
-    background-size: 48px 48px;
-    opacity: .05;
-    mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 75%);
-  }
-  /* Subtle CRT scanlines over the whole app */
-  body::after {
-    content: "";
-    position: fixed; inset: 0; pointer-events: none; z-index: 1;
-    background: repeating-linear-gradient(180deg, rgba(255,255,255,.012) 0 1px, transparent 1px 3px);
-    opacity: .6;
   }
   input, button, select, textarea { font: inherit; color: inherit; }
   /* iOS Safari zooms into any input with font-size <16px → pushes layout. Force min 16px on touch devices. */
@@ -57,7 +38,7 @@
   .mono { font-family: theme(fontFamily.mono); font-variant-numeric: tabular-nums; }
   .caps { text-transform: uppercase; letter-spacing: .14em; font-weight: 600; }
 
-  .card { @apply bg-surface border border-line rounded-xl relative; }
+  .card { @apply bg-surface border border-line/70 rounded-2xl relative; }
   .card-title { @apply mono text-[.66rem] text-ink2 uppercase tracking-[.22em] font-semibold; }
 
   .section-label {
@@ -71,7 +52,7 @@
            hover:bg-surface2 hover:border-line2 active:scale-[.98] transition select-none;
   }
   .btn-primary {
-    @apply mono text-xs caps px-3 py-2 rounded-lg bg-signal text-[#0a0c00] font-bold
+    @apply mono text-xs caps px-3 py-2 rounded-lg bg-signal text-[#000000] font-bold
            shadow-[0_0_18px_-4px_theme(colors.signal)]
            hover:brightness-110 active:scale-[.98] transition disabled:opacity-50 disabled:cursor-not-allowed select-none;
   }
@@ -103,52 +84,32 @@
   }
   @keyframes pulse { 0%,100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1); } }
 
-  /* Hero atmosphere */
-  .hero-glow {
-    border: 1px solid theme(colors.signald);
+  /* Hero — iOS Health style card */
+  .hero-card {
+    position: relative;
     background:
-      radial-gradient(600px 200px at 50% -20%, rgba(212,255,58,.2), transparent 70%),
-      linear-gradient(180deg, #191c11 0%, #13160f 100%);
+      radial-gradient(800px 300px at 0% 0%, rgba(255,55,95,.08), transparent 55%),
+      radial-gradient(800px 300px at 100% 100%, rgba(48,209,88,.08), transparent 55%),
+      linear-gradient(180deg, theme(colors.surface) 0%, #151517 100%);
+    border: 1px solid theme(colors.line);
     box-shadow: theme(boxShadow.glow);
-    animation: heroBreath 5s ease-in-out infinite;
+    border-radius: 22px;
   }
-  @keyframes heroBreath {
-    0%,100% { box-shadow: 0 0 0 1px rgba(212,255,58,.08), 0 0 60px -20px rgba(212,255,58,.5), inset 0 1px 0 rgba(255,255,255,.04); }
-    50%     { box-shadow: 0 0 0 1px rgba(212,255,58,.16), 0 0 80px -15px rgba(212,255,58,.75), inset 0 1px 0 rgba(255,255,255,.06); }
-  }
-  .hero-glow::after {
-    content: "";
-    position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(180deg, transparent 48%, rgba(212,255,58,.08) 49.5%, rgba(212,255,58,.08) 50.5%, transparent 52%);
-    background-size: 100% 6px;
-    mix-blend-mode: screen;
-    opacity: .25;
-    animation: scan 4s linear infinite;
-  }
-  @keyframes scan { 0% { background-position: 0 -20px; } 100% { background-position: 0 140%; } }
 
   .page {
     @apply relative z-10 max-w-[680px] mx-auto px-[14px] pt-4 pb-[128px] flex flex-col gap-[14px];
   }
 
-  /* Corner bracket frame — decorative 4 L-corners */
+  /* Corner bracket frame — subtle structural decoration */
   .brackets { position: relative; }
   .brackets > .bk {
-    position: absolute; width: 10px; height: 10px;
-    border-color: theme(colors.signal); pointer-events: none;
+    position: absolute; width: 8px; height: 8px;
+    border-color: theme(colors.line2); pointer-events: none;
   }
   .brackets > .bk.tl { top: -1px; left: -1px; border-top: 1px solid; border-left: 1px solid; }
   .brackets > .bk.tr { top: -1px; right: -1px; border-top: 1px solid; border-right: 1px solid; }
   .brackets > .bk.bl { bottom: -1px; left: -1px; border-bottom: 1px solid; border-left: 1px solid; }
   .brackets > .bk.br { bottom: -1px; right: -1px; border-bottom: 1px solid; border-right: 1px solid; }
-
-  /* Notch top-right on hero / active items */
-  .notch::before {
-    content: ""; position: absolute; top: 0; right: 0;
-    width: 22px; height: 22px; background: theme(colors.signal);
-    clip-path: polygon(100% 0, 100% 100%, 0 0);
-    opacity: .9;
-  }
 
   /* Skeleton shimmer */
   .skeleton {
@@ -184,12 +145,12 @@
   .meter.hydro  > span { background: theme(colors.cyan);   box-shadow: 0 0 8px  theme(colors.cyan);   }
   .meter.muscle > span { background: theme(colors.lime);   box-shadow: 0 0 10px theme(colors.lime);   }
 
-  /* Success flash — brief lime glow pulse on save */
+  /* Success flash — brief green glow pulse on save */
   .flash-ok { animation: flashOk .55s ease-out; }
   @keyframes flashOk {
-    0%   { box-shadow: 0 0 0 0 rgba(212,255,58,.0); transform: scale(1); }
-    30%  { box-shadow: 0 0 28px 4px rgba(212,255,58,.7); transform: scale(1.06); }
-    100% { box-shadow: 0 0 0 0 rgba(212,255,58,0); transform: scale(1); }
+    0%   { box-shadow: 0 0 0 0 rgba(48,209,88,.0); transform: scale(1); }
+    30%  { box-shadow: 0 0 28px 4px rgba(48,209,88,.7); transform: scale(1.06); }
+    100% { box-shadow: 0 0 0 0 rgba(48,209,88,0); transform: scale(1); }
   }
 
   /* Phase strip — 4 segmented bar */
@@ -202,7 +163,7 @@
   .tick-top { position: relative; }
   .tick-top::after {
     content: ""; position: absolute; top: -1px; left: 8%; right: 8%; height: 1px;
-    background: linear-gradient(90deg, transparent, theme(colors.signal), transparent);
+    background: linear-gradient(90deg, transparent, theme(colors.amber), transparent);
     opacity: .55;
     animation: tick 2.4s ease-in-out infinite;
   }
@@ -210,7 +171,7 @@
 
   /* Hatch (for target zones / disabled) */
   .hatch {
-    background-image: repeating-linear-gradient(135deg, rgba(212,255,58,.08) 0 2px, transparent 2px 6px);
+    background-image: repeating-linear-gradient(135deg, rgba(48,209,88,.08) 0 2px, transparent 2px 6px);
   }
 
   /* Chip (fuel/eating badges: OMAD, FAST, LOW, rest, A/B/C) */
@@ -230,20 +191,23 @@
   .step-btn {
     @apply w-10 h-10 rounded-lg border border-line bg-surface2 text-ink
            grid place-items-center mono text-lg font-medium
-           hover:border-signal/50 hover:text-signal active:bg-signal active:text-[#0a0c00] active:border-signal
+           hover:border-signal/50 hover:text-signal active:bg-signal active:text-[#000000] active:border-signal
            transition select-none;
   }
 
   /* Pretty focus rings for keyboard */
   :focus-visible { outline: 1px solid theme(colors.lime); outline-offset: 2px; border-radius: 6px; }
 
-  /* Per-page atmosphere — tints body radial glow via CSS vars (body:has walks down to .page-* descendant) */
-  body:has(.page-dashboard) { --page-glow-a: rgba(212,255,58,.07);  --page-glow-b: rgba(255,180,84,.035); --page-glow-c: rgba(212,255,58,.03);  }
-  body:has(.page-today)     { --page-glow-a: rgba(255,180,84,.06);  --page-glow-b: rgba(212,255,58,.03);  --page-glow-c: rgba(94,200,255,.02);  }
-  body:has(.page-log)       { --page-glow-a: rgba(255,180,84,.065); --page-glow-b: rgba(212,255,58,.025); --page-glow-c: rgba(255,77,109,.02);  }
-  body:has(.page-training)  { --page-glow-a: rgba(255,77,109,.06);  --page-glow-b: rgba(255,180,84,.03);  --page-glow-c: rgba(212,255,58,.015); }
-  body:has(.page-progress)  { --page-glow-a: rgba(255,77,109,.05);  --page-glow-b: rgba(212,255,58,.035); --page-glow-c: rgba(255,180,84,.02);  }
-  body:has(.page-habits)    { --page-glow-a: rgba(212,255,58,.07);  --page-glow-b: rgba(255,180,84,.025); --page-glow-c: rgba(212,255,58,.025); }
-  body:has(.page-checkin)   { --page-glow-a: rgba(94,200,255,.06);  --page-glow-b: rgba(255,77,109,.025); --page-glow-c: rgba(212,255,58,.015); }
-  body:has(.page-settings)  { --page-glow-a: rgba(212,255,58,.025); --page-glow-b: rgba(94,200,255,.02);  --page-glow-c: transparent;          }
+  /* Per-page atmosphere — subtle tints via CSS vars */
+  body:has(.page-dashboard) { --page-glow-a: rgba(48,209,88,.05);  --page-glow-b: rgba(255,159,10,.025); }
+  body:has(.page-today)     { --page-glow-a: rgba(255,159,10,.045); --page-glow-b: rgba(100,210,255,.02); }
+  body:has(.page-log)       { --page-glow-a: rgba(255,159,10,.045); --page-glow-b: rgba(48,209,88,.02);   }
+  body:has(.page-training)  { --page-glow-a: rgba(255,55,95,.04);  --page-glow-b: rgba(48,209,88,.02);   }
+  body:has(.page-progress)  { --page-glow-a: rgba(255,55,95,.035); --page-glow-b: rgba(48,209,88,.03);   }
+  body:has(.page-habits)    { --page-glow-a: rgba(48,209,88,.05);  --page-glow-b: rgba(255,159,10,.02);  }
+  body:has(.page-checkin)   { --page-glow-a: rgba(100,210,255,.045); --page-glow-b: rgba(191,90,242,.02); }
+  body:has(.page-settings)  { --page-glow-a: rgba(100,210,255,.02); --page-glow-b: transparent;          }
+
+  /* Ring gauge — SVG progress */
+  .ring-track { stroke: theme(colors.surface2); }
 }

@@ -63,16 +63,16 @@ function useStepCounter() {
 }
 
 const CAT_STYLE = {
-  routine:    { dot: "#8a8f98", label: "ROUT" },
-  supplement: { dot: "#b070ff", label: "SUPP" },
-  checkpoint: { dot: "#ff6c8a", label: "CHK"  },
-  exercise:   { dot: "#4ad0ff", label: "EXR"  },
-  activity:   { dot: "#4ad0ff", label: "ACT"  },
-  cardio:     { dot: "#4ad0ff", label: "CAR"  },
-  training:   { dot: "#d4ff3a", label: "GYM"  },
-  nutrition:  { dot: "#ffb84a", label: "EAT"  },
-  family:     { dot: "#ff6c8a", label: "FAM"  },
-  sleep:      { dot: "#5b6cff", label: "SLP"  }
+  routine:    { dot: "#a1a1a6", label: "ROUT" },
+  supplement: { dot: "#bf5af2", label: "SUPP" },
+  checkpoint: { dot: "#30d158", label: "CHK"  },
+  exercise:   { dot: "#ff9f0a", label: "EXR"  },
+  activity:   { dot: "#ff9f0a", label: "ACT"  },
+  cardio:     { dot: "#ff375f", label: "CAR"  },
+  training:   { dot: "#30d158", label: "GYM"  },
+  nutrition:  { dot: "#ff9f0a", label: "EAT"  },
+  family:     { dot: "#bf5af2", label: "FAM"  },
+  sleep:      { dot: "#0a84ff", label: "SLP"  }
 };
 
 const nowHHMM = () => {
@@ -248,8 +248,8 @@ export default function Today() {
             className="h-full transition-all duration-700"
             style={{
               width: `${journeyPct}%`,
-              background: "linear-gradient(90deg, #ff4d6d 0%, #ffb454 60%, #d4ff3a 100%)",
-              boxShadow: "0 0 8px rgba(255,180,84,.4)"
+              background: "linear-gradient(90deg, #ff375f 0%, #ff9f0a 60%, #30d158 100%)",
+              boxShadow: "0 0 8px rgba(255,159,10,.4)"
             }}
           />
         </div>
@@ -261,7 +261,7 @@ export default function Today() {
 
       {/* Quote of the day — journey gradient (coral → amber → lime) */}
       <div className="card p-4 relative overflow-hidden" style={{
-        background: "linear-gradient(135deg, rgba(255,77,109,.05) 0%, rgba(255,180,84,.05) 50%, rgba(212,255,58,.05) 100%)"
+        background: "linear-gradient(135deg, rgba(255,55,95,.05) 0%, rgba(255,159,10,.05) 50%, rgba(48,209,88,.05) 100%)"
       }}>
         <div className="absolute top-2 left-3 font-display text-[2.5rem] leading-none text-amber/40 select-none italic">"</div>
         <div className="pl-6 pt-1">
@@ -326,7 +326,7 @@ export default function Today() {
         {/* Progress bar — amber fill (energy) that brightens to lime at 100% */}
         <div className="h-2 bg-bg2 rounded overflow-hidden mb-3">
           <div
-            className={`h-full transition-all ${stepsLogged >= day.stepTarget ? "bg-lime shadow-[0_0_10px_rgba(212,255,58,.5)]" : "bg-amber shadow-[0_0_8px_rgba(255,180,84,.4)]"}`}
+            className={`h-full transition-all ${stepsLogged >= day.stepTarget ? "bg-lime shadow-[0_0_10px_rgba(48,209,88,.5)]" : "bg-amber shadow-[0_0_8px_rgba(255,159,10,.4)]"}`}
             style={{ width: `${Math.min(100, Math.round((stepsLogged / day.stepTarget) * 100))}%` }}
           />
         </div>
@@ -400,7 +400,7 @@ export default function Today() {
             <div
               key={`${item.time}-${i}`}
               className={`card p-2 flex items-start gap-2 transition ${
-                isCurrent ? "border-amber/60 bg-amber/[.06] shadow-[0_0_0_1px_rgba(255,180,84,.15)]" : ""
+                isCurrent ? "border-amber/60 bg-amber/[.06] shadow-[0_0_0_1px_rgba(255,159,10,.15)]" : ""
               } ${isPast ? "opacity-50" : ""}`}
             >
               <div className="mono text-[.7rem] text-ink tabular-nums w-11 shrink-0 pt-[2px]">

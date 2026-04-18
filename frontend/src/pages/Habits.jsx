@@ -53,7 +53,7 @@ export default function Habits() {
       <button key={h.id} onClick={() => toggle(h.id)}
         className={`relative w-full px-4 py-3 flex items-center gap-3 border-b border-line last:border-0 text-left transition ${done ? "bg-lime/[.04]" : "hover:bg-bg2"}`}>
         <span className={`absolute left-0 top-0 bottom-0 w-[2px] transition ${done ? "bg-lime shadow-[0_0_8px_rgba(212,255,58,.5)]" : "bg-amber/40"}`} />
-        <span className={`shrink-0 w-5 h-5 rounded border grid place-items-center transition ${done ? "bg-lime border-lime text-[#0a0c00]" : "border-amber/40 bg-amber/[.04]"}`}>
+        <span className={`shrink-0 w-5 h-5 rounded border grid place-items-center transition ${done ? "bg-lime border-lime text-[#000000]" : "border-amber/40 bg-amber/[.04]"}`}>
           {done && <Icon.check size={12} />}
         </span>
         <div className="flex-1 min-w-0">

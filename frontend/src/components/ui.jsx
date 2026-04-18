@@ -46,11 +46,11 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, target > 0 ? value / target : 0));
   const dash = c * pct;
-  const color = over ? "#ff7a3d" : "#d4ff3a";
+  const color = over ? "#ff9500" : "#30d158";
   return (
     <div className="relative inline-grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90 overflow-visible">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="#2a2f33" strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="#2c2c2e" strokeWidth={stroke} fill="none" />
         <circle cx={size / 2} cy={size / 2} r={r}
           stroke={color} strokeWidth={stroke} fill="none"
           strokeDasharray={`${dash} ${c}`} strokeLinecap="round"
@@ -62,7 +62,7 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
           const y1 = size/2 + (r - stroke/2 - 2) * Math.sin(a);
           const x2 = size/2 + (r - stroke/2 - (i % 6 === 0 ? 6 : 3)) * Math.cos(a);
           const y2 = size/2 + (r - stroke/2 - (i % 6 === 0 ? 6 : 3)) * Math.sin(a);
-          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#363c40" strokeWidth="1" />;
+          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#48484a" strokeWidth="1" />;
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
@@ -81,13 +81,13 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
 }
 
 /* ─────────── Mini ring (compact macro display) ─────────── */
-export function MiniRing({ value = 0, target = 100, size = 54, stroke = 5, color = "#d4ff3a" }) {
+export function MiniRing({ value = 0, target = 100, size = 54, stroke = 5, color = "#30d158" }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, target > 0 ? value / target : 0));
   return (
     <svg width={size} height={size} className="-rotate-90 overflow-visible">
-      <circle cx={size/2} cy={size/2} r={r} stroke="#2a2f33" strokeWidth={stroke} fill="none" />
+      <circle cx={size/2} cy={size/2} r={r} stroke="#2c2c2e" strokeWidth={stroke} fill="none" />
       <circle cx={size/2} cy={size/2} r={r} stroke={color} strokeWidth={stroke} fill="none"
         strokeDasharray={`${c * pct} ${c}`} strokeLinecap="round"
         style={{ filter: `drop-shadow(0 0 4px ${color}aa)`, transition: "stroke-dasharray .5s cubic-bezier(.2,.8,.2,1)" }} />
@@ -108,7 +108,7 @@ export function Bar({ value = 0, target = 100, tone = "signal" }) {
 }
 
 /* ─────────── Sparkline (tiny trend) ─────────── */
-export function Sparkline({ values = [], width = 200, height = 32, color = "#d4ff3a" }) {
+export function Sparkline({ values = [], width = 200, height = 32, color = "#30d158" }) {
   const pts = values.filter((v) => v != null && !isNaN(v));
   if (pts.length < 2) return <div style={{ height }} className="mono text-[.58rem] text-mute flex items-center">no trend yet</div>;
   const min = Math.min(...pts), max = Math.max(...pts);
@@ -155,7 +155,7 @@ export function DayGlyph({ type = "A", size = 34 }) {
   };
   const shape = shapes[type] || null;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="text-signal" style={{ filter: "drop-shadow(0 0 6px rgba(212,255,58,.4))" }}>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="text-signal" style={{ filter: "drop-shadow(0 0 6px rgba(48,209,88,.4))" }}>
       <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">{shape}</g>
       <text x={size/2} y={size/2 + 4} textAnchor="middle" className="mono" fontSize={size * 0.32} fill="currentColor" fontWeight="700">{type}</text>
     </svg>
@@ -212,12 +212,12 @@ export function Stepper({ value, onChange, step = 0.1, min, max, suffix, big = f
   return (
     <div className="flex items-stretch gap-2">
       <button type="button" className="step-btn" onClick={dec} aria-label="decrement">−</button>
-      <div className={`flex-1 relative border border-line rounded-lg bg-gradient-to-b from-[#0f1210] to-[#15181a] overflow-hidden ${big ? "min-h-[64px]" : ""}`}>
+      <div className={`flex-1 relative border border-line rounded-lg bg-gradient-to-b from-[#0a0a0b] to-[#1c1c1e] overflow-hidden ${big ? "min-h-[64px]" : ""}`}>
         <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-signal/30 to-transparent" />
         <input type="number" step={step} inputMode="decimal"
           value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? "" : +e.target.value)}
           className={`w-full h-full text-center mono font-bold text-signal bg-transparent border-none outline-none ${big ? "text-[2rem]" : "text-lg"} py-2`}
-          style={{ textShadow: "0 0 14px rgba(212,255,58,.35)" }}
+          style={{ textShadow: "0 0 14px rgba(48,209,88,.35)" }}
           placeholder="0" />
         {suffix && <div className="absolute right-3 top-1/2 -translate-y-1/2 mono text-xs text-mute pointer-events-none">{suffix}</div>}
       </div>

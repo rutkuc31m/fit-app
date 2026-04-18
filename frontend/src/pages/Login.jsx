@@ -24,7 +24,7 @@ export default function Login() {
   return (
     <div className="page pt-[80px]">
       <div className="text-center mb-2">
-        <div className="inline-block w-[44px] h-[44px] rounded-lg bg-signal grid place-items-center text-[#0a0c00] mono font-bold text-xl shadow-[0_0_30px_-6px_theme(colors.signal)]">F</div>
+        <div className="inline-block w-[44px] h-[44px] rounded-lg bg-signal grid place-items-center text-[#000000] mono font-bold text-xl shadow-[0_0_30px_-6px_theme(colors.signal)]">F</div>
         <div className="mt-3 mono text-xs caps text-ink2">fit · rutkuc</div>
       </div>
 

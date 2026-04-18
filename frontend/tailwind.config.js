@@ -10,45 +10,50 @@ export default {
   theme: {
     extend: {
       colors: {
-        // structure
-        bg:       "#0c0e0d",
-        bg2:      "#0f1213",
-        surface:  "#15181a",
-        surface2: "#1c2022",
-        line:     "#2a2f33",
-        line2:    "#363c40",
-        ink:      "#e8ebe4",
-        ink2:     "#a8afa6",
-        mute:     "#6b7280",
-        mute2:    "#4a5056",
+        // structure — iOS dark
+        bg:       "#000000",
+        bg2:      "#0a0a0b",
+        surface:  "#1c1c1e",
+        surface2: "#2c2c2e",
+        line:     "#38383a",
+        line2:    "#48484a",
+        ink:      "#f5f5f7",
+        ink2:     "#a1a1a6",
+        mute:     "#6d6d70",
+        mute2:    "#48484a",
 
-        // semantic accents
-        lime:    "#d4ff3a", // muscle / protein / target / achieved
-        limed:   "#9bc41a",
-        coral:   "#ff4d6d", // heart / cardio / loss / effort
-        corald:  "#c42348",
-        amber:   "#ffb454", // energy / fuel / present / calories
-        amberd:  "#c47f20",
-        cyan:    "#5ec8ff", // hydration / time / recovery
-        cyand:   "#2b8fc9",
+        // semantic accents — Apple Fitness / iOS Health
+        lime:    "#30d158", // green — achievement / muscle / protein / target
+        limed:   "#248a3d",
+        coral:   "#ff375f", // red/pink — loss / heart / cardio / effort (Move)
+        corald:  "#c9254c",
+        amber:   "#ff9f0a", // orange — energy / fuel / now / streak
+        amberd:  "#c87009",
+        cyan:    "#64d2ff", // cyan — hydration / time / recovery (Stand)
+        cyand:   "#2ba4d6",
 
-        // system
-        warn:    "#ff7a3d",
-        danger:  "#ff3d3d",
+        // extra Apple system hues
+        yellow:  "#ffd60a", // sun / energy-bright
+        purple:  "#bf5af2", // sleep / mind
+        blue:    "#0a84ff", // data / measurement
 
-        // legacy aliases (remove after migration)
-        signal:  "#d4ff3a",
-        signald: "#9bc41a",
-        cool:    "#5ec8ff"
+        // system states
+        warn:    "#ff9500",
+        danger:  "#ff453a",
+
+        // legacy aliases (remapped to new green)
+        signal:  "#30d158",
+        signald: "#248a3d",
+        cool:    "#64d2ff"
       },
       fontFamily: {
         mono:    ["'IBM Plex Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
         sans:    ["'Bricolage Grotesque'", "system-ui", "-apple-system", "sans-serif"],
         display: ["'Fraunces'", "'Bricolage Grotesque'", "Georgia", "serif"]
       },
-      borderRadius: { xl: "14px", lg: "10px" },
+      borderRadius: { xl: "16px", lg: "12px", "2xl": "22px" },
       boxShadow: {
-        glow: "0 0 0 1px rgba(212,255,58,.08), 0 0 60px -20px rgba(212,255,58,.5), inset 0 1px 0 rgba(255,255,255,.04)"
+        glow: "0 0 0 1px rgba(48,209,88,.12), 0 20px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04)"
       }
     }
   },

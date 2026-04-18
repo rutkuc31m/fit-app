@@ -75,126 +75,105 @@ export default function Dashboard() {
         <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">W{week}</div>
       </div>
 
-      {/* Hero — Transformation Telemetry */}
-      <div className="hero-glow rounded-xl overflow-hidden relative">
-        {/* Grid texture */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[.05]"
-          style={{
-            backgroundImage:
-              "linear-gradient(#d4ff3a 1px, transparent 1px), linear-gradient(90deg, #d4ff3a 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-            maskImage: "radial-gradient(ellipse at 50% 40%, black 20%, transparent 80%)",
-            WebkitMaskImage: "radial-gradient(ellipse at 50% 40%, black 20%, transparent 80%)"
-          }}
-        />
-
-        {/* Phase edge accent */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-[3px] z-[2]"
-          style={{
-            background: `linear-gradient(180deg, ${phase.color} 0%, transparent 90%)`,
-            boxShadow: `0 0 18px ${phase.color}55`
-          }}
-        />
-
-        {/* Status strip */}
-        <div className="relative z-[2] px-4 pt-3 pb-1 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="pulse-dot" />
-            <span className="mono text-[.62rem] font-bold text-signal uppercase tracking-[.24em]">
-              {t(dayLabelKey)}
-            </span>
+      {/* Hero — Journey gauge (iOS Health style) */}
+      <div className="hero-card overflow-hidden p-5">
+        {/* Top meta row */}
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <div className="mono text-[.58rem] text-mute uppercase tracking-[.24em]">transformation</div>
+            <div
+              className="font-display text-[1.9rem] leading-[1] text-ink tracking-[-.02em] mt-[2px]"
+              style={{ fontVariationSettings: '"SOFT" 60, "opsz" 96' }}
+            >
+              Day <span className="tabular-nums">{daysBetween(PLAN.startDate, date) + 1}</span>
+              <span className="text-ink2 font-light"> / 182</span>
+            </div>
           </div>
-          <div className="flex items-center gap-[6px] mono text-[.6rem] uppercase tracking-[.18em]">
-            <span style={{ color: phase.color }} className="font-bold">P{phase.id}</span>
-            <span className="text-mute">·</span>
-            <span className="text-ink2">WK {week}</span>
+          <div className="flex flex-col items-end gap-[3px]">
+            <div className="mono text-[.58rem] text-amber uppercase tracking-[.2em] font-bold">{t(dayLabelKey)}</div>
+            <div className="mono text-[.58rem] flex items-center gap-[5px] uppercase tracking-[.16em]">
+              <span style={{ color: phase.color }} className="font-bold">P{phase.id}</span>
+              <span className="text-mute2">·</span>
+              <span className="text-ink2">WK {week}</span>
+            </div>
           </div>
         </div>
 
-        {/* Narrative */}
-        <div className="relative z-[2] px-4 pt-2 pb-3">
-          <div
-            className="font-display text-[1.5rem] leading-[1.02] text-ink tracking-[-.02em]"
-            style={{ fontVariationSettings: '"SOFT" 100, "opsz" 96' }}
-          >
-            <span className="italic text-ink2 font-light">day </span>
-            <span className="text-signal tabular-nums font-normal not-italic">
-              {daysBetween(PLAN.startDate, date) + 1}
-            </span>
-            <span className="italic text-ink2 font-light"> of </span>
-            <span className="tabular-nums text-ink2 font-light not-italic">182</span>
-          </div>
-          <div className="mono text-[.64rem] uppercase tracking-[.18em] mt-[4px] flex items-center gap-[8px]">
-            <span className="text-coral tabular-nums">−{lost.toFixed(1)}</span>
-            <span className="text-mute2">forged</span>
-            <span className="text-line2">/</span>
-            <span className="text-lime tabular-nums">−{(sw - tw).toFixed(1)}</span>
-            <span className="text-mute2">target</span>
-            <span className="text-line2 ml-auto">·</span>
-            <span className="text-cyan tabular-nums">{daysLeft}d</span>
-          </div>
-        </div>
-
-        {/* Journey bar */}
-        <div className="relative z-[2] px-5 pt-1 pb-[44px]">
-          <div className="relative h-[6px]">
-            <div className="absolute inset-x-0 top-[1px] h-[3px] rounded-full bg-bg2 overflow-hidden border border-line/60">
-              <div
-                className="absolute left-0 top-0 bottom-0 rounded-full transition-all duration-700"
-                style={{
-                  width: `${pct}%`,
-                  background:
-                    "linear-gradient(90deg, #ff4d6d 0%, #ff7a3d 35%, #ffb454 60%, #d4ff3a 100%)",
-                  boxShadow: "0 0 12px rgba(255,180,84,.55)"
-                }}
+        {/* Progress ring + stats */}
+        <div className="flex items-center gap-5">
+          <div className="relative w-[124px] h-[124px] shrink-0">
+            <svg viewBox="0 0 124 124" className="w-full h-full -rotate-90">
+              <defs>
+                <linearGradient id="heroRing" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%"   stopColor="#ff375f" />
+                  <stop offset="55%"  stopColor="#ff9f0a" />
+                  <stop offset="100%" stopColor="#30d158" />
+                </linearGradient>
+              </defs>
+              <circle cx="62" cy="62" r="54" stroke="#2c2c2e" strokeWidth="10" fill="none" />
+              <circle
+                cx="62" cy="62" r="54"
+                stroke="url(#heroRing)" strokeWidth="10" fill="none"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 54}
+                strokeDashoffset={(1 - pct / 100) * 2 * Math.PI * 54}
+                style={{ transition: "stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)", filter: "drop-shadow(0 0 6px rgba(255,159,10,.45))" }}
               />
-            </div>
-
-            {/* Start marker — just a dot */}
-            <div className="absolute left-0 -top-[2px] flex flex-col items-start">
-              <div className="w-[7px] h-[7px] rounded-full bg-coral ring-[3px] ring-coral/15" />
-              <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] mt-[10px]">start</div>
-            </div>
-
-            {/* Current marker — elegant, no dominant weight number */}
-            <div className="absolute -top-[3px] -translate-x-1/2" style={{ left: `${pct}%` }}>
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
               <div
-                className="w-[11px] h-[11px] rounded-full"
-                style={{
-                  background:
-                    "radial-gradient(circle at 32% 28%, #fff0c8 0%, #ffb454 45%, #c86418 100%)",
-                  boxShadow:
-                    "0 0 0 3px rgba(255,180,84,.12), 0 0 14px rgba(255,180,84,.55)"
-                }}
-              />
-              <div className="absolute left-1/2 -translate-x-1/2 top-[14px] flex flex-col items-center">
-                <div className="mono text-[.52rem] text-[#ffb454] uppercase tracking-[.2em] tabular-nums">
-                  {lost > 0 ? `−${lost.toFixed(1)}` : "—"}
-                </div>
-                <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] -mt-[1px]">
-                  now
-                </div>
+                className="font-display text-[1.9rem] text-ink leading-none tabular-nums"
+                style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}
+              >
+                {pct}<span className="text-[1rem] text-ink2 font-light">%</span>
+              </div>
+              <div className="mono text-[.5rem] text-mute uppercase tracking-[.22em] mt-[3px]">journey</div>
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col gap-3">
+            <div>
+              <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">forged</div>
+              <div
+                className="font-display text-[1.5rem] text-coral leading-none tabular-nums mt-[3px]"
+                style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}
+              >
+                −{lost.toFixed(1)}
+                <span className="text-[.72rem] text-ink2 font-light ml-[4px]">kg</span>
               </div>
             </div>
-
-            {/* Target marker */}
-            <div className="absolute right-0 -top-[2px] flex flex-col items-end">
+            <div>
+              <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">target</div>
               <div
-                className="w-[7px] h-[7px] rounded-full bg-lime ring-[3px] ring-lime/20"
-                style={{ boxShadow: "0 0 10px rgba(212,255,58,.8)" }}
-              />
-              <div className="mono text-[.52rem] text-lime uppercase tracking-[.16em] mt-[8px] tabular-nums">
-                {tw.toFixed(0)}
-              </div>
-              <div className="mono text-[.5rem] text-mute uppercase tracking-[.16em] -mt-[1px]">
-                target
+                className="font-display text-[1.5rem] text-lime leading-none tabular-nums mt-[3px]"
+                style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}
+              >
+                −{(sw - tw).toFixed(1)}
+                <span className="text-[.72rem] text-ink2 font-light ml-[4px]">kg</span>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Bottom stat strip */}
+        <div className="mt-5 pt-4 border-t border-line/70 grid grid-cols-3">
+          <div className="flex flex-col items-center gap-[3px]">
+            <div className="mono text-[.54rem] text-mute uppercase tracking-[.22em]">start</div>
+            <div className="mono text-sm text-ink2 tabular-nums">
+              {sw.toFixed(0)}<span className="text-[.6rem] text-mute ml-[3px]">kg</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-[3px] border-x border-line/50">
+            <div className="mono text-[.54rem] text-mute uppercase tracking-[.22em]">target</div>
+            <div className="mono text-sm text-lime tabular-nums">
+              {tw.toFixed(0)}<span className="text-[.6rem] text-mute ml-[3px]">kg</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-[3px]">
+            <div className="mono text-[.54rem] text-mute uppercase tracking-[.22em]">days left</div>
+            <div className="mono text-sm text-cyan tabular-nums">{daysLeft}</div>
+          </div>
+        </div>
       </div>
 
       {/* Quick weigh-in */}
@@ -222,13 +201,13 @@ export default function Dashboard() {
               unit="kcal" label={`${Math.max(0, target.kcal - Math.round(macros.kcal))} left`} />
             <div className="flex-1 grid grid-cols-3 gap-2">
               {[
-                { k: "protein", v: macros.protein, t: target.protein, color: "#d4ff3a" },
-                { k: "carbs",   v: macros.carbs,   t: target.carbs,   color: "#5ec8ff" },
-                { k: "fat",     v: macros.fat,     t: target.fat,     color: "#ffb454" }
+                { k: "protein", v: macros.protein, t: target.protein, color: "#30d158" },
+                { k: "carbs",   v: macros.carbs,   t: target.carbs,   color: "#64d2ff" },
+                { k: "fat",     v: macros.fat,     t: target.fat,     color: "#ff9f0a" }
               ].map((m) => {
                 const pct = m.t > 0 ? (m.v / m.t) : 0;
                 const over = pct > 1;
-                const c = over ? "#ff3d3d" : m.color;
+                const c = over ? "#ff453a" : m.color;
                 return (
                   <div key={m.k} className="flex flex-col items-center">
                     <MiniRing value={m.v} target={m.t} color={c} size={54} stroke={5} />
