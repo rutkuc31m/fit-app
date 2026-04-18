@@ -55,9 +55,8 @@ export default function Recipes() {
                 </div>
               )}
               <div className="mt-2 flex flex-wrap gap-1">
-                {RECIPE_TAGS.glutenFree && <span className="chip chip-signal">GF</span>}
+                {RECIPE_TAGS.glutenFree && <span className="chip chip-signal">gluten free</span>}
                 {RECIPE_TAGS.sugarFree && <span className="chip chip-signal">no sugar</span>}
-                {RECIPE_TAGS.noPork && <span className="chip chip-signal">no pork</span>}
               </div>
             </div>
           </Brackets>
