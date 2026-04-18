@@ -316,7 +316,7 @@ export default function Log() {
                 <input className="input mono" type="number" value={draft.carbs_g} onChange={(e) => setDraft({ ...draft, carbs_g: +e.target.value })} />
               </label>
               <label className="flex flex-col gap-1 col-span-2">
-                <span className="mono text-[.62rem] text-coral uppercase tracking-[.14em]">{t("log.fat")}</span>
+                <span className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">{t("log.fat")}</span>
                 <input className="input mono" type="number" value={draft.fat_g} onChange={(e) => setDraft({ ...draft, fat_g: +e.target.value })} />
               </label>
             </div>

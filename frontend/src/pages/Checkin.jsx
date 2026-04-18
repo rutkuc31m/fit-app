@@ -22,7 +22,7 @@ const FIELD_TO_COL = {
 
 const PHOTO_FIELDS = { photo_front: "photo_front", photo_side: "photo_side", photo_back: "photo_back" };
 
-// Semantic color per field (muscle=lime, heart=coral, energy=amber, hydro=cyan)
+// Semantic color per field (muscle=lime, energy=amber, hydro=cyan)
 const FIELD_COLOR = {
   weight: "cyan",
   waist:  "cyan",
@@ -30,7 +30,7 @@ const FIELD_COLOR = {
   arm:    "cyan",
   energy: "amber",
   sleep_quality: "cyan",
-  back_pain: "coral",
+  back_pain: "amber",
   motivation: "lime",
   adherence_pct: "lime"
 };
