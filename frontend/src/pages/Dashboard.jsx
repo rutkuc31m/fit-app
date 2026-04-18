@@ -57,7 +57,9 @@ export default function Dashboard() {
   const sw = user?.start_weight || PLAN.startWeight;
   const tw = user?.target_weight || PLAN.targetWeight;
   const cur = log?.weight_kg || sw;
-  const lost = Math.max(0, sw - cur);
+  const delta = sw - cur;
+  const lost = Math.max(0, delta);
+  const gained = delta < 0 ? -delta : 0;
   const needed = sw - tw;
   const pct = Math.min(100, Math.round((lost / needed) * 100));
   const daysLeft = Math.max(0, daysBetween(date, PLAN.endDate));
@@ -105,7 +107,8 @@ export default function Dashboard() {
             <svg viewBox="0 0 124 124" className="w-full h-full -rotate-90">
               <defs>
                 <linearGradient id="heroRing" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%"   stopColor="#ff9f0a" />
+                  <stop offset="0%"   stopColor="#ff375f" />
+                  <stop offset="55%"  stopColor="#ff9f0a" />
                   <stop offset="100%" stopColor="#30d158" />
                 </linearGradient>
               </defs>
@@ -116,7 +119,7 @@ export default function Dashboard() {
                 strokeLinecap="round"
                 strokeDasharray={2 * Math.PI * 54}
                 strokeDashoffset={(1 - pct / 100) * 2 * Math.PI * 54}
-                style={{ transition: "stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)", filter: "drop-shadow(0 0 6px rgba(48,209,88,.45))" }}
+                style={{ transition: "stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)", filter: "drop-shadow(0 0 6px rgba(255,159,10,.45))" }}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -139,8 +142,11 @@ export default function Dashboard() {
               −{Math.max(0, (sw - tw) - lost).toFixed(1)}
               <span className="text-[.9rem] text-ink2 font-light ml-[5px]">kg</span>
             </div>
-            <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em] mt-2">
-              target <span className="text-lime tabular-nums">{tw.toFixed(0)}</span><span className="text-mute"> kg</span>
+            <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em] mt-2 flex items-center gap-2">
+              <span>target <span className="text-lime tabular-nums">{tw.toFixed(0)}</span><span className="text-mute"> kg</span></span>
+              {gained > 0 && (
+                <span className="chip border-coral/50 text-coral bg-coral/[.06]">+{gained.toFixed(1)}kg</span>
+              )}
             </div>
           </div>
         </div>
