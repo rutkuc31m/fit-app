@@ -181,14 +181,14 @@ function generateDaySchedule(opts) {
 
   // ── MORNING ──
   schedule.push({
-    time: "06:30",
+    time: "07:00",
     action: "Kalkış",
     details: "500ml su iç",
     category: "routine"
   });
 
   schedule.push({
-    time: "06:35",
+    time: "07:05",
     action: "Supplement",
     details: "D3+K2, Omega-3",
     category: "supplement"
@@ -196,22 +196,10 @@ function generateDaySchedule(opts) {
 
   if (isCheckpointDay) {
     schedule.push({
-      time: "06:40",
+      time: "07:10",
       action: "Haftalık Check-in",
       details: "Aç karnına tartıl, 3 fotoğraf çek (ön/yan/arka)",
       category: "checkpoint"
-    });
-  }
-
-  // Core routine — every day Phase 1, training days only after that
-  if (phase === 1 || isTrainingDay) {
-    schedule.push({
-      time: "06:45",
-      action: "Sabah Core Rutini",
-      details: phase === 1
-        ? "5dk: Dead Bug 10x + Bird Dog 10x + Glute Bridge 15x + Cat-Cow 10x"
-        : "5dk: Plank 45sn + Dead Bug 10x + Glute Bridge 15x",
-      category: "exercise"
     });
   }
 
@@ -227,15 +215,16 @@ function generateDaySchedule(opts) {
     schedule.push({
       time: "10:00",
       action: "Kısa mola",
-      details: "Ayağa kalk, 2dk yürü, su iç. Her saat tekrarla.",
+      details: "Ayağa kalk, 2dk yürü, su iç.",
       category: "activity"
     });
 
     schedule.push({
       time: "12:00",
-      action: "Öğle arası yürüyüş",
-      details: `15-20dk yürüyüş (${Math.round(stepTarget * 0.3)} adım hedefi)`,
-      category: "cardio"
+      action: "Öğle yürüyüşü",
+      details: `30dk yürüyüş (${Math.round(stepTarget * 0.4)} adım hedefi)`,
+      category: "cardio",
+      duration: "30dk"
     });
 
     schedule.push({
@@ -246,9 +235,9 @@ function generateDaySchedule(opts) {
     });
 
     schedule.push({
-      time: "17:00",
+      time: "16:30",
       action: "İşten çıkış",
-      details: isTrainingDay ? "Eve gel, gym çantası hazırla" : "Eve gel, çocuklarla vakit geçir",
+      details: "Eve geliş",
       category: "routine"
     });
   }
@@ -295,24 +284,28 @@ function generateDaySchedule(opts) {
     });
   }
 
+  // ── AFTERNOON — KIDS 17:00–19:00 (all days) ──
+  if (!isWeekend) {
+    schedule.push({
+      time: "17:00",
+      action: "Çocuklarla vakit",
+      details: "Park, oyun, sohbet — 2 saat kaliteli zaman",
+      category: "family",
+      duration: "2sa"
+    });
+  }
+
   // ── EVENING — TRAINING DAYS ──
   if (isTrainingDay) {
     schedule.push({
-      time: "17:30",
-      action: "Çocuklarla vakit",
-      details: "Kısa kaliteli zaman — yemek, oyun, sohbet",
-      category: "family"
-    });
-
-    schedule.push({
-      time: "18:15",
+      time: "18:50",
       action: "Gym hazırlık",
       details: "Gym çantası, su şişesi, kulaklık",
       category: "routine"
     });
 
     schedule.push({
-      time: "18:30",
+      time: "19:00",
       action: `GYM — Gün ${dayType}`,
       details: { A: "Üst Vücut (Push/Pull)", B: "Alt Vücut", C: "Full Body + Kardiyo" }[dayType],
       category: "training",
@@ -321,7 +314,7 @@ function generateDaySchedule(opts) {
 
     if (dayType === "C") {
       schedule.push({
-        time: "19:15",
+        time: "19:45",
         action: "Post-training LISS",
         details: `${cardio.liss.durationMin}dk eğimli yürüyüş bandı veya bisiklet`,
         category: "cardio"
@@ -329,30 +322,31 @@ function generateDaySchedule(opts) {
     }
 
     schedule.push({
-      time: "19:30",
+      time: "20:00",
       action: "Post-workout shake",
       details: "30g whey + su (120kcal, 25g protein) — yeme penceresi açılır",
       category: "nutrition"
     });
 
     schedule.push({
-      time: "19:45",
+      time: "20:15",
       action: "OMAD — Ana öğün",
       details: "Tek büyük öğün (~1650-1680kcal kalan). Protein önce, sonra sebze, en son karbonhidrat.",
       category: "nutrition",
       duration: "45-60dk"
     });
+
+    schedule.push({
+      time: "21:15",
+      action: "Akşam yürüyüşü",
+      details: `30dk sakin yürüyüş — sindirim + kalan adımlar (hedef: ${stepTarget})`,
+      category: "cardio",
+      duration: "30dk"
+    });
   }
 
   // ── EVENING — REST EATING DAYS ──
   if (!isTrainingDay && !isFastDay) {
-    schedule.push({
-      time: "17:00",
-      action: "Çocuklarla vakit",
-      details: "Park, oyun, akşam yürüyüşü",
-      category: "family"
-    });
-
     // HIIT on Thursday Phase 3+ (non-training day)
     if (cardio.hiit?.allowed && phase >= 3) {
       schedule.push({
@@ -366,62 +360,57 @@ function generateDaySchedule(opts) {
     schedule.push({
       time: "18:00",
       action: "OMAD — Ana öğün (düşük kalori)",
-      details: "Tek öğün (~1300kcal). Düşük karbonhidrat, yüksek protein.",
+      details: "Çocuklarla birlikte, tek öğün (~1300kcal). Düşük karbonhidrat, yüksek protein.",
       category: "nutrition",
       duration: "30-45dk"
     });
 
     schedule.push({
-      time: "19:00",
-      action: "Aile zamanı",
-      details: "Çocuklarla oyun, kitap, rahat akşam",
-      category: "family"
+      time: "19:30",
+      action: "Akşam yürüyüşü",
+      details: `30dk — çocuklarla da yapılabilir. Hedef: ${stepTarget} adım`,
+      category: "cardio",
+      duration: "30dk"
     });
   }
 
   // ── EVENING — FAST DAYS ──
   if (isFastDay) {
     schedule.push({
-      time: "17:00",
-      action: "Çocuklarla vakit",
-      details: "Hafif aktivite — park, oyun, yürüyüş",
-      category: "family"
+      time: "18:00",
+      action: "Çocuklara akşam yemeği",
+      details: "Sen yemek yok — su, çay. Çocuklara hazırla.",
+      category: "routine"
     });
 
     schedule.push({
-      time: "18:00",
-      action: "Akşam dinlenme",
-      details: "Su, çay. Yemek yok. Çocuklara akşam yemeği hazırla ama sen yeme.",
-      category: "routine"
+      time: "19:30",
+      action: "Akşam yürüyüşü",
+      details: "30dk hafif yürüyüş — yüklenmek yok",
+      category: "cardio",
+      duration: "30dk"
     });
   }
 
-  // ── EVENING — WIND DOWN ──
+  // ── WIND DOWN ──
   schedule.push({
-    time: "20:30",
-    action: "Akşam yürüyüşü (opsiyonel)",
-    details: `15dk — kalan adımları tamamla (hedef: ${stepTarget}). Çocuklarla da yapılabilir.`,
-    category: "cardio"
-  });
-
-  schedule.push({
-    time: "21:00",
+    time: "22:00",
     action: "Supplement + rahatlama",
     details: "Magnesium, B12. Ekranları azalt.",
     category: "supplement"
   });
 
   schedule.push({
-    time: "22:00",
+    time: "22:30",
     action: "Uyku hazırlığı",
-    details: "Telefon bırak. Bel ağrısı varsa: dizlerin arasına yastık.",
+    details: "Telefon bırak.",
     category: "routine"
   });
 
   schedule.push({
-    time: "22:30",
+    time: "23:00",
     action: "Uyku",
-    details: "Hedef: 7-8 saat. Uyku = kas büyümesi = yağ yakımı.",
+    details: "Hedef: 8 saat (23:00 → 07:00). Uyku = kas büyümesi = yağ yakımı.",
     category: "sleep"
   });
 
