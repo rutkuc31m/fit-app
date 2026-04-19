@@ -232,10 +232,14 @@ export default function Today() {
     try { await sendTestPush(); } catch (e) { console.error(e); }
   };
 
-  const day = useMemo(
-    () => FULL_SCHEDULE.days.find((d) => d.date === date),
-    [date]
-  );
+  const day = useMemo(() => {
+    const hit = FULL_SCHEDULE.days.find((d) => d.date === date);
+    if (hit) return hit;
+    // Pre-start: show Day 1 as preview so page isn't empty
+    if (date < PLAN.startDate) return FULL_SCHEDULE.days[0];
+    return null;
+  }, [date]);
+  const preStart = date < PLAN.startDate;
 
   useEffect(() => {
     let cancelled = false;
@@ -337,6 +341,14 @@ export default function Today() {
 
   return (
     <div className="page page-today">
+      {preStart && (
+        <div className="card p-3 text-center border-amber/40 bg-amber/[.06]">
+          <div className="mono text-[.62rem] text-amber uppercase tracking-[.22em] font-bold">
+            plan starts {PLAN.startDate} · preview of day 1
+          </div>
+        </div>
+      )}
+
       {/* Date nav */}
       <div className="flex items-center justify-between px-1">
         <button className="btn-ghost" onClick={() => shiftDate(-1)} aria-label="prev">

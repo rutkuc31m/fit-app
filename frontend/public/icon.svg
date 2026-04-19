@@ -1,49 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <radialGradient id="bgGlow" cx="50%" cy="40%" r="60%">
-      <stop offset="0%"  stop-color="#1a2010"/>
-      <stop offset="60%" stop-color="#0c0e0d"/>
-      <stop offset="100%" stop-color="#0c0e0d"/>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%"  stop-color="#1a1410"/>
+      <stop offset="55%" stop-color="#0a0705"/>
+      <stop offset="100%" stop-color="#050403"/>
     </radialGradient>
-    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"  stop-color="#eaffac"/>
-      <stop offset="50%" stop-color="#d4ff3a"/>
-      <stop offset="100%" stop-color="#9bc41a"/>
+    <linearGradient id="ring" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#fb7185"/>
+      <stop offset="35%"  stop-color="#fbbf24"/>
+      <stop offset="75%"  stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
     </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="1.4" result="b"/>
+    <linearGradient id="peak" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#4ade80"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
 
-  <!-- Background tile with subtle inner ring -->
-  <rect width="64" height="64" rx="14" fill="url(#bgGlow)"/>
-  <rect x="3.5" y="3.5" width="57" height="57" rx="11.5" fill="none" stroke="#1f2418" stroke-width="1"/>
+  <!-- Rounded tile -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
 
-  <!-- Tactical corner brackets -->
-  <g stroke="#d4ff3a" stroke-width="1.4" fill="none" opacity=".85">
-    <path d="M7 12 V7 H12"/>
-    <path d="M52 7 H57 V12"/>
-    <path d="M57 52 V57 H52"/>
-    <path d="M12 57 H7 V52"/>
-  </g>
+  <!-- Outer journey ring (track) -->
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#1f1812" stroke-width="28"/>
 
-  <!-- Dumbbell -->
+  <!-- Progress arc (~78% sweep, starts bottom-left) -->
+  <circle cx="256" cy="256" r="168" fill="none"
+          stroke="url(#ring)" stroke-width="28" stroke-linecap="round"
+          stroke-dasharray="823 1055"
+          stroke-dashoffset="0"
+          transform="rotate(130 256 256)"
+          filter="url(#glow)"/>
+
+  <!-- Progress head dot -->
+  <circle cx="256" cy="256" r="168" fill="none"/>
   <g filter="url(#glow)">
-    <!-- Bar (grip) -->
-    <rect x="20" y="30.5" width="24" height="3" rx="1.2" fill="url(#metal)"/>
-    <!-- Inner collars -->
-    <rect x="18" y="27" width="3" height="10" rx="1" fill="#0c0e0d" stroke="url(#metal)" stroke-width="1.2"/>
-    <rect x="43" y="27" width="3" height="10" rx="1" fill="#0c0e0d" stroke="url(#metal)" stroke-width="1.2"/>
-    <!-- Outer plates (big) -->
-    <rect x="11" y="22" width="6" height="20" rx="1.6" fill="url(#metal)"/>
-    <rect x="47" y="22" width="6" height="20" rx="1.6" fill="url(#metal)"/>
-    <!-- Plate inner shine -->
-    <rect x="12.2" y="23.5" width="1.2" height="17" rx=".6" fill="#f5ffd0" opacity=".6"/>
-    <rect x="48.2" y="23.5" width="1.2" height="17" rx=".6" fill="#f5ffd0" opacity=".6"/>
+    <circle cx="401" cy="174" r="14" fill="#fde047"/>
+    <circle cx="401" cy="174" r="7" fill="#fff"/>
   </g>
 
-  <!-- Power dot on grip center -->
-  <circle cx="32" cy="32" r="1.4" fill="#0c0e0d"/>
-  <circle cx="32" cy="32" r=".7" fill="#d4ff3a"/>
+  <!-- Inner peak symbol — rising arrow / mountain blend -->
+  <g filter="url(#glow)">
+    <path d="M170 320 L230 240 L265 280 L310 215 L360 295"
+          fill="none" stroke="url(#peak)" stroke-width="18"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Center focal dot -->
+  <circle cx="256" cy="256" r="4" fill="#fbbf24" opacity=".55"/>
 </svg>

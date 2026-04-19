@@ -22,29 +22,29 @@ export default {
         mute:     "#6d6d70",
         mute2:    "#48484a",
 
-        // semantic accents — Apple Fitness / iOS Health
-        lime:    "#30d158", // green — achievement / muscle / protein / target
-        limed:   "#248a3d",
-        coral:   "#ff375f", // red/pink — loss / heart / cardio / effort (Move)
-        corald:  "#c9254c",
-        amber:   "#ff9f0a", // orange — energy / fuel / now / streak
-        amberd:  "#c87009",
-        cyan:    "#64d2ff", // cyan — hydration / time / recovery (Stand)
-        cyand:   "#2ba4d6",
+        // semantic accents — warm dawn palette
+        lime:    "#4ade80", // fresh emerald — achievement / muscle / protein / target
+        limed:   "#22c55e",
+        coral:   "#fb7185", // rose — loss / heart / cardio / effort
+        corald:  "#e11d48",
+        amber:   "#fbbf24", // gold — energy / fuel / now / streak
+        amberd:  "#d97706",
+        cyan:    "#7dd3fc", // sky — hydration / time / recovery
+        cyand:   "#38bdf8",
 
-        // extra Apple system hues
-        yellow:  "#ffd60a", // sun / energy-bright
-        purple:  "#bf5af2", // sleep / mind
-        blue:    "#0a84ff", // data / measurement
+        // extra hues
+        yellow:  "#fde047", // sun
+        purple:  "#c4b5fd", // lavender / sleep
+        blue:    "#60a5fa", // data / measurement
 
         // system states
-        warn:    "#ff9500",
-        danger:  "#ff453a",
+        warn:    "#fbbf24",
+        danger:  "#fb7185",
 
-        // legacy aliases (remapped to new green)
-        signal:  "#30d158",
-        signald: "#248a3d",
-        cool:    "#64d2ff"
+        // legacy aliases
+        signal:  "#4ade80",
+        signald: "#22c55e",
+        cool:    "#7dd3fc"
       },
       fontFamily: {
         mono:    ["'IBM Plex Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],

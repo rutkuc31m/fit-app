@@ -15,8 +15,8 @@ export default defineConfig({
         name: "FitApp",
         short_name: "FitApp",
         description: "Transformation tracker",
-        theme_color: "#0c0e0d",
-        background_color: "#0c0e0d",
+        theme_color: "#0a0705",
+        background_color: "#0a0705",
         display: "standalone",
         start_url: "/",
         icons: [
