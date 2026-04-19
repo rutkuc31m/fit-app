@@ -3,7 +3,7 @@
 // Every day: what to do morning → evening, family-friendly, gym at 19-20h.
 
 import { PLAN, getWeekNum, getPhase, getDayPlan, getExercisesForDay } from "./plan.js";
-import { getCardioProtocol, getHabitsForPhase, getActiveRestrictions, getFootballMode } from "./protocols.js";
+import { getCardioProtocol, getHabitsForPhase, getFootballMode } from "./protocols.js";
 
 // ─── SCHEDULE GENERATOR ───
 
@@ -20,7 +20,6 @@ export function generateFullSchedule() {
     const dayPlan = getDayPlan(dateStr);
     const cardio = getCardioProtocol(weekNum);
     const habits = getHabitsForPhase(weekNum);
-    const restrictions = getActiveRestrictions(weekNum);
     const football = getFootballMode(weekNum);
 
     const isTrainingDay = dayPlan.type !== "rest";
@@ -140,7 +139,7 @@ export function generateFullSchedule() {
         ].filter(Boolean)
       } : null,
 
-      restrictions: restrictions.length > 0 ? restrictions.map(r => r.description) : null,
+      restrictions: null,
 
       // ── SUPPLEMENTS ──
       supplements: {

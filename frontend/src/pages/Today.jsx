@@ -477,17 +477,6 @@ export default function Today() {
         );
       })()}
 
-      {/* Quote of the day — amber/lime subtle tint */}
-      <div className="card p-4 relative overflow-hidden" style={{
-        background: "linear-gradient(135deg, rgba(255,159,10,.04) 0%, rgba(48,209,88,.04) 100%)"
-      }}>
-        <div className="absolute top-2 left-3 font-display text-[2.5rem] leading-none text-amber/40 select-none italic">"</div>
-        <div className="pl-6 pt-1">
-          <div className="mono text-[.78rem] text-ink leading-snug italic">{quote.q}</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-2">— {quote.a}</div>
-        </div>
-      </div>
-
       {/* Push notification panel */}
       {date === todayStr() && pushSupported() && (
         <div className="card p-3">
@@ -680,15 +669,16 @@ export default function Today() {
         );
       })()}
 
-      {/* Restriction banner */}
-      {day.restrictions && day.restrictions.length > 0 && (
-        <div className="card p-3 border-warn/40 bg-warn/[.05]">
-          <div className="mono text-[.62rem] text-warn uppercase tracking-[.14em] mb-1">
-            {t("restrictions.lower_back")}
-          </div>
-          <div className="mono text-xs text-ink2">{day.restrictions[0]}</div>
+      {/* Quote of the day — amber/lime subtle tint */}
+      <div className="card p-4 relative overflow-hidden" style={{
+        background: "linear-gradient(135deg, rgba(255,159,10,.04) 0%, rgba(48,209,88,.04) 100%)"
+      }}>
+        <div className="absolute top-2 left-3 font-display text-[2.5rem] leading-none text-amber/40 select-none italic">"</div>
+        <div className="pl-6 pt-1">
+          <div className="mono text-[.78rem] text-ink leading-snug italic">{quote.q}</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-2">— {quote.a}</div>
         </div>
-      )}
+      </div>
 
       {/* Checkpoint banner */}
       {day.isCheckpointDay && day.checkpoint && (

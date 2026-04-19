@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
-import { getActiveRestrictions, getStepTarget, getCardioProtocol } from "../lib/protocols";
+import { getStepTarget, getCardioProtocol } from "../lib/protocols";
 import { Ring, Brackets, Empty, Icon, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
 
 const sumMacros = (meals) => meals.reduce((a, m) => {
@@ -32,7 +32,6 @@ export default function Dashboard() {
   const isPhaseFirstDay = dayIdx === phaseStartDay;
   const target = getEatingTarget(dayPlan.eating);
   const macros = sumMacros(meals);
-  const restrictions = getActiveRestrictions(week);
   const stepTarget = getStepTarget(week);
   const cardio = getCardioProtocol(week);
 
@@ -265,23 +264,6 @@ export default function Dashboard() {
             <div className="mono text-[.7rem] text-ink uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
           </div>
           <div className="mono text-sm text-signal font-bold tabular-nums">{stepTarget.toLocaleString()}</div>
-        </div>
-      )}
-
-      {/* Active restriction banner */}
-      {restrictions.length > 0 && (
-        <div className="card p-3 border-warn/40 bg-warn/[.05]">
-          <div className="flex items-start gap-2">
-            <span className="mono text-[.7rem] text-warn font-bold">⚠</span>
-            <div className="flex-1">
-              <div className="mono text-[.66rem] text-warn uppercase tracking-[.14em] font-bold">
-                {t("restrictions.lower_back")}
-              </div>
-              <div className="mono text-[.62rem] text-ink2 mt-1 leading-relaxed">
-                {restrictions[0].description}
-              </div>
-            </div>
-          </div>
         </div>
       )}
 

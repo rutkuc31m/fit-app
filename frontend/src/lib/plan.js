@@ -137,21 +137,8 @@ export const getDayPlan = (dateStr = todayStr()) => {
 
 export const getEatingTarget = (eating) => PLAN.eatingTargets[eating] || PLAN.eatingTargets.LOW;
 
-// Returns exercises for a given training day, resolving phase1 substitutions
-// and including phase1Only exercises when applicable.
-export const getExercisesForDay = (dayType, weekNum) => {
+export const getExercisesForDay = (dayType) => {
   const day = PLAN.training[dayType];
   if (!day) return null;
-  const isPhase1 = weekNum >= 1 && weekNum <= 4;
-
-  const resolved = day.exercises
-    .filter((ex) => !ex.phase1Only || isPhase1)
-    .map((ex) => {
-      if (isPhase1 && ex.phase1Alt) {
-        return { ...ex, name: ex.phase1Alt.name, originalName: ex.name, substituted: true, reason: ex.phase1Alt.reason };
-      }
-      return ex;
-    });
-
-  return { ...day, exercises: resolved };
+  return { ...day, exercises: day.exercises.filter((ex) => !ex.phase1Only) };
 };

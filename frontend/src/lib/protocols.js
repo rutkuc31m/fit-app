@@ -196,7 +196,6 @@ export const PROTOCOLS = {
       { id: "arm", label: "Arm flexed (cm)", type: "number", biweekly: true },
       { id: "energy", label: "Energy level (1-5)", type: "scale" },
       { id: "sleep_quality", label: "Sleep quality (1-5)", type: "scale" },
-      { id: "back_pain", label: "Back stiffness (0=none, 5=bad)", type: "scale" },
       { id: "motivation", label: "Motivation (1-5)", type: "scale" },
       { id: "adherence_pct", label: "Plan adherence this week (%)", type: "percent" },
       { id: "notes", label: "What worked / what struggled", type: "text" }
