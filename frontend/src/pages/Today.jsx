@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { PLAN, todayStr, fmtDate, getWeekNum, getPhase, daysBetween } from "../lib/plan";
@@ -6,62 +6,8 @@ import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { quoteForDate } from "../lib/quotes";
-import { getHabitsForPhase } from "../lib/protocols";
 import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
 import { Icon, Empty } from "../components/ui";
-
-// ─── Accelerometer pedometer (mobile browsers) ───
-// Peak-detection on vertical accel magnitude — coarse but workable.
-function useStepCounter() {
-  const [steps, setSteps] = useState(0);
-  const [running, setRunning] = useState(false);
-  const [supported, setSupported] = useState(true);
-  const lastPeakRef = useRef(0);
-  const handlerRef = useRef(null);
-
-  const start = async () => {
-    if (typeof DeviceMotionEvent === "undefined") {
-      setSupported(false);
-      return;
-    }
-    if (typeof DeviceMotionEvent.requestPermission === "function") {
-      try {
-        const res = await DeviceMotionEvent.requestPermission();
-        if (res !== "granted") { setSupported(false); return; }
-      } catch { setSupported(false); return; }
-    }
-    const onMotion = (e) => {
-      const a = e.accelerationIncludingGravity || e.acceleration;
-      if (!a) return;
-      const mag = Math.sqrt((a.x || 0) ** 2 + (a.y || 0) ** 2 + (a.z || 0) ** 2);
-      const now = Date.now();
-      // Threshold ~12 m/s² with 350ms debounce — empirical walking cadence
-      if (mag > 12 && now - lastPeakRef.current > 350) {
-        lastPeakRef.current = now;
-        setSteps((s) => s + 1);
-      }
-    };
-    handlerRef.current = onMotion;
-    window.addEventListener("devicemotion", onMotion);
-    setRunning(true);
-  };
-
-  const stop = () => {
-    if (handlerRef.current) {
-      window.removeEventListener("devicemotion", handlerRef.current);
-      handlerRef.current = null;
-    }
-    setRunning(false);
-  };
-
-  const reset = () => setSteps(0);
-
-  useEffect(() => () => {
-    if (handlerRef.current) window.removeEventListener("devicemotion", handlerRef.current);
-  }, []);
-
-  return { steps, running, supported, start, stop, reset };
-}
 
 const CAT_STYLE = {
   routine:    { dot: "#a1a1a6", label: "ROUT" },
@@ -174,8 +120,6 @@ export default function Today() {
   const { user } = useAuth();
   const [date, setDate] = useState(todayStr());
   const now = nowHHMM();
-  const [stepsLogged, setStepsLogged] = useState(0);
-  const [stepInput, setStepInput] = useState("");
   const [waterMl, setWaterMl] = useState(0);
   const [savedFlash, setSavedFlash] = useState(false);
   const [pushStatus, setPushStatus] = useState("default");
@@ -184,11 +128,8 @@ export default function Today() {
   const [weightInput, setWeightInput] = useState("");
   const [mealsTotals, setMealsTotals] = useState({ kcal: 0, protein: 0, carbs: 0, fat: 0, count: 0 });
   const [session, setSession] = useState(null);
-  const [habitLogs, setHabitLogs] = useState({});
-  const pedo = useStepCounter();
   const quote = useMemo(() => quoteForDate(date), [date]);
   const week = getWeekNum(date);
-  const habitsMap = useMemo(() => getHabitsForPhase(week), [week]);
   const phase = getPhase(week);
   const dayIdx = daysBetween(PLAN.startDate, date) + 1;
   const phaseStartDay = (phase.weeks[0] - 1) * 7 + 1;
@@ -245,9 +186,6 @@ export default function Today() {
     let cancelled = false;
     api.get(`/logs/${date}`).then((l) => {
       if (cancelled) return;
-      const v = l?.steps || 0;
-      setStepsLogged(v);
-      setStepInput(v ? String(v) : "");
       setWaterMl(l?.water_ml || 0);
       if (l?.weight_kg != null) {
         setCurrentWeight(l.weight_kg);
@@ -272,9 +210,6 @@ export default function Today() {
     api.get(`/training/session?date=${date}`).then((s) => {
       if (!cancelled) setSession(s);
     }).catch(() => { if (!cancelled) setSession(null); });
-    api.get(`/habits/${date}`).then((h) => {
-      if (!cancelled) setHabitLogs(h || {});
-    }).catch(() => {});
     return () => { cancelled = true; };
   }, [date]);
 
@@ -287,26 +222,10 @@ export default function Today() {
     setTimeout(() => setSavedFlash(false), 600);
   };
 
-  const saveSteps = async (val) => {
-    const n = parseInt(val, 10);
-    if (!Number.isFinite(n) || n < 0) return;
-    await api.put(`/logs/${date}`, { steps: n });
-    setStepsLogged(n);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 600);
-  };
-
   const saveWater = async (ml) => {
     const next = Math.max(0, ml);
     setWaterMl(next);
     await api.put(`/logs/${date}`, { water_ml: next });
-  };
-
-  const commitPedoToDay = async () => {
-    const n = stepsLogged + pedo.steps;
-    await saveSteps(n);
-    setStepInput(String(n));
-    pedo.reset();
   };
 
   const shiftDate = (delta) => {
@@ -564,61 +483,6 @@ export default function Today() {
         );
       })()}
 
-      {/* Step counter */}
-      <div className="card p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
-            Steps · {stepsLogged.toLocaleString()} / {day.stepTarget.toLocaleString()}
-          </div>
-          {savedFlash && <div className="mono text-[.58rem] text-signal uppercase tracking-[.14em]">✓ saved</div>}
-        </div>
-
-        {/* Progress bar — amber fill (energy) that brightens to lime at 100% */}
-        <div className="h-2 bg-bg2 rounded overflow-hidden mb-3">
-          <div
-            className={`h-full transition-all ${stepsLogged >= day.stepTarget ? "bg-lime shadow-[0_0_10px_rgba(48,209,88,.5)]" : "bg-amber shadow-[0_0_8px_rgba(255,159,10,.4)]"}`}
-            style={{ width: `${Math.min(100, Math.round((stepsLogged / day.stepTarget) * 100))}%` }}
-          />
-        </div>
-
-        {/* Manual input */}
-        <div className="flex items-center gap-2 mb-2">
-          <input
-            type="number"
-            inputMode="numeric"
-            className="input flex-1 mono text-sm"
-            placeholder="manual steps"
-            value={stepInput}
-            onChange={(e) => setStepInput(e.target.value)}
-          />
-          <button className="btn-ghost" onClick={() => saveSteps(stepInput)}>save</button>
-        </div>
-
-        {/* Pedometer (accelerometer-based) */}
-        {pedo.supported && date === todayStr() && (
-          <div className="flex items-center gap-2">
-            <div className="flex-1 mono text-[.7rem] text-ink2">
-              {pedo.running
-                ? <>Counting… <span className="text-amber font-bold tabular-nums">+{pedo.steps}</span></>
-                : "Pedometer (phone in pocket)"}
-            </div>
-            {!pedo.running ? (
-              <button className="btn-ghost" onClick={pedo.start}>start</button>
-            ) : (
-              <>
-                <button className="btn-ghost" onClick={pedo.stop}>pause</button>
-                <button className="btn-ghost" onClick={commitPedoToDay} disabled={!pedo.steps}>+ log</button>
-              </>
-            )}
-          </div>
-        )}
-        {!pedo.supported && (
-          <div className="mono text-[.6rem] text-mute">
-            Pedometer not supported on this device — type manually
-          </div>
-        )}
-      </div>
-
       {/* Training card */}
       {day.training ? (
         <Link to="/training" className="card p-3 block hover:border-line/80 transition">
@@ -650,50 +514,6 @@ export default function Today() {
           <div className="mono text-[.7rem] text-ink2 mt-1">rest day · recovery</div>
         </div>
       )}
-
-      {/* Habits mini */}
-      {(() => {
-        const sections = [
-          { key: "morning",    color: "#ff9f0a" },
-          { key: "throughout", color: "#64d2ff" },
-          { key: "evening",    color: "#bf5af2" }
-        ];
-        const daily = [...(habitsMap.morning || []), ...(habitsMap.throughout || []), ...(habitsMap.evening || [])];
-        const done = daily.filter((h) => habitLogs[h.id]).length;
-        const total = daily.length;
-        const pct = total ? Math.round((done / total) * 100) : 0;
-        const perSection = sections.map((s) => {
-          const items = habitsMap[s.key] || [];
-          const d = items.filter((h) => habitLogs[h.id]).length;
-          return { ...s, d, t: items.length };
-        });
-        return (
-          <Link to="/habits" className="card p-3 block hover:border-line/80 transition">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">habits</div>
-                <div className="font-display text-[1.25rem] leading-none tabular-nums mt-[2px]"
-                  style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-                  <span className={done === total && total > 0 ? "text-lime" : done > 0 ? "text-amber" : "text-mute"}>{done}</span>
-                  <span className="text-mute text-[.8rem]">/{total}</span>
-                </div>
-              </div>
-              <div className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">{pct}% →</div>
-            </div>
-            <div className="flex gap-2">
-              {perSection.map((s) => (
-                <div key={s.key} className="flex-1">
-                  <div className="h-[4px] rounded-full bg-bg2 border border-line/50 overflow-hidden">
-                    <div className="h-full transition-all"
-                      style={{ width: s.t ? `${(s.d / s.t) * 100}%` : "0%", background: s.color, boxShadow: `0 0 6px ${s.color}99` }} />
-                  </div>
-                  <div className="mt-[3px] mono text-[.5rem] text-mute uppercase tracking-[.14em] text-center">{s.key} {s.d}/{s.t}</div>
-                </div>
-              ))}
-            </div>
-          </Link>
-        );
-      })()}
 
       {/* Quote of the day — amber/lime subtle tint */}
       <div className="card p-4 relative overflow-hidden" style={{
