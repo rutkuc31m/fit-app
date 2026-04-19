@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { PLAN, todayStr, fmtDate, getWeekNum } from "../lib/plan";
+import { PLAN, todayStr, fmtDate, getWeekNum, getPhase, daysBetween } from "../lib/plan";
 import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
@@ -189,6 +189,10 @@ export default function Today() {
   const quote = useMemo(() => quoteForDate(date), [date]);
   const week = getWeekNum(date);
   const habitsMap = useMemo(() => getHabitsForPhase(week), [week]);
+  const phase = getPhase(week);
+  const dayIdx = daysBetween(PLAN.startDate, date) + 1;
+  const phaseStartDay = (phase.weeks[0] - 1) * 7 + 1;
+  const isPhaseFirstDay = dayIdx === phaseStartDay;
 
   const sw = user?.start_weight || PLAN.startWeight;
   const tw = user?.target_weight || PLAN.targetWeight;
@@ -349,6 +353,16 @@ export default function Today() {
         </button>
       </div>
 
+      {/* Phase transition celebration */}
+      {isPhaseFirstDay && (
+        <div className="card p-3 text-center border" style={{ borderColor: `${phase.color}66`, background: `${phase.color}0a` }}>
+          <div className="mono text-[.62rem] uppercase tracking-[.22em] font-bold animate-pulse"
+            style={{ color: phase.color, textShadow: `0 0 10px ${phase.color}99` }}>
+            ★ phase {phase.id} unlocked
+          </div>
+        </div>
+      )}
+
       {/* Phase + eating header */}
       <div className="card p-3 flex items-center gap-3">
         <div
@@ -458,7 +472,7 @@ export default function Today() {
           );
         };
         return (
-          <Link to="/log" className="card p-3 block hover:border-line/80 transition">
+          <Link to="/recipes" className="card p-3 block hover:border-line/80 transition">
             <div className="flex items-center justify-between mb-2">
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">nutrition</div>
               <div className="mono text-[.58rem] text-ink2 uppercase tracking-[.14em]">

@@ -4,11 +4,12 @@ import i18n from "../i18n";
 import { todayStr, getDayPlan, getEatingTarget, PLAN } from "../lib/plan";
 import { getDayRecipes, getWeekRecipes, buildShoppingList, INGREDIENT_NAMES, CAT_ORDER, CAT_LABEL, RECIPE_TAGS } from "../lib/recipes";
 import { Empty, Icon, Brackets } from "../components/ui";
+import Log from "./Log";
 
 export default function Recipes() {
   const { t } = useTranslation();
   const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
-  const [tab, setTab] = useState("today"); // today | week | shop
+  const [tab, setTab] = useState("log"); // log | today | week | shop
   const [checked, setChecked] = useState({});
   const date = todayStr();
   const dayPlan = getDayPlan(date);
@@ -25,7 +26,7 @@ export default function Recipes() {
       <div className="section-label">{t("recipes.title")}</div>
 
       <div className="card p-1 flex gap-1">
-        {["today", "week", "shop"].map((k) => (
+        {["log", "today", "week", "shop"].map((k) => (
           <button key={k} onClick={() => setTab(k)}
             className={`flex-1 mono text-[.66rem] caps py-[10px] rounded-lg transition ${
               tab === k ? "bg-signal text-[#000000] font-bold" : "text-ink2 hover:bg-bg2"
@@ -34,6 +35,8 @@ export default function Recipes() {
           </button>
         ))}
       </div>
+
+      {tab === "log" && <Log />}
 
       {tab === "today" && (
         <>

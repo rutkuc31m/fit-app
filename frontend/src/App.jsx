@@ -3,8 +3,6 @@ import { useAuth } from "./lib/auth.jsx";
 import TopBar from "./components/TopBar";
 import NavBar from "./components/NavBar";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Log from "./pages/Log";
 import Training from "./pages/Training";
 import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
@@ -27,9 +25,7 @@ export default function App() {
       {user && <TopBar />}
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/"         element={<Protected><Dashboard /></Protected>} />
-        <Route path="/today"    element={<Protected><Today /></Protected>} />
-        <Route path="/log"      element={<Protected><Log /></Protected>} />
+        <Route path="/"         element={<Protected><Today /></Protected>} />
         <Route path="/recipes"  element={<Protected><Recipes /></Protected>} />
         <Route path="/training" element={<Protected><Training /></Protected>} />
         <Route path="/progress" element={<Protected><Progress /></Protected>} />
