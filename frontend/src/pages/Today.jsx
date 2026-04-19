@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { PLAN, todayStr, fmtDate } from "../lib/plan";
+import { PLAN, todayStr, fmtDate, getWeekNum } from "../lib/plan";
 import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { quoteForDate } from "../lib/quotes";
+import { getHabitsForPhase } from "../lib/protocols";
 import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
 import { Icon, Empty } from "../components/ui";
 
@@ -180,8 +181,14 @@ export default function Today() {
   const [pushStatus, setPushStatus] = useState("default");
   const [pushBusy, setPushBusy] = useState(false);
   const [currentWeight, setCurrentWeight] = useState(null);
+  const [weightInput, setWeightInput] = useState("");
+  const [mealsTotals, setMealsTotals] = useState({ kcal: 0, protein: 0, carbs: 0, fat: 0, count: 0 });
+  const [session, setSession] = useState(null);
+  const [habitLogs, setHabitLogs] = useState({});
   const pedo = useStepCounter();
   const quote = useMemo(() => quoteForDate(date), [date]);
+  const week = getWeekNum(date);
+  const habitsMap = useMemo(() => getHabitsForPhase(week), [week]);
 
   const sw = user?.start_weight || PLAN.startWeight;
   const tw = user?.target_weight || PLAN.targetWeight;
@@ -234,9 +241,43 @@ export default function Today() {
       setStepsLogged(v);
       setStepInput(v ? String(v) : "");
       setWaterMl(l?.water_ml || 0);
+      if (l?.weight_kg != null) {
+        setCurrentWeight(l.weight_kg);
+        setWeightInput(String(l.weight_kg));
+      } else {
+        setWeightInput("");
+      }
+    }).catch(() => {});
+    api.get(`/meals?date=${date}`).then((meals) => {
+      if (cancelled) return;
+      const totals = (meals || []).reduce((acc, m) => {
+        (m.items || []).forEach((it) => {
+          acc.kcal += it.kcal || 0;
+          acc.protein += it.protein_g || 0;
+          acc.carbs += it.carbs_g || 0;
+          acc.fat += it.fat_g || 0;
+        });
+        return acc;
+      }, { kcal: 0, protein: 0, carbs: 0, fat: 0, count: (meals || []).length });
+      setMealsTotals(totals);
+    }).catch(() => {});
+    api.get(`/training/session?date=${date}`).then((s) => {
+      if (!cancelled) setSession(s);
+    }).catch(() => { if (!cancelled) setSession(null); });
+    api.get(`/habits/${date}`).then((h) => {
+      if (!cancelled) setHabitLogs(h || {});
     }).catch(() => {});
     return () => { cancelled = true; };
   }, [date]);
+
+  const saveWeight = async () => {
+    const n = parseFloat(weightInput);
+    if (!Number.isFinite(n) || n <= 0) return;
+    await api.put(`/logs/${date}`, { weight_kg: n });
+    setCurrentWeight(n);
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 600);
+  };
 
   const saveSteps = async (val) => {
     const n = parseInt(val, 10);
@@ -356,6 +397,86 @@ export default function Today() {
         </div>
       </div>
 
+      {/* Weight card */}
+      <div className="card p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">weight</div>
+            <div className="font-display text-[1.5rem] text-ink leading-none tabular-nums mt-[2px]"
+              style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+              {currentWeight != null ? currentWeight.toFixed(1) : "—"}<span className="text-[.8rem] text-ink2 font-light ml-[4px]">kg</span>
+            </div>
+          </div>
+          {currentWeight != null && (
+            <div className="text-right">
+              <div className={`mono text-[.72rem] tabular-nums font-bold ${sw - currentWeight >= 0 ? "text-lime" : "text-coral"}`}>
+                {sw - currentWeight >= 0 ? "−" : "+"}{Math.abs(sw - currentWeight).toFixed(1)}kg
+              </div>
+              <div className="mono text-[.54rem] text-mute uppercase tracking-[.18em] mt-[2px]">vs start</div>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            step="0.1"
+            inputMode="decimal"
+            className="input flex-1 mono text-sm"
+            placeholder="kg"
+            value={weightInput}
+            onChange={(e) => setWeightInput(e.target.value)}
+          />
+          <button className="btn-ghost" onClick={saveWeight}>save</button>
+          {savedFlash && <span className="mono text-[.58rem] text-signal uppercase tracking-[.14em]">✓</span>}
+        </div>
+      </div>
+
+      {/* Meals ring */}
+      {(() => {
+        const kcalTarget = day.eating.targets.kcal || 0;
+        const protTarget = day.eating.targets.protein || 0;
+        const kcalPct = kcalTarget ? Math.min(100, Math.round((mealsTotals.kcal / kcalTarget) * 100)) : 0;
+        const protPct = protTarget ? Math.min(100, Math.round((mealsTotals.protein / protTarget) * 100)) : 0;
+        const ring = (pct, color, label, value, total, unit) => {
+          const r = 20, c = 2 * Math.PI * r;
+          const off = c - (pct / 100) * c;
+          return (
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative">
+                <svg width="52" height="52" viewBox="0 0 52 52">
+                  <circle cx="26" cy="26" r={r} stroke="rgba(255,255,255,.08)" strokeWidth="4" fill="none" />
+                  <circle cx="26" cy="26" r={r} stroke={color} strokeWidth="4" fill="none"
+                    strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
+                    transform="rotate(-90 26 26)"
+                    style={{ transition: "stroke-dashoffset .7s" }} />
+                </svg>
+                <div className="absolute inset-0 grid place-items-center mono text-[.62rem] tabular-nums" style={{ color }}>{pct}%</div>
+              </div>
+              <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em]">{label}</div>
+              <div className="mono text-[.58rem] text-ink2 tabular-nums">{value}<span className="text-mute">/{total}{unit}</span></div>
+            </div>
+          );
+        };
+        return (
+          <Link to="/log" className="card p-3 block hover:border-line/80 transition">
+            <div className="flex items-center justify-between mb-2">
+              <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">nutrition</div>
+              <div className="mono text-[.58rem] text-ink2 uppercase tracking-[.14em]">
+                {mealsTotals.count} meal{mealsTotals.count !== 1 ? "s" : ""} <span className="text-mute">→</span>
+              </div>
+            </div>
+            {kcalTarget === 0 ? (
+              <div className="mono text-[.7rem] text-cyan text-center py-2">fast day · 0 kcal</div>
+            ) : (
+              <div className="flex justify-around">
+                {ring(kcalPct, "#ff9f0a", "kcal", Math.round(mealsTotals.kcal), kcalTarget, "")}
+                {ring(protPct, "#30d158", "protein", Math.round(mealsTotals.protein), protTarget, "g")}
+              </div>
+            )}
+          </Link>
+        );
+      })()}
+
       {/* Quote of the day — amber/lime subtle tint */}
       <div className="card p-4 relative overflow-hidden" style={{
         background: "linear-gradient(135deg, rgba(255,159,10,.04) 0%, rgba(48,209,88,.04) 100%)"
@@ -394,22 +515,6 @@ export default function Today() {
           )}
         </div>
       )}
-
-      {/* Quick chips — semantic metric palette */}
-      <div className="grid grid-cols-3 gap-[10px]">
-        <div className="card p-2 text-center border-amber/20">
-          <div className="mono text-sm text-amber font-bold tabular-nums">{day.stepTarget}</div>
-          <div className="mono text-[.58rem] text-amber/60 uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
-        </div>
-        <div className="card p-2 text-center border-cyan/20">
-          <div className="mono text-sm text-cyan font-bold tabular-nums">{(waterMl / 1000).toFixed(1)}<span className="text-mute">/{day.waterLiters}</span>L</div>
-          <div className="mono text-[.58rem] text-cyan/60 uppercase tracking-[.14em]">water</div>
-        </div>
-        <div className="card p-2 text-center border-cyan/20">
-          <div className="mono text-sm text-cyan font-bold tabular-nums">{day.sleepHours}h</div>
-          <div className="mono text-[.58rem] text-cyan/60 uppercase tracking-[.14em]">sleep</div>
-        </div>
-      </div>
 
       {/* Water tracker */}
       {(() => {
@@ -498,6 +603,82 @@ export default function Today() {
           </div>
         )}
       </div>
+
+      {/* Training card */}
+      {day.training ? (
+        <Link to="/training" className="card p-3 block hover:border-line/80 transition">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <div className="mono text-[.58rem] text-lime uppercase tracking-[.2em]">training · day {day.training.type}</div>
+              <div className="font-display text-[1.25rem] text-ink leading-none tabular-nums mt-[2px]"
+                style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+                {day.training.label}
+              </div>
+              <div className="mono text-[.6rem] text-mute uppercase tracking-[.14em] mt-1">
+                {day.training.timeSlot} · {day.training.exercises.length} exercises
+              </div>
+            </div>
+            <div className="text-right shrink-0 pl-2">
+              {session?.completed ? (
+                <div className="mono text-[.62rem] text-lime uppercase tracking-[.14em]">✓ done</div>
+              ) : (session?.sets?.length > 0) ? (
+                <div className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{session.sets.length} sets</div>
+              ) : (
+                <div className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">start →</div>
+              )}
+            </div>
+          </div>
+        </Link>
+      ) : (
+        <div className="card p-3">
+          <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">training</div>
+          <div className="mono text-[.7rem] text-ink2 mt-1">rest day · recovery</div>
+        </div>
+      )}
+
+      {/* Habits mini */}
+      {(() => {
+        const sections = [
+          { key: "morning",    color: "#ff9f0a" },
+          { key: "throughout", color: "#64d2ff" },
+          { key: "evening",    color: "#bf5af2" }
+        ];
+        const daily = [...(habitsMap.morning || []), ...(habitsMap.throughout || []), ...(habitsMap.evening || [])];
+        const done = daily.filter((h) => habitLogs[h.id]).length;
+        const total = daily.length;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        const perSection = sections.map((s) => {
+          const items = habitsMap[s.key] || [];
+          const d = items.filter((h) => habitLogs[h.id]).length;
+          return { ...s, d, t: items.length };
+        });
+        return (
+          <Link to="/habits" className="card p-3 block hover:border-line/80 transition">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">habits</div>
+                <div className="font-display text-[1.25rem] leading-none tabular-nums mt-[2px]"
+                  style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+                  <span className={done === total && total > 0 ? "text-lime" : done > 0 ? "text-amber" : "text-mute"}>{done}</span>
+                  <span className="text-mute text-[.8rem]">/{total}</span>
+                </div>
+              </div>
+              <div className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">{pct}% →</div>
+            </div>
+            <div className="flex gap-2">
+              {perSection.map((s) => (
+                <div key={s.key} className="flex-1">
+                  <div className="h-[4px] rounded-full bg-bg2 border border-line/50 overflow-hidden">
+                    <div className="h-full transition-all"
+                      style={{ width: s.t ? `${(s.d / s.t) * 100}%` : "0%", background: s.color, boxShadow: `0 0 6px ${s.color}99` }} />
+                  </div>
+                  <div className="mt-[3px] mono text-[.5rem] text-mute uppercase tracking-[.14em] text-center">{s.key} {s.d}/{s.t}</div>
+                </div>
+              ))}
+            </div>
+          </Link>
+        );
+      })()}
 
       {/* Restriction banner */}
       {day.restrictions && day.restrictions.length > 0 && (
