@@ -9,6 +9,7 @@ import trainingRoutes from "./routes/training.js";
 import measurementsRoutes from "./routes/measurements.js";
 import checkinsRoutes from "./routes/checkins.js";
 import habitsRoutes from "./routes/habits.js";
+import statsRoutes from "./routes/stats.js";
 import pushRoutes from "./routes/push.js";
 import { startPushScheduler } from "./push_worker.js";
 
@@ -30,6 +31,7 @@ app.use("/api/training", trainingRoutes);
 app.use("/api/measurements", measurementsRoutes);
 app.use("/api/checkins", checkinsRoutes);
 app.use("/api/habits", habitsRoutes);
+app.use("/api/stats", statsRoutes);
 app.use("/api/push", pushRoutes);
 
 app.use((err, _req, res, _next) => {

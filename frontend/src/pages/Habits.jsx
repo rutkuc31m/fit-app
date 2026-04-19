@@ -20,14 +20,17 @@ export default function Habits() {
   const habits = useMemo(() => getHabitsForPhase(week), [week]);
   const [logs, setLogs] = useState({});
   const [streak, setStreak] = useState(0);
+  const [streaks, setStreaks] = useState({ weightStreak: 0, fastStreak: 0, trainingStreak: 0 });
 
   const load = async () => {
-    const [m, s] = await Promise.all([
+    const [m, s, st] = await Promise.all([
       api.get(`/habits/${date}`),
-      api.get(`/habits/streak/current`).catch(() => ({ streak: 0 }))
+      api.get(`/habits/streak/current`).catch(() => ({ streak: 0 })),
+      api.get(`/stats/streaks`).catch(() => ({ weightStreak: 0, fastStreak: 0, trainingStreak: 0 }))
     ]);
     setLogs(m || {});
     setStreak(s?.streak || 0);
+    setStreaks(st || { weightStreak: 0, fastStreak: 0, trainingStreak: 0 });
   };
   useEffect(() => { load(); }, [date]);
 
@@ -66,6 +69,26 @@ export default function Habits() {
   return (
     <div className="page page-habits">
       <div className="section-label">{t("habits.title")}</div>
+
+      {/* Streak trio */}
+      <div className="card p-3 grid grid-cols-3 divide-x divide-line">
+        {[
+          { label: "weight", value: streaks.weightStreak, color: "text-cyan" },
+          { label: "fast",   value: streaks.fastStreak,   color: "text-amber" },
+          { label: "train",  value: streaks.trainingStreak, color: "text-lime" }
+        ].map((s) => (
+          <div key={s.label} className="flex flex-col items-center gap-[2px]">
+            <div className="flex items-center gap-[4px]">
+              <Icon.flame size={12} className={s.color + "/70"} />
+              <span className={`font-display text-[1.5rem] leading-none tabular-nums italic ${s.color}`}
+                style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+                {s.value}
+              </span>
+            </div>
+            <div className="mono text-[.54rem] text-mute uppercase tracking-[.2em]">{s.label}</div>
+          </div>
+        ))}
+      </div>
 
       <Brackets>
         <div className="card p-4 flex items-center justify-between">

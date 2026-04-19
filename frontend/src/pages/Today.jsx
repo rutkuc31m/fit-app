@@ -175,6 +175,7 @@ export default function Today() {
   const now = nowHHMM();
   const [stepsLogged, setStepsLogged] = useState(0);
   const [stepInput, setStepInput] = useState("");
+  const [waterMl, setWaterMl] = useState(0);
   const [savedFlash, setSavedFlash] = useState(false);
   const [pushStatus, setPushStatus] = useState("default");
   const [pushBusy, setPushBusy] = useState(false);
@@ -232,6 +233,7 @@ export default function Today() {
       const v = l?.steps || 0;
       setStepsLogged(v);
       setStepInput(v ? String(v) : "");
+      setWaterMl(l?.water_ml || 0);
     }).catch(() => {});
     return () => { cancelled = true; };
   }, [date]);
@@ -243,6 +245,12 @@ export default function Today() {
     setStepsLogged(n);
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 600);
+  };
+
+  const saveWater = async (ml) => {
+    const next = Math.max(0, ml);
+    setWaterMl(next);
+    await api.put(`/logs/${date}`, { water_ml: next });
   };
 
   const commitPedoToDay = async () => {
@@ -394,7 +402,7 @@ export default function Today() {
           <div className="mono text-[.58rem] text-amber/60 uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
         </div>
         <div className="card p-2 text-center border-cyan/20">
-          <div className="mono text-sm text-cyan font-bold tabular-nums">{day.waterLiters}L</div>
+          <div className="mono text-sm text-cyan font-bold tabular-nums">{(waterMl / 1000).toFixed(1)}<span className="text-mute">/{day.waterLiters}</span>L</div>
           <div className="mono text-[.58rem] text-cyan/60 uppercase tracking-[.14em]">water</div>
         </div>
         <div className="card p-2 text-center border-cyan/20">
@@ -402,6 +410,39 @@ export default function Today() {
           <div className="mono text-[.58rem] text-cyan/60 uppercase tracking-[.14em]">sleep</div>
         </div>
       </div>
+
+      {/* Water tracker */}
+      {(() => {
+        const target = (day.waterLiters || 3) * 1000;
+        const glassSize = 250;
+        const totalGlasses = Math.ceil(target / glassSize);
+        const filled = Math.floor(waterMl / glassSize);
+        const pct = Math.min(100, Math.round((waterMl / target) * 100));
+        return (
+          <div className="card p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <div className="mono text-[.58rem] text-cyan uppercase tracking-[.2em]">hydration</div>
+                <div className="font-display text-[1.5rem] text-cyan leading-none tabular-nums mt-[2px]"
+                  style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+                  {(waterMl / 1000).toFixed(2)}<span className="text-[.8rem] text-ink2 font-light ml-[4px]">L</span>
+                  <span className="text-mute text-[.7rem] font-light ml-[6px]">/ {(target / 1000).toFixed(1)}L</span>
+                </div>
+              </div>
+              <div className="flex gap-1">
+                <button className="btn-icon text-cyan" onClick={() => saveWater(waterMl - 250)} title="−250ml">−</button>
+                <button className="btn-icon text-cyan" onClick={() => saveWater(waterMl + 250)} title="+250ml">+</button>
+              </div>
+            </div>
+            <div className="flex gap-[3px] mt-1">
+              {Array.from({ length: totalGlasses }).map((_, i) => (
+                <div key={i} className={`flex-1 h-[6px] rounded-sm transition ${i < filled ? "bg-cyan shadow-[0_0_6px_rgba(100,210,255,.5)]" : "bg-bg2 border border-line/50"}`} />
+              ))}
+            </div>
+            <div className="mt-1 mono text-[.52rem] text-mute uppercase tracking-[.18em] text-right">{pct}%</div>
+          </div>
+        );
+      })()}
 
       {/* Step counter */}
       <div className="card p-3">

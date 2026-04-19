@@ -27,6 +27,9 @@ export default function Dashboard() {
   const dayPlan = getDayPlan(date);
   const week = getWeekNum(date);
   const phase = getPhase(week);
+  const dayIdx = daysBetween(PLAN.startDate, date) + 1;
+  const phaseStartDay = (phase.weeks[0] - 1) * 7 + 1;
+  const isPhaseFirstDay = dayIdx === phaseStartDay;
   const target = getEatingTarget(dayPlan.eating);
   const macros = sumMacros(meals);
   const restrictions = getActiveRestrictions(week);
@@ -98,6 +101,12 @@ export default function Dashboard() {
               <span className="text-mute2">·</span>
               <span className="text-ink2">WK {week}</span>
             </div>
+            {isPhaseFirstDay && (
+              <div className="mono text-[.56rem] uppercase tracking-[.2em] font-bold animate-pulse"
+                style={{ color: phase.color, textShadow: `0 0 8px ${phase.color}80` }}>
+                ★ phase {phase.id} unlocked
+              </div>
+            )}
           </div>
         </div>
 
