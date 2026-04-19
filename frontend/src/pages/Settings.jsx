@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api } from "../lib/api";
+import { api, getToken } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { setLang } from "../i18n";
 
@@ -65,6 +65,35 @@ export default function Settings() {
             {lng.toUpperCase()}
           </button>
         ))}
+      </div>
+
+      <div className="section-label">Shortcut Auto-Sync</div>
+      <div className="card p-3 flex flex-col gap-2">
+        <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
+          iphone shortcut → steps otomatik sync
+        </div>
+        <button
+          className="btn"
+          onClick={() => {
+            const token = getToken();
+            if (!token) return;
+            navigator.clipboard.writeText(token);
+            setMsg("token copied");
+            setTimeout(() => setMsg(null), 1500);
+          }}
+        >
+          Copy API token
+        </button>
+        <button
+          className="btn"
+          onClick={() => {
+            navigator.clipboard.writeText("https://api.fit.rutkuc.com/api");
+            setMsg("url copied");
+            setTimeout(() => setMsg(null), 1500);
+          }}
+        >
+          Copy API URL
+        </button>
       </div>
 
       <button className="btn text-warn" onClick={logout}>{t("auth.logout")}</button>
