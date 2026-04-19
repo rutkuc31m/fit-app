@@ -1,7 +1,7 @@
 {
   "nav": { "today": "Today", "log": "Log", "recipes": "Meals", "training": "Train", "progress": "Stats", "settings": "Set" },
   "recipes": {
-    "title": "Meal plan", "tab_today": "Today", "tab_week": "Week", "tab_shop": "Shopping",
+    "title": "Meal plan", "tab_log": "Log", "tab_today": "Today", "tab_week": "Week", "tab_shop": "Shopping",
     "eating_today": "Eating mode today", "target": "Target", "fast_day": "Fasting day", "fast_hint": "No meals planned. Hydrate well.",
     "ingredients": "Ingredients", "steps": "Steps",
     "the_meal": "Today's meal",

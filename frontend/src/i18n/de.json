@@ -1,7 +1,7 @@
 {
   "nav": { "today": "Heute", "log": "Log", "recipes": "Essen", "training": "Train", "progress": "Stats", "settings": "Set" },
   "recipes": {
-    "title": "Essensplan", "tab_today": "Heute", "tab_week": "Woche", "tab_shop": "Einkauf",
+    "title": "Essensplan", "tab_log": "Log", "tab_today": "Heute", "tab_week": "Woche", "tab_shop": "Einkauf",
     "eating_today": "Essmodus heute", "target": "Ziel", "fast_day": "Fastentag", "fast_hint": "Keine Mahlzeiten geplant. Viel trinken.",
     "ingredients": "Zutaten", "steps": "Schritte",
     "the_meal": "Mahlzeit heute",
