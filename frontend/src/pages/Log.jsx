@@ -8,6 +8,8 @@ import BarcodeScanner from "../components/BarcodeScanner";
 import { Empty, Icon } from "../components/ui";
 
 const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, barcode: null };
+const numberOrBlank = (value) => value === "" ? "" : Number(value);
+const cleanNumber = (value) => value === "" || value == null || Number.isNaN(Number(value)) ? 0 : Number(value);
 
 export default function Log() {
   const { t } = useTranslation();
@@ -65,6 +67,7 @@ export default function Log() {
   }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
 
   const updateAmount = (g) => {
+    if (g === "") return setDraft({ ...draft, amount_g: "" });
     if (!draft?._per100) return setDraft({ ...draft, amount_g: g });
     const factor = g / 100;
     setDraft({
@@ -119,6 +122,10 @@ export default function Log() {
   };
 
   const updatePieces = (n) => {
+    if (n === "") {
+      setPieces("");
+      return;
+    }
     if (!pieceFood || n < 0) return;
     setPieces(n);
     const scaled = scaleByPieces(pieceFood, n);
@@ -147,6 +154,11 @@ export default function Log() {
 
   const saveDraft = async () => {
     const { _per100, _analyzing, _noData, _pieces, _pieceFoodId, _gPerPiece, ...clean } = draft;
+    clean.amount_g = cleanNumber(clean.amount_g);
+    clean.kcal = cleanNumber(clean.kcal);
+    clean.protein_g = cleanNumber(clean.protein_g);
+    clean.carbs_g = cleanNumber(clean.carbs_g);
+    clean.fat_g = cleanNumber(clean.fat_g);
     if (editingItemId) await api.put(`/meals/items/${editingItemId}`, clean);
     else {
       const mealId = await ensureMeal();
@@ -350,27 +362,27 @@ export default function Log() {
               <label className="flex flex-col gap-1">
                 <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.amount_g")}</span>
                 <input className="input mono" type="number" value={draft.amount_g}
-                  onChange={(e) => updateAmount(+e.target.value)} />
+                  onChange={(e) => updateAmount(numberOrBlank(e.target.value))} />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.kcal")}</span>
                 <input className="input mono" type="number" value={draft.kcal}
-                  onChange={(e) => setDraft({ ...draft, kcal: +e.target.value })} />
+                  onChange={(e) => setDraft({ ...draft, kcal: numberOrBlank(e.target.value) })} />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="mono text-[.62rem] text-lime uppercase tracking-[.14em]">{t("log.protein")}</span>
                 <input className="input mono" type="number" value={draft.protein_g}
-                  onChange={(e) => setDraft({ ...draft, protein_g: +e.target.value })} />
+                  onChange={(e) => setDraft({ ...draft, protein_g: numberOrBlank(e.target.value) })} />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.carbs")}</span>
                 <input className="input mono" type="number" value={draft.carbs_g}
-                  onChange={(e) => setDraft({ ...draft, carbs_g: +e.target.value })} />
+                  onChange={(e) => setDraft({ ...draft, carbs_g: numberOrBlank(e.target.value) })} />
               </label>
               <label className="flex flex-col gap-1 col-span-2">
                 <span className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">{t("log.fat")}</span>
                 <input className="input mono" type="number" value={draft.fat_g}
-                  onChange={(e) => setDraft({ ...draft, fat_g: +e.target.value })} />
+                  onChange={(e) => setDraft({ ...draft, fat_g: numberOrBlank(e.target.value) })} />
               </label>
             </div>
 
