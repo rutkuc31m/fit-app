@@ -44,4 +44,23 @@ r.delete("/items/:itemId", (req, res) => {
   res.json({ ok: true });
 });
 
+r.put("/items/:itemId", (req, res) => {
+  const item = db.prepare(`
+    SELECT mi.id
+    FROM meal_items mi
+    JOIN meals m ON m.id = mi.meal_id
+    WHERE mi.id = ? AND m.user_id = ?
+  `).get(req.params.itemId, req.user.id);
+  if (!item) return res.status(404).json({ error: "not_found" });
+
+  const { barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g } = req.body || {};
+  db.prepare(`
+    UPDATE meal_items
+    SET barcode = ?, name = ?, amount_g = ?, kcal = ?, protein_g = ?, carbs_g = ?, fat_g = ?
+    WHERE id = ?
+  `).run(barcode || null, name, amount_g, kcal || 0, protein_g || 0, carbs_g || 0, fat_g || 0, item.id);
+
+  res.json(db.prepare("SELECT * FROM meal_items WHERE id = ?").get(item.id));
+});
+
 export default r;

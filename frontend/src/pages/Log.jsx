@@ -22,6 +22,7 @@ export default function Log() {
   const [mode, setMode] = useState("gram"); // gram | piece
   const [pieceFood, setPieceFood] = useState(null);
   const [pieces, setPieces] = useState(1);
+  const [editingItemId, setEditingItemId] = useState(null);
 
   const shiftDate = (delta) => {
     const d = new Date(date);
@@ -124,17 +125,37 @@ export default function Log() {
     setDraft((d) => ({ ...(d || emptyItem), ...scaled, name: pieceFood.name[lang], barcode: null }));
   };
 
-  const openAdd = () => { setDraft({ ...emptyItem }); setMode("gram"); setPieceFood(null); setPieces(1); };
-  const openScan = () => setScanOpen(true);
-
-  const saveDraft = async () => {
-    const mealId = await ensureMeal();
-    const { _per100, _analyzing, _noData, _pieces, _pieceFoodId, _gPerPiece, ...clean } = draft;
-    await api.post(`/meals/${mealId}/items`, clean);
-    setDraft(null); setMode("gram"); setPieceFood(null); setPieces(1); load();
+  const openAdd = () => { setDraft({ ...emptyItem }); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); };
+  const openScan = () => { setEditingItemId(null); setScanOpen(true); };
+  const openEdit = (item) => {
+    const amount = Number(item.amount_g) || 100;
+    setDraft({
+      ...emptyItem,
+      ...item,
+      _per100: {
+        kcal: ((Number(item.kcal) || 0) / amount) * 100,
+        p: ((Number(item.protein_g) || 0) / amount) * 100,
+        c: ((Number(item.carbs_g) || 0) / amount) * 100,
+        f: ((Number(item.fat_g) || 0) / amount) * 100,
+      },
+    });
+    setEditingItemId(item.id);
+    setMode("gram");
+    setPieceFood(null);
+    setPieces(1);
   };
 
-  const closeDraft = () => { setDraft(null); setMode("gram"); setPieceFood(null); setPieces(1); };
+  const saveDraft = async () => {
+    const { _per100, _analyzing, _noData, _pieces, _pieceFoodId, _gPerPiece, ...clean } = draft;
+    if (editingItemId) await api.put(`/meals/items/${editingItemId}`, clean);
+    else {
+      const mealId = await ensureMeal();
+      await api.post(`/meals/${mealId}/items`, clean);
+    }
+    setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); load();
+  };
+
+  const closeDraft = () => { setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); };
 
   return (
     <div className="page page-log">
@@ -190,7 +211,7 @@ export default function Log() {
           <div className="divide-y divide-line">
             {allItems.map((it) => (
               <div key={it.id} className="px-4 py-2 flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
+                <button type="button" className="min-w-0 flex-1 text-left" onClick={() => openEdit(it)}>
                   {/* Name: 2-line clamp instead of truncate */}
                   <div className="text-sm text-ink leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {it.name}
@@ -198,7 +219,7 @@ export default function Log() {
                   <div className="mono text-[.62rem] text-mute tabular-nums mt-[2px]">
                     {it.amount_g}g · <span className="text-lime">P</span>{Math.round(it.protein_g)} <span className="text-amber">C</span>{Math.round(it.carbs_g)} <span className="text-ink2">F</span>{Math.round(it.fat_g)}
                   </div>
-                </div>
+                </button>
                 <div className="flex items-center gap-3 shrink-0 pt-[2px]">
                   <div className="mono text-sm text-amber font-bold tabular-nums">{Math.round(it.kcal)}</div>
                   <button className="text-mute hover:text-danger text-lg leading-none" onClick={() => deleteItem(it.id)}>×</button>
@@ -242,7 +263,7 @@ export default function Log() {
       {draft && (
         <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
           <div className="card w-full max-w-md p-4 flex flex-col gap-3 relative max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-32px)] overflow-y-auto">
-            <div className="section-label">{t("log.add_item")}</div>
+            <div className="section-label">{editingItemId ? "Zutat bearbeiten" : t("log.add_item")}</div>
 
             {/* Mode toggle */}
             <div className="card p-1 flex gap-1">
