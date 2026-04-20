@@ -64,8 +64,8 @@ function RestTimer({ seconds, onClose }) {
 }
 
 export default function Training() {
-  const { t } = useTranslation();
-  const lang = "de";
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language || "tr").slice(0, 2);
   const [openInfo, setOpenInfo] = useState({});
   const [date] = useState(todayStr());
   const plan = getDayPlan(date);

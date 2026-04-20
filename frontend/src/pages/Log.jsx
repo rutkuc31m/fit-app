@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { api } from "../lib/api";
 import { todayStr } from "../lib/plan";
 import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
@@ -10,7 +11,7 @@ const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, 
 
 export default function Log() {
   const { t } = useTranslation();
-  const lang = "de";
+  const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
   const [date, setDate] = useState(todayStr());
   const [meals, setMeals] = useState([]);
   const [scanOpen, setScanOpen] = useState(false);

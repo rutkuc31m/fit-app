@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth.jsx";
+import { setLang } from "../i18n";
 
 export default function Login() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { login, register } = useAuth();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ email: "", password: "", name: "" });
@@ -14,7 +15,7 @@ export default function Login() {
     e.preventDefault(); setErr(null); setBusy(true);
     try {
       if (mode === "login") await login(form.email, form.password);
-      else await register(form.email, form.password, form.name, "de");
+      else await register(form.email, form.password, form.name, i18n.language);
     } catch (ex) {
       setErr(ex.message);
     } finally { setBusy(false); }
@@ -48,6 +49,15 @@ export default function Login() {
           {mode === "login" ? t("auth.or_register") : t("auth.or_login")}
         </button>
 
+        <div className="flex justify-center gap-2 pt-2 border-t border-line">
+          {["en", "de"].map((lng) => (
+            <button key={lng} type="button"
+              onClick={() => setLang(lng)}
+              className={`mono text-[.7rem] caps px-2 py-1 rounded ${i18n.language === lng ? "text-signal" : "text-mute hover:text-ink2"}`}>
+              {lng.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </form>
     </div>
   );

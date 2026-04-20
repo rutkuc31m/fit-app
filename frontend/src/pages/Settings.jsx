@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, getToken } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
+import { setLang } from "../i18n";
 
 export default function Settings() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, logout, refresh } = useAuth();
   const [form, setForm] = useState({
     name: user?.name || "",
@@ -20,6 +21,12 @@ export default function Settings() {
     await refresh();
     setMsg(t("settings.saved"));
     setTimeout(() => setMsg(null), 1500);
+  };
+
+  const chLang = async (lng) => {
+    setLang(lng);
+    await api.put("/auth/me", { lang: lng });
+    await refresh();
   };
 
   return (
@@ -47,6 +54,17 @@ export default function Settings() {
         </div>
         <button className="btn-primary" onClick={save}>{t("settings.save")}</button>
         {msg && <div className="mono text-xs text-signal text-center">{msg}</div>}
+      </div>
+
+      <div className="section-label">{t("settings.language")}</div>
+      <div className="card p-3 flex gap-2">
+        {["en", "de"].map((lng) => (
+          <button key={lng}
+            className={i18n.language === lng ? "btn-primary flex-1" : "btn flex-1"}
+            onClick={() => chLang(lng)}>
+            {lng.toUpperCase()}
+          </button>
+        ))}
       </div>
 
       <div className="section-label">Shortcut Auto-Sync</div>
