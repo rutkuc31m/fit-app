@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, getToken } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
-import { setLang } from "../i18n";
 import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
 
 export default function Settings() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, logout, refresh } = useAuth();
   const [pushStatus, setPushStatus] = useState("default");
   const [pushBusy, setPushBusy] = useState(false);
@@ -39,12 +38,6 @@ export default function Settings() {
     setTimeout(() => setMsg(null), 1500);
   };
 
-  const chLang = async (lng) => {
-    setLang(lng);
-    await api.put("/auth/me", { lang: lng });
-    await refresh();
-  };
-
   return (
     <div className="page page-settings">
       <div className="section-label">{t("settings.profile")}</div>
@@ -72,18 +65,7 @@ export default function Settings() {
         {msg && <div className="mono text-xs text-signal text-center">{msg}</div>}
       </div>
 
-      <div className="section-label">{t("settings.language")}</div>
-      <div className="card p-3 flex gap-2">
-        {["en", "de"].map((lng) => (
-          <button key={lng}
-            className={i18n.language === lng ? "btn-primary flex-1" : "btn flex-1"}
-            onClick={() => chLang(lng)}>
-            {lng.toUpperCase()}
-          </button>
-        ))}
-      </div>
-
-      {pushSupported() && (
+{pushSupported() && (
         <>
           <div className="section-label">Daily Push</div>
           <div className="card p-3 flex flex-col gap-2">

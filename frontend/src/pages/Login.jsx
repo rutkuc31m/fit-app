@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth.jsx";
-import { setLang } from "../i18n";
 
 export default function Login() {
   const { t, i18n } = useTranslation();
@@ -49,15 +48,6 @@ export default function Login() {
           {mode === "login" ? t("auth.or_register") : t("auth.or_login")}
         </button>
 
-        <div className="flex justify-center gap-2 pt-2 border-t border-line">
-          {["en", "de"].map((lng) => (
-            <button key={lng} type="button"
-              onClick={() => setLang(lng)}
-              className={`mono text-[.7rem] caps px-2 py-1 rounded ${i18n.language === lng ? "text-signal" : "text-mute hover:text-ink2"}`}>
-              {lng.toUpperCase()}
-            </button>
-          ))}
-        </div>
       </form>
     </div>
   );
