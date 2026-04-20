@@ -12,6 +12,7 @@ export const EXERCISES = {
   bp: {
     id: "bp",
     name: { en: "Bench Press", de: "Bankdrücken", tr: "Bench Press (Barbell ile Göğüs Press)" },
+    gifPath: "/gifs/bp.gif",
     targetMuscles: ["chest", "shoulders_front", "triceps"],
     equipment: "barbell_or_dumbbells",
     videoSearch: {
@@ -38,6 +39,7 @@ export const EXERCISES = {
   dr: {
     id: "dr",
     name: { en: "Dumbbell Row", de: "Einarmiges Kurzhantelrudern", tr: "Tek El Dambıl Row" },
+    gifPath: "/gifs/dr.gif",
     targetMuscles: ["back", "biceps", "rear_delts"],
     equipment: "dumbbell_bench",
     videoSearch: {
@@ -86,6 +88,7 @@ export const EXERCISES = {
   seated_shoulder_press: {
     id: "seated_shoulder_press",
     name: { en: "Seated Shoulder Press (Machine)", de: "Schulterdrücken Gerät (sitzend)", tr: "Makinede Oturarak Omuz Press" },
+    gifPath: "/gifs/seated_shoulder_press.gif",
     targetMuscles: ["shoulders", "triceps"],
     equipment: "machine",
     videoSearch: {
@@ -106,6 +109,7 @@ export const EXERCISES = {
   lp: {
     id: "lp",
     name: { en: "Lat Pulldown", de: "Latzug", tr: "Lat Pulldown (Kablo ile Yukardan Çekiş)" },
+    gifPath: "/gifs/lp.gif",
     targetMuscles: ["lats", "biceps", "rear_delts"],
     equipment: "cable_machine",
     videoSearch: {
@@ -130,6 +134,7 @@ export const EXERCISES = {
   fp: {
     id: "fp",
     name: { en: "Face Pull", de: "Face Pulls (Gesichtszug)", tr: "Face Pull (Yüze Doğru Kablo Çekiş)" },
+    gifPath: "/gifs/fp.gif",
     targetMuscles: ["rear_delts", "rhomboids", "rotator_cuff"],
     equipment: "cable_machine_rope",
     videoSearch: {
@@ -151,6 +156,7 @@ export const EXERCISES = {
   bc: {
     id: "bc",
     name: { en: "Bicep Curl", de: "Bizepscurl", tr: "Biceps Curl (Kol Bükme)" },
+    gifPath: "/gifs/bc.gif",
     targetMuscles: ["biceps", "forearms"],
     equipment: "dumbbells_or_barbell",
     videoSearch: {
@@ -174,6 +180,7 @@ export const EXERCISES = {
   tp: {
     id: "tp",
     name: { en: "Tricep Pushdown", de: "Trizepsdrücken am Kabel", tr: "Triceps Pushdown (Kablo ile Aşağı İtiş)" },
+    gifPath: "/gifs/tp.gif",
     targetMuscles: ["triceps"],
     equipment: "cable_machine",
     videoSearch: {
@@ -208,6 +215,7 @@ export const EXERCISES = {
   leg_press: {
     id: "leg_press",
     name: { en: "Leg Press", de: "Beinpresse", tr: "Leg Press (Yatarak Bacak İtiş)" },
+    gifPath: "/gifs/leg_press.gif",
     targetMuscles: ["quads", "glutes", "hamstrings"],
     equipment: "machine",
     videoSearch: {
@@ -247,6 +255,7 @@ export const EXERCISES = {
   seated_leg_curl: {
     id: "seated_leg_curl",
     name: { en: "Seated Leg Curl", de: "Beinbeuger sitzend", tr: "Oturarak Bacak Bükme" },
+    gifPath: "/gifs/seated_leg_curl.gif",
     targetMuscles: ["hamstrings"],
     equipment: "machine",
     videoSearch: {
@@ -265,6 +274,7 @@ export const EXERCISES = {
   lc: {
     id: "lc",
     name: { en: "Leg Curl (lying or seated)", de: "Beinbeuger", tr: "Leg Curl (Bacak Bükme Makinesi)" },
+    gifPath: "/gifs/lc.gif",
     targetMuscles: ["hamstrings"],
     equipment: "machine",
     videoSearch: {
@@ -277,6 +287,7 @@ export const EXERCISES = {
   le: {
     id: "le",
     name: { en: "Leg Extension", de: "Beinstrecker", tr: "Leg Extension (Bacak Uzatma Makinesi)" },
+    gifPath: "/gifs/le.gif",
     targetMuscles: ["quads"],
     equipment: "machine",
     videoSearch: {
@@ -294,6 +305,7 @@ export const EXERCISES = {
   cr: {
     id: "cr",
     name: { en: "Calf Raise", de: "Wadenheben", tr: "Calf Raise (Baldır Kaldırma)" },
+    gifPath: "/gifs/cr.gif",
     targetMuscles: ["calves"],
     equipment: "machine_or_step",
     videoSearch: {
@@ -311,6 +323,7 @@ export const EXERCISES = {
   pl: {
     id: "pl",
     name: { en: "Plank", de: "Unterarmstütz (Plank)", tr: "Plank (Düzlemde Destek)" },
+    gifPath: "/gifs/pl.gif",
     targetMuscles: ["core", "shoulders"],
     equipment: "bodyweight",
     videoSearch: {
@@ -330,6 +343,7 @@ export const EXERCISES = {
   db: {
     id: "db",
     name: { en: "Dead Bug", de: "Dead Bug (Toter Käfer)", tr: "Dead Bug (Ters Böcek - Core Egzersizi)" },
+    gifPath: "/gifs/db.gif",
     targetMuscles: ["core", "lower_back_stability"],
     equipment: "bodyweight",
     videoSearch: {
@@ -351,6 +365,7 @@ export const EXERCISES = {
   bd: {
     id: "bd",
     name: { en: "Bird Dog", de: "Bird Dog (Vogelhund)", tr: "Bird Dog (Kuş Köpeği - Core Egzersizi)" },
+    gifPath: "/gifs/bd.gif",
     targetMuscles: ["core", "lower_back", "glutes"],
     equipment: "bodyweight",
     videoSearch: {
@@ -372,6 +387,7 @@ export const EXERCISES = {
   gb: {
     id: "gb",
     name: { en: "Glute Bridge", de: "Glute Bridge (Hüftbrücke)", tr: "Glute Bridge (Kalça Köprüsü)" },
+    gifPath: "/gifs/gb.gif",
     targetMuscles: ["glutes", "hamstrings", "core"],
     equipment: "bodyweight",
     videoSearch: {
@@ -408,6 +424,7 @@ export const EXERCISES = {
   hip_thrust: {
     id: "hip_thrust",
     name: { en: "Hip Thrust", de: "Hip Thrust (Hüftstoß)", tr: "Hip Thrust (Kalça İtiş)" },
+    gifPath: "/gifs/hip_thrust.gif",
     targetMuscles: ["glutes", "hamstrings"],
     equipment: "barbell_bench_or_machine",
     videoSearch: {
@@ -429,6 +446,7 @@ export const EXERCISES = {
   ip: {
     id: "ip",
     name: { en: "Incline Dumbbell Press", de: "Schrägbankdrücken Kurzhantel", tr: "Eğimli Bench Dambıl Press" },
+    gifPath: "/gifs/ip.gif",
     targetMuscles: ["upper_chest", "shoulders", "triceps"],
     equipment: "dumbbells_incline_bench",
     videoSearch: {
@@ -447,6 +465,7 @@ export const EXERCISES = {
   cw: {
     id: "cw",
     name: { en: "Cable Row", de: "Kabelrudern sitzend", tr: "Cable Row (Oturarak Kablo Çekiş)" },
+    gifPath: "/gifs/cw.gif",
     targetMuscles: ["back", "biceps", "rear_delts"],
     equipment: "cable_machine",
     videoSearch: {
@@ -466,6 +485,7 @@ export const EXERCISES = {
   gs: {
     id: "gs",
     name: { en: "Goblet Squat", de: "Goblet Squat", tr: "Goblet Squat (Göğüs Önünde Dambıl ile Squat)" },
+    gifPath: "/gifs/gs.gif",
     targetMuscles: ["quads", "glutes", "core"],
     equipment: "dumbbell_or_kettlebell",
     phase1Alt: "leg_press_light",
@@ -479,6 +499,7 @@ export const EXERCISES = {
   lr: {
     id: "lr",
     name: { en: "Lateral Raise", de: "Seitheben", tr: "Lateral Raise (Yan Omuz Kaldırma)" },
+    gifPath: "/gifs/lr.gif",
     targetMuscles: ["side_delts"],
     equipment: "dumbbells",
     videoSearch: {

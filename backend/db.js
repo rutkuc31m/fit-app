@@ -173,6 +173,14 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
   created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id);
+
+CREATE TABLE IF NOT EXISTS notification_prefs (
+  user_id         INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  quote_enabled   INTEGER DEFAULT 1,
+  workout_enabled INTEGER DEFAULT 1,
+  meal_enabled    INTEGER DEFAULT 1,
+  supp_enabled    INTEGER DEFAULT 1
+);
 `);
 
 // ─── ALTER weekly_checkins to v2 schema (idempotent) ───

@@ -9,7 +9,14 @@ export default function Settings() {
   const { user, logout, refresh } = useAuth();
   const [pushStatus, setPushStatus] = useState("default");
   const [pushBusy, setPushBusy] = useState(false);
+  const [prefs, setPrefs] = useState({ quote_enabled: 1, workout_enabled: 1, meal_enabled: 1, supp_enabled: 1 });
+  const [prefsBusy, setPrefsBusy] = useState(false);
+
   useEffect(() => { getPushStatus().then(setPushStatus); }, []);
+  useEffect(() => {
+    api.get("/push/prefs").then(setPrefs).catch(() => {});
+  }, []);
+
   const onPushEnable = async () => {
     setPushBusy(true);
     try { setPushStatus(await subscribeToPush()); }
@@ -22,6 +29,14 @@ export default function Settings() {
     finally { setPushBusy(false); }
   };
   const onPushTest = async () => { try { await sendTestPush(); } catch {} };
+
+  const togglePref = async (key) => {
+    const next = { ...prefs, [key]: prefs[key] ? 0 : 1 };
+    setPrefs(next);
+    setPrefsBusy(true);
+    try { await api.put("/push/prefs", next); }
+    finally { setPrefsBusy(false); }
+  };
   const [form, setForm] = useState({
     name: user?.name || "",
     start_date: user?.start_date || "2026-04-20",
@@ -67,11 +82,11 @@ export default function Settings() {
 
 {pushSupported() && (
         <>
-          <div className="section-label">Daily Push</div>
+          <div className="section-label">Push Bildirimleri</div>
           <div className="card p-3 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
-                random 07:00–21:00 · quote + reminder
+                07:00 özlü söz · günlük hatırlatmalar
               </div>
               <div className="mono text-[.58rem] uppercase tracking-[.14em]"
                 style={{ color: pushStatus === "subscribed" ? "#4ade80" : pushStatus === "denied" ? "#fb7185" : "#6d6d70" }}>
@@ -91,6 +106,37 @@ export default function Settings() {
               </button>
             )}
           </div>
+
+          {pushStatus === "subscribed" && (
+            <>
+              <div className="section-label">Bildirim Kategorileri</div>
+              <div className="card p-3 flex flex-col gap-[2px]">
+                {[
+                  { key: "quote_enabled",   label: "Günlük özlü söz",     sub: "Her sabah 07:00" },
+                  { key: "workout_enabled", label: "Antrenman hatırlatmaları", sub: "Gym hazırlık · post-workout · check-in" },
+                  { key: "meal_enabled",    label: "Öğün hatırlatmaları",  sub: "OMAD · oruç · düşük kalori · su" },
+                  { key: "supp_enabled",    label: "Supplement & uyku",    sub: "21:00 Mg+B12 · 22:45 uyku hazırlığı" },
+                ].map(({ key, label, sub }) => (
+                  <label key={key} className="flex items-center justify-between py-2 border-b border-line/40 last:border-0 cursor-pointer">
+                    <div>
+                      <div className="text-[.76rem] text-ink">{label}</div>
+                      <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em] mt-[2px]">{sub}</div>
+                    </div>
+                    <div
+                      className="relative w-10 h-6 rounded-full transition-colors duration-200 shrink-0"
+                      style={{ background: prefs[key] ? "#30d158" : "#3a3a3c" }}
+                      onClick={() => !prefsBusy && togglePref(key)}
+                    >
+                      <div
+                        className="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
+                        style={{ transform: prefs[key] ? "translateX(20px)" : "translateX(4px)" }}
+                      />
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
 

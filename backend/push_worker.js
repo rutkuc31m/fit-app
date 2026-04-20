@@ -111,54 +111,10 @@ export async function sendWeeklyRecapToAll() {
   return { sent, failed };
 }
 
-// ─── Scheduler: pick random minute 07:00–21:00 each day, fire once ───
-
-let scheduledTimer = null;
-let scheduledForDate = null;
-
-const pickRandomMinute = () => {
-  const HOUR_START = 7;
-  const HOUR_END = 21; // last min = 20:59
-  const total = (HOUR_END - HOUR_START) * 60;
-  const offset = Math.floor(Math.random() * total);
-  return { h: HOUR_START + Math.floor(offset / 60), m: offset % 60 };
-};
-
-function scheduleTodayPush() {
-  const todayStr = new Date().toISOString().slice(0, 10);
-  if (scheduledForDate === todayStr) return; // already scheduled
-  if (scheduledTimer) clearTimeout(scheduledTimer);
-
-  const { h, m } = pickRandomMinute();
-  const now = new Date();
-  const fire = new Date();
-  fire.setHours(h, m, 0, 0);
-  const msUntil = fire.getTime() - now.getTime();
-
-  if (msUntil < 0) {
-    console.log(`[push] today ${todayStr} target ${h}:${m} already passed — skip until tomorrow`);
-    scheduledForDate = todayStr;
-    return;
-  }
-
-  console.log(`[push] daily scheduled for ${todayStr} at ${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")} (${Math.round(msUntil/60000)} min)`);
-  scheduledForDate = todayStr;
-  scheduledTimer = setTimeout(() => {
-    sendDailyPushToAll().catch(console.error);
-  }, msUntil);
-}
-
 export function startPushScheduler() {
-  // On boot: schedule today (if time remaining)
-  scheduleTodayPush();
-  // Daily at 00:05 local VM time: roll random for new day
-  cron.schedule("5 0 * * *", () => {
-    scheduledForDate = null;
-    scheduleTodayPush();
-  });
-  // Weekly recap every Sunday 19:00 VM time
+  // Weekly recap every Sunday 19:00 Berlin time
   cron.schedule("0 19 * * 0", () => {
     sendWeeklyRecapToAll().catch(console.error);
-  });
-  console.log("[push] scheduler started");
+  }, { timezone: "Europe/Berlin" });
+  console.log("[push] scheduler started (weekly recap active)");
 }

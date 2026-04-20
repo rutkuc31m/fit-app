@@ -3,8 +3,9 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getDayPlan, getWeekNum, getExercisesForDay } from "../lib/plan";
 import { getCardioProtocol, getStepTarget } from "../lib/protocols";
-import { EXERCISES, getVideoUrl, MUSCLE_LABELS } from "../lib/exercises";
+import { EXERCISES, MUSCLE_LABELS } from "../lib/exercises";
 import { Empty, Icon } from "../components/ui";
+import ExerciseGifPreview from "../components/ExerciseGifPreview";
 
 function RestTimer({ seconds, onClose }) {
   const [left, setLeft] = useState(seconds);
@@ -129,7 +130,7 @@ export default function Training() {
     const last = lastByEx[ex.id];
     const libId = ex.substituted && EXERCISES[ex.id]?.phase1Alt ? EXERCISES[ex.id].phase1Alt : ex.id;
     const lib = EXERCISES[libId];
-    const videoUrl = lib ? getVideoUrl(libId, lang) : null;
+    const gifPath = lib?.gifPath || null;
     const isOpen = !!openInfo[ex.id];
     const muscles = (lib?.targetMuscles || []).map((m) => MUSCLE_LABELS[m]?.[lang] || MUSCLE_LABELS[m]?.en || m);
     return (
@@ -160,12 +161,7 @@ export default function Training() {
             )}
             {lib && (
               <div className="flex items-center gap-1">
-                {videoUrl && (
-                  <a href={videoUrl} target="_blank" rel="noreferrer"
-                     className="mono text-[.58rem] uppercase tracking-[.14em] text-signal bg-surface2 hover:bg-surface3 px-[8px] py-[3px] rounded inline-flex items-center gap-1">
-                    ▶ Video
-                  </a>
-                )}
+                <ExerciseGifPreview gifPath={gifPath} />
                 <button
                   className="mono text-[.58rem] uppercase tracking-[.14em] text-ink2 bg-surface2 hover:bg-surface3 px-[8px] py-[3px] rounded"
                   onClick={() => setOpenInfo((s) => ({ ...s, [ex.id]: !s[ex.id] }))}>

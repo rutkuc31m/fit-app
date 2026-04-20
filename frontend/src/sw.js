@@ -23,13 +23,16 @@ self.addEventListener("push", (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch { data = { body: event.data?.text?.() || "" }; }
   const title = data.title || "Fit";
+  const isQuote = data.data?.type === "daily_quote";
   const options = {
     body: data.body || "",
     icon: data.icon || "/icon-192.png",
     badge: "/icon-192.png",
     tag: data.tag || "fit-push",
     data: { url: data.url || "/today" },
-    vibrate: [80, 40, 80]
+    vibrate: [80, 40, 80],
+    // Quote push: no action buttons, just tap to open
+    actions: isQuote ? [] : (data.actions || [])
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
