@@ -58,7 +58,7 @@ for filename in "${!GIFS[@]}"; do
 
   if [ -f "$dest_file" ] && [ -s "$dest_file" ]; then
     echo "  [skip] $filename (already exists)"
-    ((ok++))
+    ((ok+=1))
     continue
   fi
 
@@ -66,11 +66,11 @@ for filename in "${!GIFS[@]}"; do
   if curl -fsSL --max-time 30 "$url" -o "$dest_file"; then
     size=$(du -sh "$dest_file" | cut -f1)
     echo "ok ($size)"
-    ((ok++))
+    ((ok+=1))
   else
     echo "FAIL (url: $url)"
     rm -f "$dest_file"
-    ((fail++))
+    ((fail+=1))
   fi
 done
 

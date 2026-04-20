@@ -78,6 +78,7 @@ export default function Training() {
   const [session, setSession] = useState(null);
   const [lastByEx, setLastByEx] = useState({});
   const [rest, setRest] = useState(null); // { seconds } when active
+  const [previewGif, setPreviewGif] = useState(null);
 
   const mainExercises = day.exercises.filter((e) => !e.phase1Only);
   const coreExercises = day.exercises.filter((e) => e.phase1Only);
@@ -136,7 +137,12 @@ export default function Training() {
     return (
       <div key={ex.id} className="card overflow-hidden">
         <div className="px-4 py-3 border-b border-line flex justify-between items-baseline gap-2">
-          <div className="min-w-0">
+          <button
+            type="button"
+            className={`min-w-0 flex-1 text-left ${gifPath ? "cursor-pointer" : "cursor-default"}`}
+            onClick={() => gifPath && setPreviewGif(gifPath)}
+            title={gifPath ? "Hareketi goster" : undefined}
+          >
             <div className="text-sm text-ink font-semibold truncate">{ex.name}</div>
             <div className="mono text-[.66rem] text-mute uppercase tracking-[.14em] mt-[2px]">
               {ex.sets}×{ex.reps}{ex.unit ? ex.unit : ""}
@@ -151,7 +157,7 @@ export default function Training() {
                 ⚠ {t("training_v2.substituted")}
               </div>
             )}
-          </div>
+          </button>
           <div className="flex flex-col items-end gap-1 shrink-0">
             {last && (
               <div className="mono text-[.62rem] text-ink2 text-right">
@@ -283,6 +289,19 @@ export default function Training() {
       )}
 
       {rest && <RestTimer key={rest.key} seconds={rest.seconds} onClose={() => setRest(null)} />}
+      {previewGif && (
+        <div className="gif-modal-backdrop" onClick={() => setPreviewGif(null)} role="dialog" aria-modal="true">
+          <div className="gif-modal-content" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={previewGif}
+              alt="Hareket onizleme"
+              loading="lazy"
+              style={{ maxWidth: "100%", maxHeight: "70vh", display: "block", borderRadius: "8px" }}
+            />
+            <button className="btn mt-2 w-full" onClick={() => setPreviewGif(null)}>Kapat</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
