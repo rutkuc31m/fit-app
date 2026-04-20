@@ -1,12 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, getToken } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { setLang } from "../i18n";
+import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
   const { user, logout, refresh } = useAuth();
+  const [pushStatus, setPushStatus] = useState("default");
+  const [pushBusy, setPushBusy] = useState(false);
+  useEffect(() => { getPushStatus().then(setPushStatus); }, []);
+  const onPushEnable = async () => {
+    setPushBusy(true);
+    try { setPushStatus(await subscribeToPush()); }
+    catch (e) { setPushStatus(e.message || "denied"); }
+    finally { setPushBusy(false); }
+  };
+  const onPushDisable = async () => {
+    setPushBusy(true);
+    try { await unsubscribeFromPush(); setPushStatus("default"); }
+    finally { setPushBusy(false); }
+  };
+  const onPushTest = async () => { try { await sendTestPush(); } catch {} };
   const [form, setForm] = useState({
     name: user?.name || "",
     start_date: user?.start_date || "2026-04-20",
@@ -66,6 +82,35 @@ export default function Settings() {
           </button>
         ))}
       </div>
+
+      {pushSupported() && (
+        <>
+          <div className="section-label">Daily Push</div>
+          <div className="card p-3 flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
+                random 07:00–21:00 · quote + reminder
+              </div>
+              <div className="mono text-[.58rem] uppercase tracking-[.14em]"
+                style={{ color: pushStatus === "subscribed" ? "#4ade80" : pushStatus === "denied" ? "#fb7185" : "#6d6d70" }}>
+                {pushStatus === "subscribed" ? "on" : pushStatus === "denied" ? "blocked" : "off"}
+              </div>
+            </div>
+            {pushStatus === "subscribed" ? (
+              <div className="flex gap-2">
+                <button className="btn flex-1" onClick={onPushTest} disabled={pushBusy}>send test</button>
+                <button className="btn flex-1 text-warn" onClick={onPushDisable} disabled={pushBusy}>disable</button>
+              </div>
+            ) : pushStatus === "denied" ? (
+              <div className="mono text-[.6rem] text-warn">Blocked — enable in browser settings</div>
+            ) : (
+              <button className="btn-primary" onClick={onPushEnable} disabled={pushBusy}>
+                {pushBusy ? "…" : "enable push"}
+              </button>
+            )}
+          </div>
+        </>
+      )}
 
       <div className="section-label">Shortcut Auto-Sync</div>
       <div className="card p-3 flex flex-col gap-2">

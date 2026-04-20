@@ -9,6 +9,7 @@ import Settings from "./pages/Settings";
 import Recipes from "./pages/Recipes";
 import Checkin from "./pages/Checkin";
 import Today from "./pages/Today";
+import PushPrompt from "./components/PushPrompt";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {user && <NavBar />}
+      {user && <PushPrompt />}
     </>
   );
 }

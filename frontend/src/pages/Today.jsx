@@ -6,7 +6,6 @@ import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { quoteForDate } from "../lib/quotes";
-import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
 import { Icon, Empty } from "../components/ui";
 
 const CAT_STYLE = {
@@ -123,8 +122,6 @@ export default function Today() {
   const [waterMl, setWaterMl] = useState(0);
   const [stepsLogged, setStepsLogged] = useState(0);
   const [savedFlash, setSavedFlash] = useState(false);
-  const [pushStatus, setPushStatus] = useState("default");
-  const [pushBusy, setPushBusy] = useState(false);
   const [currentWeight, setCurrentWeight] = useState(null);
   const [weightInput, setWeightInput] = useState("");
   const [mealsTotals, setMealsTotals] = useState({ kcal: 0, protein: 0, carbs: 0, fat: 0, count: 0 });
@@ -142,8 +139,6 @@ export default function Today() {
   const lost = currentWeight ? Math.max(0, sw - currentWeight) : 0;
   const journeyPct = totalJourney > 0 ? Math.min(100, Math.round((lost / totalJourney) * 100)) : 0;
 
-  useEffect(() => { getPushStatus().then(setPushStatus); }, []);
-
   useEffect(() => {
     const from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
     api.get(`/logs?from=${from}&to=${todayStr()}`)
@@ -153,26 +148,6 @@ export default function Today() {
       })
       .catch(() => {});
   }, []);
-
-  const onSubscribe = async () => {
-    setPushBusy(true);
-    try {
-      const s = await subscribeToPush();
-      setPushStatus(s);
-    } catch (e) {
-      setPushStatus(e.message || "denied");
-    } finally {
-      setPushBusy(false);
-    }
-  };
-  const onUnsubscribe = async () => {
-    setPushBusy(true);
-    try { await unsubscribeFromPush(); setPushStatus("default"); }
-    finally { setPushBusy(false); }
-  };
-  const onTest = async () => {
-    try { await sendTestPush(); } catch (e) { console.error(e); }
-  };
 
   const day = useMemo(() => {
     const hit = FULL_SCHEDULE.days.find((d) => d.date === date);
@@ -423,34 +398,6 @@ export default function Today() {
           </Link>
         );
       })()}
-
-      {/* Push notification panel */}
-      {date === todayStr() && pushSupported() && (
-        <div className="card p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="pulse-dot" />
-            <div className="card-title flex-1">Daily push</div>
-            <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">
-              {pushStatus === "subscribed" ? "on" : pushStatus === "denied" ? "blocked" : "off"}
-            </div>
-          </div>
-          <div className="mono text-[.62rem] text-mute mb-2">
-            Random time 07:00–21:00 · quote + reminder, sent from server
-          </div>
-          {pushStatus === "subscribed" ? (
-            <div className="flex gap-2">
-              <button className="btn-ghost flex-1" onClick={onTest} disabled={pushBusy}>send test</button>
-              <button className="btn-ghost flex-1" onClick={onUnsubscribe} disabled={pushBusy}>disable</button>
-            </div>
-          ) : pushStatus === "denied" ? (
-            <div className="mono text-[.6rem] text-warn">Permission blocked — enable in browser settings</div>
-          ) : (
-            <button className="btn-primary w-full" onClick={onSubscribe} disabled={pushBusy}>
-              {pushBusy ? "…" : "enable push"}
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Water tracker */}
       {(() => {
