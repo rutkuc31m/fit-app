@@ -26,8 +26,8 @@ export default function Settings() {
   const [form, setForm] = useState({
     name: user?.name || "",
     start_date: user?.start_date || "2026-04-20",
-    start_weight: user?.start_weight || 95,
-    target_weight: user?.target_weight || 72,
+    start_weight: user?.start_weight || 93,
+    target_weight: user?.target_weight || 73,
     height_cm: user?.height_cm || 177
   });
   const [msg, setMsg] = useState(null);

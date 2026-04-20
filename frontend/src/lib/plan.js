@@ -4,8 +4,8 @@
 export const PLAN = {
   startDate: "2026-04-20",
   endDate: "2026-10-19",
-  startWeight: 95,
-  targetWeight: 75,
+  startWeight: 93,
+  targetWeight: 73,
   heightCm: 177,
 
   // Dietary constraints — applied globally, filter for meals/recipes
@@ -17,10 +17,10 @@ export const PLAN = {
   },
 
   phases: [
-    { id: 1, nameKey: "phase1", weeks: [1, 4],   from: 95, to: 90, color: "#ff9f0a" },
-    { id: 2, nameKey: "phase2", weeks: [5, 12],  from: 90, to: 82, color: "#ff9f0a" },
-    { id: 3, nameKey: "phase3", weeks: [13, 20], from: 82, to: 77, color: "#64d2ff" },
-    { id: 4, nameKey: "phase4", weeks: [21, 26], from: 77, to: 75, color: "#30d158" }
+    { id: 1, nameKey: "phase1", weeks: [1, 4],   from: 93, to: 88, color: "#ff9f0a" },
+    { id: 2, nameKey: "phase2", weeks: [5, 12],  from: 88, to: 80, color: "#ff9f0a" },
+    { id: 3, nameKey: "phase3", weeks: [13, 20], from: 80, to: 75, color: "#64d2ff" },
+    { id: 4, nameKey: "phase4", weeks: [21, 26], from: 75, to: 73, color: "#30d158" }
   ],
 
   // Weekly pattern by getDay() (0=Sun..6=Sat). ADF-hybrid with OMAD.
