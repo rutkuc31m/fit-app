@@ -7,6 +7,8 @@ import { EXERCISES, MUSCLE_LABELS } from "../lib/exercises";
 import { Empty, Icon } from "../components/ui";
 import ExerciseGifPreview from "../components/ExerciseGifPreview";
 
+const numberOrNull = (value) => value === "" ? null : Number(value);
+
 function RestTimer({ seconds, onClose }) {
   const [left, setLeft] = useState(seconds);
   const firedRef = useRef(false);
@@ -112,11 +114,9 @@ export default function Training() {
   };
 
   const updateSet = async (s, patch) => {
-    await api.del(`/training/set/${s.id}`);
-    await api.post(`/training/session/${session.id}/set`, {
-      exercise_id: s.exercise_id, exercise_name: s.exercise_name,
-      set_number: s.set_number,
-      weight_kg: patch.weight_kg ?? s.weight_kg, reps: patch.reps ?? s.reps
+    await api.put(`/training/set/${s.id}`, {
+      weight_kg: Object.hasOwn(patch, "weight_kg") ? patch.weight_kg : (s.weight_kg ?? null),
+      reps: Object.hasOwn(patch, "reps") ? patch.reps : (s.reps ?? null)
     });
     load();
   };
@@ -141,7 +141,7 @@ export default function Training() {
             type="button"
             className={`min-w-0 flex-1 text-left ${gifPath ? "cursor-pointer" : "cursor-default"}`}
             onClick={() => gifPath && setPreviewGif(gifPath)}
-            title={gifPath ? "Hareketi goster" : undefined}
+            title={gifPath ? t("training.show_exercise") : undefined}
           >
             <div className="text-sm text-ink font-semibold truncate">{ex.name}</div>
             <div className="mono text-[.66rem] text-mute uppercase tracking-[.14em] mt-[2px]">
@@ -213,10 +213,10 @@ export default function Training() {
             <div key={s.id} className="px-4 py-2 flex items-center gap-2">
               <span className="chip chip-muscle w-7 justify-center">{s.set_number}</span>
               <input type="number" className="input mono flex-1 text-center" defaultValue={s.weight_kg || ""} placeholder="kg"
-                onBlur={(e) => e.target.value !== String(s.weight_kg || "") && updateSet(s, { weight_kg: +e.target.value })} />
+                onBlur={(e) => e.target.value !== String(s.weight_kg || "") && updateSet(s, { weight_kg: numberOrNull(e.target.value) })} />
               <span className="mono text-mute">×</span>
               <input type="number" className="input mono flex-1 text-center" defaultValue={s.reps || ""} placeholder="reps"
-                onBlur={(e) => e.target.value !== String(s.reps || "") && updateSet(s, { reps: +e.target.value })} />
+                onBlur={(e) => e.target.value !== String(s.reps || "") && updateSet(s, { reps: numberOrNull(e.target.value) })} />
             </div>
           ))}
           <div className="flex divide-x divide-line">
@@ -294,11 +294,11 @@ export default function Training() {
           <div className="gif-modal-content" onClick={(e) => e.stopPropagation()}>
             <img
               src={previewGif}
-              alt="Hareket onizleme"
+              alt={t("training.exercise_preview")}
               loading="lazy"
               style={{ maxWidth: "100%", maxHeight: "70vh", display: "block", borderRadius: "8px" }}
             />
-            <button className="btn mt-2 w-full" onClick={() => setPreviewGif(null)}>Kapat</button>
+            <button className="btn mt-2 w-full" onClick={() => setPreviewGif(null)}>{t("common.close")}</button>
           </div>
         </div>
       )}

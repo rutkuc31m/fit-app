@@ -25,7 +25,7 @@
     "title": "Food log", "add_meal": "+ Meal", "add_item": "+ Item",
     "scan_barcode": "Scan barcode", "manual": "Manual", "recent": "Recent",
     "amount_g": "Grams", "kcal": "kcal", "protein": "Protein (g)", "carbs": "Carbs (g)", "fat": "Fat (g)",
-    "save": "Save", "cancel": "Cancel", "delete": "Delete",
+    "save": "Save", "cancel": "Cancel", "delete": "Delete", "edit": "Edit", "edit_item": "Edit item",
     "meal_name": "Meal name", "meal_time": "Time",
     "scan_hint": "Point camera at barcode", "not_found": "Product not found",
     "totals": "Totals",
@@ -40,7 +40,7 @@
     "title": "Training", "day_a": "Upper (Push/Pull)", "day_b": "Lower", "day_c": "Full Body",
     "rest": "Rest", "sets": "Sets", "reps": "Reps", "weight": "Weight (kg)",
     "add_set": "+ Set", "last_time": "Last time", "complete": "Mark complete",
-    "cardio_min": "Cardio (min)", "notes": "Notes", "history": "History"
+    "cardio_min": "Cardio (min)", "notes": "Notes", "history": "History", "show_exercise": "Show movement", "exercise_preview": "Movement preview"
   },
   "progress": {
     "title": "Progress", "weight_chart": "Weight", "measurements": "Measurements",

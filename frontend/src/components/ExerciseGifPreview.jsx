@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function EyeIcon() {
   return (
@@ -9,6 +10,7 @@ function EyeIcon() {
 }
 
 export default function ExerciseGifPreview({ gifPath }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   if (!gifPath) return null;
@@ -18,8 +20,8 @@ export default function ExerciseGifPreview({ gifPath }) {
       <button
         className="btn-icon"
         onClick={() => setOpen(true)}
-        aria-label="Hareketi goster"
-        title="Hareketi goster"
+        aria-label={t("training.show_exercise")}
+        title={t("training.show_exercise")}
       >
         <EyeIcon />
       </button>
@@ -34,12 +36,12 @@ export default function ExerciseGifPreview({ gifPath }) {
           <div className="gif-modal-content" onClick={(e) => e.stopPropagation()}>
             <img
               src={gifPath}
-              alt="Hareket onizleme"
+              alt={t("training.exercise_preview")}
               loading="lazy"
               style={{ maxWidth: "100%", maxHeight: "70vh", display: "block", borderRadius: "8px" }}
             />
             <button className="btn mt-2 w-full" onClick={() => setOpen(false)}>
-              Kapat
+              {t("common.close")}
             </button>
           </div>
         </div>

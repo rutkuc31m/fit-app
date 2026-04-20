@@ -25,7 +25,7 @@
     "title": "Essens-Log", "add_meal": "+ Mahlzeit", "add_item": "+ Zutat",
     "scan_barcode": "Barcode scannen", "manual": "Manuell", "recent": "Kürzlich",
     "amount_g": "Gramm", "kcal": "kcal", "protein": "Protein (g)", "carbs": "Kohlenh. (g)", "fat": "Fett (g)",
-    "save": "Speichern", "cancel": "Abbrechen", "delete": "Löschen",
+    "save": "Speichern", "cancel": "Abbrechen", "delete": "Löschen", "edit": "Bearbeiten", "edit_item": "Zutat bearbeiten",
     "meal_name": "Mahlzeit", "meal_time": "Uhrzeit",
     "scan_hint": "Kamera auf Barcode richten", "not_found": "Produkt nicht gefunden",
     "totals": "Gesamt",
@@ -40,7 +40,7 @@
     "title": "Training", "day_a": "Oberkörper (Push/Pull)", "day_b": "Unterkörper", "day_c": "Ganzkörper",
     "rest": "Ruhe", "sets": "Sätze", "reps": "Wdh", "weight": "Gewicht (kg)",
     "add_set": "+ Satz", "last_time": "Letztes Mal", "complete": "Abschließen",
-    "cardio_min": "Cardio (Min)", "notes": "Notizen", "history": "Verlauf"
+    "cardio_min": "Cardio (Min)", "notes": "Notizen", "history": "Verlauf", "show_exercise": "Bewegung zeigen", "exercise_preview": "Bewegungsvorschau"
   },
   "progress": {
     "title": "Fortschritt", "weight_chart": "Gewicht", "measurements": "Maße",

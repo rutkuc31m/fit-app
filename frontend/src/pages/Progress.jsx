@@ -3,6 +3,11 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { PLAN, todayStr } from "../lib/plan";
 
+const numberOrBlank = (value) => value === "" ? "" : Number(value);
+const cleanMeasurement = (draft = {}) => Object.fromEntries(
+  Object.entries(draft).filter(([, value]) => value !== "" && value != null && !Number.isNaN(Number(value)))
+);
+
 function WeightChart({ logs }) {
   const data = logs.filter((l) => l.weight_kg != null).map((l) => ({ date: l.date, w: l.weight_kg }));
   if (!data.length) return <div className="mono text-xs text-mute text-center py-6">—</div>;
@@ -39,7 +44,7 @@ export default function Progress() {
   useEffect(() => { load(); }, []);
 
   const saveMeas = async () => {
-    await api.post("/measurements", { date: todayStr(), ...draft });
+    await api.post("/measurements", { date: todayStr(), ...cleanMeasurement(draft) });
     setDraft(null); load();
   };
 
@@ -87,7 +92,8 @@ export default function Progress() {
               <label key={k} className="flex items-center gap-3">
                 <span className="mono text-xs text-mute uppercase tracking-[.14em] w-20">{t(`progress.${k}`)}</span>
                 <input type="number" step="0.1" className="input mono flex-1"
-                  onChange={(e) => setDraft({ ...draft, [`${k}_cm`]: +e.target.value })} />
+                  value={draft[`${k}_cm`] ?? ""}
+                  onChange={(e) => setDraft({ ...draft, [`${k}_cm`]: numberOrBlank(e.target.value) })} />
                 <span className="mono text-xs text-mute">{t("progress.cm")}</span>
               </label>
             ))}

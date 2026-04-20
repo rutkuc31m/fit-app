@@ -40,6 +40,25 @@ r.post("/session/:id/set", (req, res) => {
   res.json(db.prepare("SELECT * FROM training_sets WHERE id = ?").get(info.lastInsertRowid));
 });
 
+r.put("/set/:id", (req, res) => {
+  const set = db.prepare(`
+    SELECT ts.id
+    FROM training_sets ts
+    JOIN training_sessions s ON s.id = ts.session_id
+    WHERE ts.id = ? AND s.user_id = ?
+  `).get(req.params.id, req.user.id);
+  if (!set) return res.status(404).json({ error: "not_found" });
+
+  const { weight_kg, reps } = req.body || {};
+  db.prepare(`
+    UPDATE training_sets
+    SET weight_kg = ?, reps = ?
+    WHERE id = ?
+  `).run(weight_kg ?? null, reps ?? null, set.id);
+
+  res.json(db.prepare("SELECT * FROM training_sets WHERE id = ?").get(set.id));
+});
+
 r.delete("/set/:id", (req, res) => {
   db.prepare(`DELETE FROM training_sets WHERE id = ? AND session_id IN (SELECT id FROM training_sessions WHERE user_id = ?)`)
     .run(req.params.id, req.user.id);

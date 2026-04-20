@@ -4,6 +4,9 @@ import { api, getToken } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
 
+const numberOrBlank = (value) => value === "" ? "" : Number(value);
+const numberOrNull = (value) => value === "" || value == null || Number.isNaN(Number(value)) ? null : Number(value);
+
 export default function Settings() {
   const { t } = useTranslation();
   const { user, logout, refresh } = useAuth();
@@ -47,7 +50,12 @@ export default function Settings() {
   const [msg, setMsg] = useState(null);
 
   const save = async () => {
-    await api.put("/auth/me", form);
+    await api.put("/auth/me", {
+      ...form,
+      start_weight: numberOrNull(form.start_weight),
+      target_weight: numberOrNull(form.target_weight),
+      height_cm: numberOrNull(form.height_cm)
+    });
     await refresh();
     setMsg(t("settings.saved"));
     setTimeout(() => setMsg(null), 1500);
@@ -72,7 +80,7 @@ export default function Settings() {
                 <span>{t(`settings.${tk}`)}</span>
                 <span className="text-mute/60">({unit})</span>
               </span>
-              <input className="input mono" type="number" step="0.1" value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: +e.target.value })} />
+              <input className="input mono" type="number" step="0.1" value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: numberOrBlank(e.target.value) })} />
             </label>
           ))}
         </div>

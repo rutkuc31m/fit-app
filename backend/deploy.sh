@@ -15,7 +15,7 @@ fi
 # 2. App dir
 echo "[2/5] Setting up /opt/fitapi..."
 mkdir -p /opt/fitapi
-cp -r server.js db.js auth.js routes jobs scripts push_worker.js quotes.js package.json /opt/fitapi/
+cp -r server.js db.js auth.js routes jobs scripts push_worker.js quotes.js package.json package-lock.json /opt/fitapi/
 cd /opt/fitapi
 npm install --omit=dev
 
@@ -38,14 +38,12 @@ Type=simple
 User=ubuntu
 WorkingDirectory=/opt/fitapi
 Environment=FIT_DB=/opt/fitapi/data/fit.db
-Environment=JWT_SECRET=CHANGE_ME_ON_VM
 Environment=CORS_ORIGINS=https://fit.rutkuc.com
 Environment=PORT=8001
-# FIT_VAPID_PUBLIC and FIT_VAPID_PRIVATE must be set via systemd drop-in
-# (not committed). Create /etc/systemd/system/fitapi.service.d/vapid.conf
-# with a [Service] block defining both. Generate keys:
-#   npx web-push generate-vapid-keys
 Environment=FIT_VAPID_SUBJECT=mailto:admin@rutkuc.com
+# Secrets must be set on the VM, not committed. This file can define:
+# JWT_SECRET, FIT_VAPID_PUBLIC, FIT_VAPID_PRIVATE, ANTHROPIC_API_KEY, GEMINI_API_KEY.
+EnvironmentFile=-/etc/fitapi/fitapi.env
 ExecStart=/usr/bin/node /opt/fitapi/server.js
 Restart=always
 RestartSec=5

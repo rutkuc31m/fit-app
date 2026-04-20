@@ -234,6 +234,7 @@ export default function Log() {
                 </button>
                 <div className="flex items-center gap-3 shrink-0 pt-[2px]">
                   <div className="mono text-sm text-amber font-bold tabular-nums">{Math.round(it.kcal)}</div>
+                  <button className="text-mute hover:text-signal mono text-[.62rem] uppercase tracking-[.14em] leading-none" onClick={() => openEdit(it)}>{t("log.edit")}</button>
                   <button className="text-mute hover:text-danger text-lg leading-none" onClick={() => deleteItem(it.id)}>×</button>
                 </div>
               </div>
@@ -275,7 +276,7 @@ export default function Log() {
       {draft && (
         <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
           <div className="card w-full max-w-md p-4 flex flex-col gap-3 relative max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-32px)] overflow-y-auto">
-            <div className="section-label">{editingItemId ? "Zutat bearbeiten" : t("log.add_item")}</div>
+            <div className="section-label">{editingItemId ? t("log.edit_item") : t("log.add_item")}</div>
 
             {/* Mode toggle */}
             <div className="card p-1 flex gap-1">
@@ -307,10 +308,10 @@ export default function Log() {
                         onClick={() => { setPieceFood(null); setPieces(1); }}>change</button>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button className="step-btn" onClick={() => updatePieces(Math.max(0, pieces - 1))}>−</button>
+                      <button className="step-btn" onClick={() => updatePieces(Math.max(0, (Number(pieces) || 0) - 1))}>−</button>
                       <input type="number" step="0.5" className="input mono text-center text-lg text-signal flex-1"
-                        value={pieces} onChange={(e) => updatePieces(+e.target.value || 0)} />
-                      <button className="step-btn" onClick={() => updatePieces(pieces + 1)}>+</button>
+                        value={pieces} onChange={(e) => updatePieces(numberOrBlank(e.target.value))} />
+                      <button className="step-btn" onClick={() => updatePieces((Number(pieces) || 0) + 1)}>+</button>
                       <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">×{pieceFood.g_per_piece}g</span>
                     </div>
                     <div className="mt-2 mono text-[.66rem] text-ink2 text-center tabular-nums">

@@ -29,7 +29,6 @@ api.fit.rutkuc.com {
 fit.rutkuc.com {
     root * /var/www/fitapp
     encode gzip
-    try_files {path} /index.html
 
     @nocache {
         path /index.html /sw.js /registerSW.js /manifest.webmanifest /workbox-*.js
@@ -39,5 +38,16 @@ fit.rutkuc.com {
     @immutable path /assets/* /gifs/*
     header @immutable Cache-Control "public, max-age=31536000, immutable"
 
-    file_server
+    handle /assets/* {
+        file_server
+    }
+
+    handle /gifs/* {
+        file_server
+    }
+
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
 }
