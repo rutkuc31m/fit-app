@@ -137,8 +137,17 @@ export const getDayPlan = (dateStr = todayStr()) => {
 
 export const getEatingTarget = (eating) => PLAN.eatingTargets[eating] || PLAN.eatingTargets.LOW;
 
-export const getExercisesForDay = (dayType) => {
+export const getExercisesForDay = (dayType, weekNum = getWeekNum()) => {
   const day = PLAN.training[dayType];
   if (!day) return null;
-  return { ...day, exercises: day.exercises.filter((ex) => !ex.phase1Only) };
+  const inPhase1 = weekNum >= PLAN.phases[0].weeks[0] && weekNum <= PLAN.phases[0].weeks[1];
+  const exercises = day.exercises
+    .filter((ex) => inPhase1 || !ex.phase1Only)
+    .map((ex) => {
+      if (inPhase1 && ex.phase1Alt) {
+        return { ...ex, name: ex.phase1Alt.name, substituted: true, substituteReason: ex.phase1Alt.reason };
+      }
+      return ex;
+    });
+  return { ...day, exercises };
 };
