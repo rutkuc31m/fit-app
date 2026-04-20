@@ -240,8 +240,8 @@ export default function Log() {
 
       {/* Add item modal */}
       {draft && (
-        <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-end justify-center sm:items-center p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
-          <div className="card w-full max-w-md p-4 flex flex-col gap-3 relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
+          <div className="card w-full max-w-md p-4 flex flex-col gap-3 relative max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-32px)] overflow-y-auto">
             <div className="section-label">{t("log.add_item")}</div>
 
             {/* Mode toggle */}
@@ -353,7 +353,7 @@ export default function Log() {
               </label>
             </div>
 
-            <div className="flex gap-2 mt-1">
+            <div className="sticky bottom-[-1rem] -mx-4 -mb-4 flex gap-2 mt-1 p-4 bg-surface/95 border-t border-line/70 backdrop-blur">
               <button className="btn flex-1" onClick={closeDraft}>{t("log.cancel")}</button>
               <button className="btn-primary flex-1" onClick={saveDraft}>{t("log.save")}</button>
             </div>
