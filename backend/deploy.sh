@@ -15,7 +15,7 @@ fi
 # 2. App dir
 echo "[2/5] Setting up /opt/fitapi..."
 mkdir -p /opt/fitapi
-cp -r server.js db.js auth.js routes push_worker.js quotes.js package.json /opt/fitapi/
+cp -r server.js db.js auth.js routes jobs push_worker.js quotes.js package.json /opt/fitapi/
 cd /opt/fitapi
 npm install --omit=dev
 
