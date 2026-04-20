@@ -10,6 +10,7 @@ npm ci
 npm run build
 
 sudo mkdir -p "$WEB_DIR/gifs"
-sudo rsync -a --delete --exclude gifs/ dist/ "$WEB_DIR/"
+sudo rsync -a --delete --filter='P /gifs/***' dist/ "$WEB_DIR/"
 sudo bash "$APP_DIR/backend/scripts/download_gifs.sh"
+sudo test -s "$WEB_DIR/gifs/bp.gif"
 sudo chown -R caddy:caddy "$WEB_DIR"
