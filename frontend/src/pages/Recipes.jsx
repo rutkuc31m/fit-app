@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import i18n from "../i18n";
 import { todayStr, getDayPlan, getEatingTarget, PLAN } from "../lib/plan";
 import { getDayRecipes, getWeekRecipes, buildShoppingList, INGREDIENT_NAMES, CAT_ORDER, CAT_LABEL, RECIPE_TAGS } from "../lib/recipes";
 import { Empty, Icon, Brackets } from "../components/ui";
@@ -8,7 +7,7 @@ import Log from "./Log";
 
 export default function Recipes() {
   const { t } = useTranslation();
-  const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
+  const lang = "de";
   const [tab, setTab] = useState("log"); // log | today | week | shop
   const [checked, setChecked] = useState({});
   const date = todayStr();
