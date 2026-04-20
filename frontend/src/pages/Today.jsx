@@ -121,6 +121,7 @@ export default function Today() {
   const [date, setDate] = useState(todayStr());
   const now = nowHHMM();
   const [waterMl, setWaterMl] = useState(0);
+  const [stepsLogged, setStepsLogged] = useState(0);
   const [savedFlash, setSavedFlash] = useState(false);
   const [pushStatus, setPushStatus] = useState("default");
   const [pushBusy, setPushBusy] = useState(false);
@@ -187,6 +188,7 @@ export default function Today() {
     api.get(`/logs/${date}`).then((l) => {
       if (cancelled) return;
       setWaterMl(l?.water_ml || 0);
+      setStepsLogged(l?.steps || 0);
       if (l?.weight_kg != null) {
         setCurrentWeight(l.weight_kg);
         setWeightInput(String(l.weight_kg));
@@ -482,6 +484,28 @@ export default function Today() {
           </div>
         );
       })()}
+
+      {/* Steps (auto-sync via iPhone Shortcut) */}
+      <div className="card p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">steps</div>
+            <div className="font-display text-[1.5rem] text-ink leading-none tabular-nums mt-[2px]"
+              style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+              {stepsLogged.toLocaleString()}<span className="text-mute text-[.7rem] font-light ml-[6px]">/ {day.stepTarget.toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] text-right">
+            {Math.min(100, Math.round((stepsLogged / day.stepTarget) * 100))}%
+          </div>
+        </div>
+        <div className="h-2 bg-bg2 rounded overflow-hidden">
+          <div
+            className={`h-full transition-all ${stepsLogged >= day.stepTarget ? "bg-lime shadow-[0_0_10px_rgba(74,222,128,.5)]" : "bg-amber shadow-[0_0_8px_rgba(251,191,36,.4)]"}`}
+            style={{ width: `${Math.min(100, Math.round((stepsLogged / day.stepTarget) * 100))}%` }}
+          />
+        </div>
+      </div>
 
       {/* Training card */}
       {day.training ? (
