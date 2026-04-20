@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join } from "node:path";
 import db from "../db.js";
 import { requireAuth } from "../auth.js";
 
@@ -31,6 +31,7 @@ r.get("/:week", (req, res) => {
 r.put("/:week", (req, res) => {
   const week = parseInt(req.params.week, 10);
   const body = req.body || {};
+  if (body.date === undefined) body.date = new Date().toISOString().slice(0, 10);
   const existing = db.prepare("SELECT id FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
 
   const provided = V2_FIELDS.filter((f) => body[f] !== undefined);
@@ -53,7 +54,7 @@ r.put("/:week", (req, res) => {
 // POST /api/checkins/:week/photo  — body { angle: "front"|"side"|"back", data_url: "data:image/jpeg;base64,..." }
 r.post("/:week/photo", (req, res) => {
   const week = parseInt(req.params.week, 10);
-  const { angle, data_url } = req.body || {};
+  const { angle, data_url, date } = req.body || {};
   if (!angle || !["front", "side", "back"].includes(angle)) return res.status(400).json({ error: "bad_angle" });
   if (!data_url || !data_url.startsWith("data:image/")) return res.status(400).json({ error: "bad_data" });
 
@@ -73,8 +74,8 @@ r.post("/:week/photo", (req, res) => {
   if (existing) {
     db.prepare(`UPDATE weekly_checkins SET ${col} = ? WHERE id = ?`).run(relPath, existing.id);
   } else {
-    db.prepare(`INSERT INTO weekly_checkins (user_id, week_number, ${col}) VALUES (?, ?, ?)`)
-      .run(req.user.id, week, relPath);
+    db.prepare(`INSERT INTO weekly_checkins (user_id, week_number, date, ${col}) VALUES (?, ?, ?, ?)`)
+      .run(req.user.id, week, date || new Date().toISOString().slice(0, 10), relPath);
   }
   // also add to progress_photos for history
   db.prepare("INSERT INTO progress_photos (user_id, date, path, angle) VALUES (?, ?, ?, ?)")

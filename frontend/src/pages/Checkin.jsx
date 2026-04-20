@@ -77,7 +77,7 @@ export default function Checkin() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async () => {
-      const out = await api.post(`/checkins/${week}/photo`, { angle: angle.replace("photo_", ""), data_url: reader.result });
+      const out = await api.post(`/checkins/${week}/photo`, { angle: angle.replace("photo_", ""), data_url: reader.result, date });
       setData((d) => ({ ...d, [angle]: out.path }));
     };
     reader.readAsDataURL(file);

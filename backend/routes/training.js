@@ -5,15 +5,16 @@ import { requireAuth } from "../auth.js";
 const r = Router();
 r.use(requireAuth);
 
-// Get or create today's session
+// Get a session, creating it only for training screens that pass day_type.
 r.get("/session", (req, res) => {
   const { date, day_type } = req.query;
   let sess = db.prepare("SELECT * FROM training_sessions WHERE user_id = ? AND date = ?").get(req.user.id, date);
-  if (!sess) {
+  if (!sess && day_type) {
     const info = db.prepare("INSERT INTO training_sessions (user_id, date, day_type) VALUES (?, ?, ?)")
-      .run(req.user.id, date, day_type || null);
+      .run(req.user.id, date, day_type);
     sess = db.prepare("SELECT * FROM training_sessions WHERE id = ?").get(info.lastInsertRowid);
   }
+  if (!sess) return res.json(null);
   const sets = db.prepare("SELECT * FROM training_sets WHERE session_id = ? ORDER BY id ASC").all(sess.id);
   res.json({ ...sess, sets });
 });
