@@ -1,46 +1,89 @@
 import cron from "node-cron";
 import db from "../db.js";
 import { sendToSubscription } from "../push_worker.js";
+import { getScheduleForDate } from "../lib/dailySchedule.js";
 
-const REMINDERS = [
-  { cron: "10 7 * * 1",      type: "checkin",      cat: "workout",  title: "Check-in zamanı",  body: "Tartıl + 3 fotoğraf 📸" },
-  { cron: "0 12 * * 1-5",    type: "walk",         cat: "meal",     title: "Öğle yürüyüşü",   body: "15-20dk dışarı çık 🚶",               dayCheck: "weekday" },
-  { cron: "0 15 * * 1-5",    type: "water",        cat: "meal",     title: "Su zamanı",        body: "500ml su iç 💧",                      dayCheck: "weekday" },
-  { cron: "45 18 * * 1,3,5", type: "gym_prep",     cat: "workout",  title: "Gym'e 15dk",       body: "Çantayı hazırla 💪",                  dayCheck: "training" },
-  { cron: "30 19 * * 1,3,5", type: "shake",        cat: "workout",  title: "Post-workout",     body: "30g whey + su 🥤",                    dayCheck: "training" },
-  { cron: "0 20 * * 1,3,5",  type: "omad",         cat: "meal",     title: "OMAD zamanı",      body: "Protein önce, sonra sebze 🍽️",        dayCheck: "eating" },
-  { cron: "0 20 * * 2,6",    type: "fast_hydrate", cat: "meal",     title: "Oruç devam",       body: "Hidrasyon bol tut 💧",                dayCheck: "fast" },
-  { cron: "0 20 * * 0,4",    type: "low_meal",     cat: "meal",     title: "Düşük kalori",     body: "Tek öğün, ~1300 kcal 🍽️",            dayCheck: "low" },
-  { cron: "0 21 * * *",      type: "supp_pm",      cat: "supp",     title: "Supplement",       body: "Magnesium + B12 💊" },
-  { cron: "45 22 * * *",     type: "wind_down",    cat: "supp",     title: "Uyku hazırlığı",   body: "15dk — ekranı bırak 😴" }
-];
+const TZ = "Europe/Berlin";
 
-const eatingPattern = { 1: "OMAD", 2: "FAST", 3: "OMAD", 4: "LOW", 5: "OMAD", 6: "FAST", 0: "LOW" };
-const typePattern   = { 1: "training", 2: "rest", 3: "training", 4: "rest", 5: "training", 6: "rest", 0: "rest" };
+const PREF_BY_CATEGORY = {
+  checkpoint: "workout_enabled",
+  training: "workout_enabled",
+  cardio: "cardio_enabled",
+  activity: "routine_enabled",
+  nutrition: "meal_enabled",
+  supplement: "supp_enabled",
+  routine: "routine_enabled",
+  family: "family_enabled",
+  sleep: "sleep_enabled"
+};
 
-function shouldFireToday(check) {
-  if (!check) return true;
-  const dow = new Date().getDay();
-  if (check === "weekday")  return dow >= 1 && dow <= 5;
-  if (check === "training") return typePattern[dow] === "training";
-  if (check === "eating")   return eatingPattern[dow] === "OMAD";
-  if (check === "fast")     return eatingPattern[dow] === "FAST";
-  if (check === "low")      return eatingPattern[dow] === "LOW";
-  return true;
+function berlinParts(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(now).reduce((acc, p) => {
+    acc[p.type] = p.value;
+    return acc;
+  }, {});
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}`
+  };
 }
 
-function prefField(cat) {
-  if (cat === "workout") return "workout_enabled";
-  if (cat === "meal")    return "meal_enabled";
-  if (cat === "supp")    return "supp_enabled";
-  return null;
+const itemId = (item) => `${item.time}|${item.category}|${item.action}`;
+
+function prefsAllow(prefs, item) {
+  const field = PREF_BY_CATEGORY[item.category];
+  if (!field) return true;
+  return !prefs || prefs[field] !== 0;
 }
 
-async function sendReminder(r) {
-  if (!shouldFireToday(r.dayCheck)) return;
+async function sendScheduleItem(date, item, byUser) {
+  const payload = JSON.stringify({
+    title: item.action,
+    body: item.details || "",
+    tag: `schedule-${date}-${itemId(item)}`,
+    data: { type: "schedule", date, itemId: itemId(item), category: item.category },
+    url: "/today"
+  });
+
+  let sentUsers = 0;
+  for (const [userId, userSubs] of byUser) {
+    const prefs = db.prepare("SELECT * FROM notification_prefs WHERE user_id = ?").get(userId);
+    if (!prefsAllow(prefs, item)) continue;
+
+    const delivery = db.prepare(
+      "SELECT 1 FROM push_reminder_deliveries WHERE user_id = ? AND date = ? AND item_id = ?"
+    ).get(userId, date, itemId(item));
+    if (delivery) continue;
+
+    const results = await Promise.all(userSubs.map((s) => sendToSubscription(s, payload)));
+    if (results.some((r) => r.ok)) {
+      db.prepare("INSERT OR IGNORE INTO push_reminder_deliveries (user_id, date, item_id) VALUES (?, ?, ?)")
+        .run(userId, date, itemId(item));
+      sentUsers += 1;
+    }
+  }
+
+  if (sentUsers) {
+    console.log(`[push] schedule reminder sent: ${date} ${item.time} ${item.category} ${item.action} users=${sentUsers}`);
+  }
+}
+
+export async function sendDueScheduleReminders(now = new Date()) {
+  const { date, time } = berlinParts(now);
+  const dueItems = getScheduleForDate(date).filter((item) => item.time === time);
+  if (!dueItems.length) return { due: 0, sent: 0 };
 
   const subs = db.prepare("SELECT * FROM push_subscriptions").all();
-  if (!subs.length) return;
+  if (!subs.length) return { due: dueItems.length, sent: 0 };
 
   const byUser = new Map();
   subs.forEach((s) => {
@@ -48,29 +91,14 @@ async function sendReminder(r) {
     byUser.get(s.user_id).push(s);
   });
 
-  const field = prefField(r.cat);
-  const payload = JSON.stringify({
-    title: r.title,
-    body: r.body,
-    tag: `reminder-${r.type}`,
-    data: { type: "reminder", reminderType: r.type },
-    url: "/today"
-  });
-
-  for (const [userId, userSubs] of byUser) {
-    if (field) {
-      const prefs = db.prepare(`SELECT ${field} FROM notification_prefs WHERE user_id = ?`).get(userId);
-      if (prefs && prefs[field] === 0) continue;
-    }
-    await Promise.all(userSubs.map((s) => sendToSubscription(s, payload)));
+  for (const item of dueItems) {
+    await sendScheduleItem(date, item, byUser);
   }
 
-  console.log(`[push] reminder sent: ${r.type}`);
+  return { due: dueItems.length, sent: byUser.size };
 }
 
 export function startReminderCrons() {
-  for (const r of REMINDERS) {
-    cron.schedule(r.cron, () => sendReminder(r).catch(console.error), { timezone: "Europe/Berlin" });
-  }
-  console.log(`[push] ${REMINDERS.length} reminder crons registered`);
+  cron.schedule("* * * * *", () => sendDueScheduleReminders().catch(console.error), { timezone: TZ });
+  console.log("[push] schedule reminder cron registered (every minute, Berlin)");
 }

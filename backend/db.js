@@ -182,7 +182,19 @@ CREATE TABLE IF NOT EXISTS notification_prefs (
   quote_enabled   INTEGER DEFAULT 1,
   workout_enabled INTEGER DEFAULT 1,
   meal_enabled    INTEGER DEFAULT 1,
-  supp_enabled    INTEGER DEFAULT 1
+  supp_enabled    INTEGER DEFAULT 1,
+  cardio_enabled  INTEGER DEFAULT 1,
+  routine_enabled INTEGER DEFAULT 1,
+  family_enabled  INTEGER DEFAULT 1,
+  sleep_enabled   INTEGER DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS push_reminder_deliveries (
+  user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date      TEXT NOT NULL,
+  item_id   TEXT NOT NULL,
+  sent_at   TEXT DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, date, item_id)
 );
 `);
 
@@ -216,5 +228,13 @@ const addDailyLogCol = (col, def) => {
 addDailyLogCol("source", "TEXT");
 addDailyLogCol("sent_at", "TEXT");
 addDailyLogCol("updated_at", "TEXT");
+
+const prefCols = db.prepare("PRAGMA table_info(notification_prefs)").all().map((c) => c.name);
+const addPrefCol = (col) => {
+  if (!prefCols.includes(col)) {
+    try { db.exec(`ALTER TABLE notification_prefs ADD COLUMN ${col} INTEGER DEFAULT 1;`); } catch {}
+  }
+};
+["cardio_enabled", "routine_enabled", "family_enabled", "sleep_enabled"].forEach(addPrefCol);
 
 export default db;

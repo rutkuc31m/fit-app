@@ -53,28 +53,58 @@ r.post("/test", async (req, res) => {
 r.get("/prefs", (req, res) => {
   let prefs = db.prepare("SELECT * FROM notification_prefs WHERE user_id = ?").get(req.user.id);
   if (!prefs) {
-    prefs = { user_id: req.user.id, quote_enabled: 1, workout_enabled: 1, meal_enabled: 1, supp_enabled: 1 };
+    prefs = {
+      user_id: req.user.id,
+      quote_enabled: 1,
+      workout_enabled: 1,
+      meal_enabled: 1,
+      supp_enabled: 1,
+      cardio_enabled: 1,
+      routine_enabled: 1,
+      family_enabled: 1,
+      sleep_enabled: 1
+    };
   }
   res.json(prefs);
 });
 
 // PUT /api/push/prefs — update notification preferences
 r.put("/prefs", (req, res) => {
-  const { quote_enabled, workout_enabled, meal_enabled, supp_enabled } = req.body || {};
+  const {
+    quote_enabled,
+    workout_enabled,
+    meal_enabled,
+    supp_enabled,
+    cardio_enabled,
+    routine_enabled,
+    family_enabled,
+    sleep_enabled
+  } = req.body || {};
   db.prepare(`
-    INSERT INTO notification_prefs (user_id, quote_enabled, workout_enabled, meal_enabled, supp_enabled)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO notification_prefs (
+      user_id, quote_enabled, workout_enabled, meal_enabled, supp_enabled,
+      cardio_enabled, routine_enabled, family_enabled, sleep_enabled
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(user_id) DO UPDATE SET
       quote_enabled   = excluded.quote_enabled,
       workout_enabled = excluded.workout_enabled,
       meal_enabled    = excluded.meal_enabled,
-      supp_enabled    = excluded.supp_enabled
+      supp_enabled    = excluded.supp_enabled,
+      cardio_enabled  = excluded.cardio_enabled,
+      routine_enabled = excluded.routine_enabled,
+      family_enabled  = excluded.family_enabled,
+      sleep_enabled   = excluded.sleep_enabled
   `).run(
     req.user.id,
     quote_enabled   == null ? 1 : +!!quote_enabled,
     workout_enabled == null ? 1 : +!!workout_enabled,
     meal_enabled    == null ? 1 : +!!meal_enabled,
-    supp_enabled    == null ? 1 : +!!supp_enabled
+    supp_enabled    == null ? 1 : +!!supp_enabled,
+    cardio_enabled  == null ? 1 : +!!cardio_enabled,
+    routine_enabled == null ? 1 : +!!routine_enabled,
+    family_enabled  == null ? 1 : +!!family_enabled,
+    sleep_enabled   == null ? 1 : +!!sleep_enabled
   );
   res.json({ ok: true });
 });

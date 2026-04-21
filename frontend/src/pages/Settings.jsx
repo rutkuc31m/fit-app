@@ -12,7 +12,16 @@ export default function Settings() {
   const { user, logout, refresh } = useAuth();
   const [pushStatus, setPushStatus] = useState("default");
   const [pushBusy, setPushBusy] = useState(false);
-  const [prefs, setPrefs] = useState({ quote_enabled: 1, workout_enabled: 1, meal_enabled: 1, supp_enabled: 1 });
+  const [prefs, setPrefs] = useState({
+    quote_enabled: 1,
+    workout_enabled: 1,
+    meal_enabled: 1,
+    supp_enabled: 1,
+    cardio_enabled: 1,
+    routine_enabled: 1,
+    family_enabled: 1,
+    sleep_enabled: 1
+  });
   const [prefsBusy, setPrefsBusy] = useState(false);
 
   useEffect(() => { getPushStatus().then(setPushStatus); }, []);
@@ -124,7 +133,12 @@ export default function Settings() {
                   { key: "workout_enabled", label: "Antrenman hatırlatmaları", sub: "Gym hazırlık · post-workout · check-in" },
                   { key: "meal_enabled",    label: "Öğün hatırlatmaları",  sub: "OMAD · oruç · düşük kalori · su" },
                   { key: "supp_enabled",    label: "Supplement & uyku",    sub: "21:00 Mg+B12 · 22:45 uyku hazırlığı" },
-                ].map(({ key, label, sub }) => (
+                ].concat([
+                  { key: "cardio_enabled",  label: "Cardio & activity", sub: "Walks · short breaks · LISS · HIIT" },
+                  { key: "routine_enabled", label: "Routine",           sub: "Wake-up · commute · prep · transitions" },
+                  { key: "family_enabled",  label: "Family",            sub: "Kids and family blocks" },
+                  { key: "sleep_enabled",   label: "Sleep",             sub: "Bedtime target" },
+                ]).map(({ key, label, sub }) => (
                   <label key={key} className="flex items-center justify-between py-2 border-b border-line/40 last:border-0 cursor-pointer">
                     <div>
                       <div className="text-[.76rem] text-ink">{label}</div>
