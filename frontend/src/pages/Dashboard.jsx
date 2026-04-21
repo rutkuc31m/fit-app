@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
-import { getStepTarget, getCardioProtocol } from "../lib/protocols";
 import { Ring, Brackets, Empty, Icon, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
 
 const sumMacros = (meals) => meals.reduce((a, m) => {
@@ -32,8 +31,6 @@ export default function Dashboard() {
   const isPhaseFirstDay = dayIdx === phaseStartDay;
   const target = getEatingTarget(dayPlan.eating);
   const macros = sumMacros(meals);
-  const stepTarget = getStepTarget(week);
-  const cardio = getCardioProtocol(week);
 
   const load = async () => {
     const [l, m] = await Promise.all([
@@ -255,17 +252,6 @@ export default function Dashboard() {
           )}
         </Link>
       </div>
-
-      {/* Step target + cardio chip */}
-      {stepTarget && (
-        <div className="card p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Icon.zap size={16} className="text-signal" />
-            <div className="mono text-[.7rem] text-ink uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
-          </div>
-          <div className="mono text-sm text-signal font-bold tabular-nums">{stepTarget.toLocaleString()}</div>
-        </div>
-      )}
 
       {/* Today timeline + Habits + Check-in quick links */}
       <Link to="/today" className="card p-3 hover:border-line2 transition flex items-center gap-2">

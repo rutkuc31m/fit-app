@@ -82,7 +82,7 @@ function buildDaySchedule(opts) {
   if (!isWeekend) {
     schedule.push({ time: "07:30", action: "Ise gidis", details: isFastDay ? "Sadece su ve siyah kahve" : "Kahve serbest, yemek yok", category: "routine" });
     schedule.push({ time: "10:00", action: "Kisa mola", details: "Ayaga kalk, 2dk yuru, su ic", category: "activity" });
-    schedule.push({ time: "12:00", action: "Ogle yuruyusu", details: `30dk yuruyus (${Math.round(stepTarget * 0.4)} adim hedefi)`, category: "cardio", duration: "30dk" });
+    schedule.push({ time: "12:00", action: "Ogle yuruyusu", details: "30dk rahat tempo yuruyus", category: "cardio", duration: "30dk" });
     schedule.push({ time: "15:00", action: "Ikindi molasi", details: "500ml su, 5dk ayakta mola", category: "routine" });
     schedule.push({ time: "16:30", action: "Isten cikis", details: "Eve gelis", category: "routine" });
     schedule.push({ time: "17:00", action: "Cocuklarla vakit", details: "Park, oyun, sohbet - 2 saat kaliteli zaman", category: "family", duration: "2sa" });
@@ -107,7 +107,7 @@ function buildDaySchedule(opts) {
     }
     schedule.push({ time: "20:00", action: "Post-workout shake", details: "30g whey + su", category: "nutrition" });
     schedule.push({ time: "20:15", action: "OMAD - Ana ogun", details: "Protein once, sonra sebze, en son karbonhidrat", category: "nutrition", duration: "45-60dk" });
-    schedule.push({ time: "21:15", action: "Aksam yuruyusu", details: `30dk sakin yuruyus - hedef: ${stepTarget}`, category: "cardio", duration: "30dk" });
+    schedule.push({ time: "21:15", action: "Aksam yuruyusu", details: "30dk sakin yuruyus - sindirim ve toparlanma", category: "cardio", duration: "30dk" });
   }
 
   if (!isTrainingDay && !isFastDay) {
@@ -115,7 +115,7 @@ function buildDaySchedule(opts) {
       schedule.push({ time: "17:30", action: "HIIT (opsiyonel)", details: `${cardio.hiit.format} - ${cardio.hiit.durationMin}dk`, category: "cardio" });
     }
     schedule.push({ time: "18:00", action: "OMAD - Ana ogun", details: "Tek ogun, dusuk karbonhidrat, yuksek protein", category: "nutrition", duration: "30-45dk" });
-    schedule.push({ time: "19:30", action: "Aksam yuruyusu", details: `30dk - hedef: ${stepTarget} adim`, category: "cardio", duration: "30dk" });
+    schedule.push({ time: "19:30", action: "Aksam yuruyusu", details: "30dk rahat tempo - cocuklarla da yapilabilir", category: "cardio", duration: "30dk" });
   }
 
   if (isFastDay) {

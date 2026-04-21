@@ -80,7 +80,6 @@ export const PROTOCOLS = {
         { id: "core_routine", label: "5min core routine (dead bug, bird dog, glute bridge)", icon: "yoga" }
       ],
       throughout: [
-        { id: "steps", label: "Hit daily step target", icon: "shoe" },
         { id: "posture", label: "Stand/walk 2min every hour", icon: "chair" },
         { id: "water_total", label: "2.5L+ water", icon: "water" }
       ],
@@ -102,7 +101,6 @@ export const PROTOCOLS = {
         { id: "core_routine", label: "5min core routine", icon: "yoga" }
       ],
       throughout: [
-        { id: "steps", label: "7000+ steps", icon: "shoe" },
         { id: "logbook", label: "Log training weights", icon: "book" },
         { id: "water_total", label: "2.5L+ water", icon: "water" }
       ],
@@ -123,7 +121,6 @@ export const PROTOCOLS = {
         { id: "supp_am", label: "D3+K2, Omega-3", icon: "pill" }
       ],
       throughout: [
-        { id: "steps", label: "8000-10000 steps", icon: "shoe" },
         { id: "logbook", label: "Log training weights", icon: "book" },
         { id: "water_total", label: "3L+ water", icon: "water" }
       ],
@@ -144,7 +141,6 @@ export const PROTOCOLS = {
         { id: "supp_am", label: "D3+K2, Omega-3", icon: "pill" }
       ],
       throughout: [
-        { id: "steps", label: "8000+ steps (locked habit)", icon: "shoe" },
         { id: "logbook", label: "Log training weights", icon: "book" }
       ],
       evening: [

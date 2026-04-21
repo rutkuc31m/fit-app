@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api, getToken } from "../lib/api";
+import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
 
@@ -185,33 +185,6 @@ export default function Settings() {
           )}
         </>
       )}
-
-      <div className="section-label">Shortcut Auto-Sync</div>
-      <div className="card p-3 flex flex-col gap-2">
-        <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
-          iPhone shortcut to API steps sync
-        </div>
-        <button
-          className="btn"
-          onClick={() => {
-            const token = getToken();
-            if (!token) return;
-            navigator.clipboard.writeText(token);
-            flash("token copied");
-          }}
-        >
-          Copy API token
-        </button>
-        <button
-          className="btn"
-          onClick={() => {
-            navigator.clipboard.writeText("https://api.fit.rutkuc.com/api");
-            flash("url copied");
-          }}
-        >
-          Copy API URL
-        </button>
-      </div>
 
       <button className="btn text-warn" onClick={logout}>{t("auth.logout")}</button>
 

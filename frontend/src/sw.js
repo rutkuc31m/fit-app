@@ -12,7 +12,7 @@ self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 precacheAndRoute(self.__WB_MANIFEST || []);
 cleanupOutdatedCaches();
 
-// API data should be fresh. Static app assets are precached; logs/steps are not.
+// API data should be fresh. Static app assets are precached; logs are not.
 registerRoute(
   ({ url }) => url.hostname === "api.fit.rutkuc.com",
   new NetworkOnly()

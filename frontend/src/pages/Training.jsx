@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getDayPlan, getWeekNum, getExercisesForDay } from "../lib/plan";
-import { getCardioProtocol, getStepTarget } from "../lib/protocols";
+import { getCardioProtocol } from "../lib/protocols";
 import { EXERCISES, MUSCLE_LABELS } from "../lib/exercises";
 import { Empty, Icon } from "../components/ui";
 import ExerciseGifPreview from "../components/ExerciseGifPreview";
@@ -76,7 +76,6 @@ export default function Training() {
   const dayType = plan.type === "rest" ? "A" : plan.type;
   const day = useMemo(() => getExercisesForDay(dayType, week), [dayType, week]);
   const cardio = useMemo(() => getCardioProtocol(week), [week]);
-  const stepTarget = useMemo(() => getStepTarget(week), [week]);
   const [session, setSession] = useState(null);
   const [lastByEx, setLastByEx] = useState({});
   const [rest, setRest] = useState(null); // { seconds } when active
@@ -254,8 +253,8 @@ export default function Training() {
               <div className="metric-value">W{String(week).padStart(2, "0")}</div>
             </div>
             <div className="metric-tile">
-              <div className="metric-label">steps</div>
-              <div className="metric-value text-amber">{stepTarget?.toLocaleString() || "--"}</div>
+              <div className="metric-label">liss</div>
+              <div className="metric-value text-amber">{cardio?.liss?.durationMin || "--"}min</div>
             </div>
           </div>
         </div>
@@ -278,17 +277,6 @@ export default function Training() {
             <div className="mono text-[.62rem] text-cyan/80 uppercase tracking-[.14em] tabular-nums">{cardio.liss?.durationMin}min · {cardio.liss?.intensity}</div>
           </div>
           {cardio.liss?.notes && <div className="mono text-[.66rem] text-ink2 mt-1 pl-2">{cardio.liss.notes}</div>}
-        </div>
-      )}
-
-      {/* Step target banner (any day) */}
-      {stepTarget && (
-        <div className="card p-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Icon.zap size={16} className="text-amber" />
-            <div className="mono text-[.7rem] text-ink uppercase tracking-[.14em]">{t("cardio.step_target")}</div>
-          </div>
-          <div className="mono text-sm text-amber font-bold tabular-nums">{stepTarget.toLocaleString()}</div>
         </div>
       )}
 

@@ -222,7 +222,7 @@ function generateDaySchedule(opts) {
     schedule.push({
       time: "12:00",
       action: "Öğle yürüyüşü",
-      details: `30dk yürüyüş (${Math.round(stepTarget * 0.4)} adım hedefi)`,
+      details: "30dk rahat tempo yürüyüş",
       category: "cardio",
       duration: "30dk"
     });
@@ -279,7 +279,7 @@ function generateDaySchedule(opts) {
     schedule.push({
       time: "14:00",
       action: "Aile zamanı",
-      details: "Çocuklarla aktivite — park, oyun, yürüyüş (adım sayısına katkı)",
+      details: "Çocuklarla aktivite — park, oyun, yürüyüş",
       category: "family"
     });
   }
@@ -339,7 +339,7 @@ function generateDaySchedule(opts) {
     schedule.push({
       time: "21:15",
       action: "Akşam yürüyüşü",
-      details: `30dk sakin yürüyüş — sindirim + kalan adımlar (hedef: ${stepTarget})`,
+      details: "30dk sakin yürüyüş — sindirim + toparlanma",
       category: "cardio",
       duration: "30dk"
     });
@@ -368,7 +368,7 @@ function generateDaySchedule(opts) {
     schedule.push({
       time: "19:30",
       action: "Akşam yürüyüşü",
-      details: `30dk — çocuklarla da yapılabilir. Hedef: ${stepTarget} adım`,
+      details: "30dk — çocuklarla da yapılabilir",
       category: "cardio",
       duration: "30dk"
     });
