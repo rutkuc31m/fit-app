@@ -77,7 +77,7 @@ export default function Progress() {
         <div className="card p-4 grid grid-cols-5 gap-2">
           {[["waist", last.waist_cm], ["chest", last.chest_cm], ["arm", last.arm_cm], ["hip", last.hip_cm], ["thigh", last.thigh_cm]].map(([k, v]) => (
             <div key={k} className="text-center">
-              <div className="mono text-sm font-bold text-cyan tabular-nums">{v ? "—"}</div>
+              <div className="mono text-sm font-bold text-cyan tabular-nums">{v ?? "—"}</div>
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-1">{t(`progress.${k}`)}</div>
             </div>
           ))}
