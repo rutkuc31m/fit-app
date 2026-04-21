@@ -59,6 +59,9 @@ CREATE TABLE IF NOT EXISTS daily_logs (
   sleep_hours  REAL,
   mood         INTEGER,
   notes        TEXT,
+  source       TEXT,
+  sent_at      TEXT,
+  updated_at   TEXT DEFAULT (datetime('now')),
   UNIQUE(user_id, date)
 );
 CREATE INDEX IF NOT EXISTS idx_logs_user_date ON daily_logs(user_id, date);
@@ -202,5 +205,16 @@ addCol("notes", "TEXT");
 addCol("photo_front", "TEXT");
 addCol("photo_side", "TEXT");
 addCol("photo_back", "TEXT");
+
+// daily_logs sync metadata for iOS Shortcut / automation debugging.
+const dailyLogCols = db.prepare("PRAGMA table_info(daily_logs)").all().map((c) => c.name);
+const addDailyLogCol = (col, def) => {
+  if (!dailyLogCols.includes(col)) {
+    try { db.exec(`ALTER TABLE daily_logs ADD COLUMN ${col} ${def};`); } catch {}
+  }
+};
+addDailyLogCol("source", "TEXT");
+addDailyLogCol("sent_at", "TEXT");
+addDailyLogCol("updated_at", "TEXT");
 
 export default db;
