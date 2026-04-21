@@ -9,7 +9,7 @@ async function request(path, opts = {}) {
   const t = getToken();
   if (t) headers.Authorization = `Bearer ${t}`;
   const ctrl = new AbortController();
-  const timeoutMs = opts.timeoutMs ? 15000;
+  const timeoutMs = opts.timeoutMs ?? 15000;
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   let res;
   try {
