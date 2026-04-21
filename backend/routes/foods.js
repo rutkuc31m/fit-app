@@ -8,6 +8,31 @@ r.use(requireAuth);
 const OFF_URL = (barcode) => `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json`;
 const CACHE_DAYS = 30;
 
+const clampMacro = (value, max) => {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.min(max, +n.toFixed(1));
+};
+const normalizeNutrition = (item) => {
+  if (!item || typeof item !== "object") return null;
+  return {
+    ...item,
+    kcal_100g: clampMacro(item.kcal_100g, 1200),
+    protein_100g: clampMacro(item.protein_100g, 100),
+    carbs_100g: clampMacro(item.carbs_100g, 100),
+    fat_100g: clampMacro(item.fat_100g, 100)
+  };
+};
+const hasUsableMacros = (item = {}) =>
+  item.kcal_100g != null && item.kcal_100g > 0 &&
+  ["protein_100g", "carbs_100g", "fat_100g"].every((field) => item[field] != null && item[field] >= 0) &&
+  (item.protein_100g + item.carbs_100g + item.fat_100g) > 0;
+const parseAiJson = (text) => {
+  const match = String(text || "").match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try { return JSON.parse(match[0]); } catch { return null; }
+};
+
 r.get("/barcode/:code", async (req, res, next) => {
   const code = req.params.code.trim();
   try {
@@ -21,7 +46,7 @@ r.get("/barcode/:code", async (req, res, next) => {
     if (data.status !== 1) return res.status(404).json({ error: "not_found" });
     const p = data.product || {};
     const n = p.nutriments || {};
-    const row = {
+    const row = normalizeNutrition({
       barcode: code,
       name: p.product_name || p.generic_name || "",
       brand: p.brands || "",
@@ -30,7 +55,7 @@ r.get("/barcode/:code", async (req, res, next) => {
       carbs_100g: n.carbohydrates_100g ?? null,
       fat_100g: n.fat_100g ?? null,
       raw_json: JSON.stringify({ product_name: p.product_name, brands: p.brands, nutriments: n }),
-    };
+    });
     db.prepare(`INSERT INTO foods_cache (barcode, name, brand, kcal_100g, protein_100g, carbs_100g, fat_100g, raw_json, fetched_at)
       VALUES (@barcode, @name, @brand, @kcal_100g, @protein_100g, @carbs_100g, @fat_100g, @raw_json, datetime('now'))
       ON CONFLICT(barcode) DO UPDATE SET
@@ -76,12 +101,12 @@ If the photo contains no food at all, return {"error": "not_food"}.`;
     }
     const data = await resp.json();
     const text = ((data.candidates?.[0]?.content?.parts || []).map((p) => p.text).join("") || "").trim();
-    console.log("[gemini] raw:", text.slice(0, 500));
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) return res.status(422).json({ error: "ai_parse_failed", raw: text.slice(0, 300) });
-    let parsed;
-    try { parsed = JSON.parse(match[0]); } catch { return res.status(422).json({ error: "ai_parse_failed", raw: match[0].slice(0, 300) }); }
+    const parsedRaw = parseAiJson(text);
+    if (!parsedRaw) return res.status(422).json({ error: "ai_parse_failed", raw: text.slice(0, 300) });
+    const parsed = normalizeNutrition(parsedRaw);
     if (parsed.error) return res.status(404).json({ error: parsed.error });
+    if (!hasUsableMacros(parsed)) return res.status(422).json({ error: "ai_bad_macros" });
+    console.log("[gemini.food]", JSON.stringify({ name: parsed.name || null, brand: parsed.brand || null, confidence: parsed.confidence || null }));
     res.json({ source: "ai", ...parsed });
   } catch (e) { next(e); }
 });
@@ -98,7 +123,7 @@ r.get("/search", async (req, res, next) => {
     const items = (data.products || []).map((p) => {
       const n = p.nutriments || {};
       const kcal = n["energy-kcal_100g"] ?? (n["energy_100g"] ? n["energy_100g"] / 4.184 : null);
-      return {
+      return normalizeNutrition({
         barcode: p.code || null,
         name: p.product_name || "",
         brand: p.brands || "",
@@ -106,7 +131,7 @@ r.get("/search", async (req, res, next) => {
         protein_100g: n.proteins_100g ?? null,
         carbs_100g: n.carbohydrates_100g ?? null,
         fat_100g: n.fat_100g ?? null,
-      };
+      });
     }).filter((x) => x.name);
     res.json(items);
   } catch (e) { next(e); }
@@ -137,9 +162,9 @@ Return ONLY JSON with typical per-100g macros. Non-zero positive numbers. No pro
     }
     const data = await resp.json();
     const text = ((data.candidates?.[0]?.content?.parts || []).map((p) => p.text).join("") || "").trim();
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) return res.status(422).json({ error: "ai_parse_failed", raw: text.slice(0, 300) });
-    const parsed = JSON.parse(match[0]);
+    const parsed = normalizeNutrition(parseAiJson(text));
+    if (!parsed) return res.status(422).json({ error: "ai_parse_failed", raw: text.slice(0, 300) });
+    if (!hasUsableMacros(parsed)) return res.status(422).json({ error: "ai_bad_macros" });
     res.json({ source: "ai", name, brand: brand || null, ...parsed });
   } catch (e) { next(e); }
 });

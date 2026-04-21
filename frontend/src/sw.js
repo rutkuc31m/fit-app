@@ -4,7 +4,7 @@
 
 import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
 import { registerRoute, NavigationRoute } from "workbox-routing";
-import { NetworkFirst } from "workbox-strategies";
+import { NetworkOnly } from "workbox-strategies";
 
 self.skipWaiting();
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
@@ -12,10 +12,10 @@ self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 precacheAndRoute(self.__WB_MANIFEST || []);
 cleanupOutdatedCaches();
 
-// API (NetworkFirst with short timeout)
+// API data should be fresh. Static app assets are precached; logs/steps are not.
 registerRoute(
   ({ url }) => url.hostname === "api.fit.rutkuc.com",
-  new NetworkFirst({ cacheName: "api", networkTimeoutSeconds: 4 })
+  new NetworkOnly()
 );
 
 // ─── PUSH ───

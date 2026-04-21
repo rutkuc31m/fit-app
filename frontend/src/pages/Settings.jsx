@@ -80,7 +80,7 @@ export default function Settings() {
                 <span>{t(`settings.${tk}`)}</span>
                 <span className="text-mute/60">({unit})</span>
               </span>
-              <input className="input mono" type="number" step="0.1" value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: numberOrBlank(e.target.value) })} />
+              <input className="input mono" type="number" step="0.1" value={form[k] ? ""} onChange={(e) => setForm({ ...form, [k]: numberOrBlank(e.target.value) })} />
             </label>
           ))}
         </div>

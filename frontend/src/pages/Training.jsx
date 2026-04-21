@@ -115,8 +115,8 @@ export default function Training() {
 
   const updateSet = async (s, patch) => {
     await api.put(`/training/set/${s.id}`, {
-      weight_kg: Object.hasOwn(patch, "weight_kg") ? patch.weight_kg : (s.weight_kg ?? null),
-      reps: Object.hasOwn(patch, "reps") ? patch.reps : (s.reps ?? null)
+      weight_kg: Object.hasOwn(patch, "weight_kg") ? patch.weight_kg : (s.weight_kg ? null),
+      reps: Object.hasOwn(patch, "reps") ? patch.reps : (s.reps ? null)
     });
     load();
   };

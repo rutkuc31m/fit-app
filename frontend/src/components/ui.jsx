@@ -66,7 +66,7 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
-        {children ?? (
+        {children ? (
           <>
             <div className={`mono font-bold leading-none ${over ? "text-warn" : "text-signal"}`} style={{ fontSize: size * 0.26 }}>
               {Math.round(value)}
@@ -207,15 +207,15 @@ export function LiveClock({ className = "" }) {
 
 /* ─────────── Number stepper (good for quick weight / reps) ─────────── */
 export function Stepper({ value, onChange, step = 0.1, min, max, suffix, big = false }) {
-  const dec = () => onChange(Math.max(min ?? -Infinity, +(Number(value || 0) - step).toFixed(2)));
-  const inc = () => onChange(Math.min(max ?? Infinity,  +(Number(value || 0) + step).toFixed(2)));
+  const dec = () => onChange(Math.max(min ? -Infinity, +(Number(value || 0) - step).toFixed(2)));
+  const inc = () => onChange(Math.min(max ? Infinity,  +(Number(value || 0) + step).toFixed(2)));
   return (
     <div className="flex items-stretch gap-2">
       <button type="button" className="step-btn" onClick={dec} aria-label="decrement">−</button>
       <div className={`flex-1 relative border border-line rounded-lg bg-gradient-to-b from-[#0a0a0b] to-[#1c1c1e] overflow-hidden ${big ? "min-h-[64px]" : ""}`}>
         <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-signal/30 to-transparent" />
         <input type="number" step={step} inputMode="decimal"
-          value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? "" : +e.target.value)}
+          value={value ? ""} onChange={(e) => onChange(e.target.value === "" ? "" : +e.target.value)}
           className={`w-full h-full text-center mono font-bold text-signal bg-transparent border-none outline-none ${big ? "text-[2rem]" : "text-lg"} py-2`}
           style={{ textShadow: "0 0 14px rgba(48,209,88,.35)" }}
           placeholder="0" />

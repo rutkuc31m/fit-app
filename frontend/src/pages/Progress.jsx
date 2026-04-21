@@ -77,7 +77,7 @@ export default function Progress() {
         <div className="card p-4 grid grid-cols-5 gap-2">
           {[["waist", last.waist_cm], ["chest", last.chest_cm], ["arm", last.arm_cm], ["hip", last.hip_cm], ["thigh", last.thigh_cm]].map(([k, v]) => (
             <div key={k} className="text-center">
-              <div className="mono text-sm font-bold text-cyan tabular-nums">{v ?? "—"}</div>
+              <div className="mono text-sm font-bold text-cyan tabular-nums">{v ? "—"}</div>
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-1">{t(`progress.${k}`)}</div>
             </div>
           ))}
@@ -92,7 +92,7 @@ export default function Progress() {
               <label key={k} className="flex items-center gap-3">
                 <span className="mono text-xs text-mute uppercase tracking-[.14em] w-20">{t(`progress.${k}`)}</span>
                 <input type="number" step="0.1" className="input mono flex-1"
-                  value={draft[`${k}_cm`] ?? ""}
+                  value={draft[`${k}_cm`] ? ""}
                   onChange={(e) => setDraft({ ...draft, [`${k}_cm`]: numberOrBlank(e.target.value) })} />
                 <span className="mono text-xs text-mute">{t("progress.cm")}</span>
               </label>

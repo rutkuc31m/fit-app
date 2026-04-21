@@ -121,6 +121,7 @@ export default function Today() {
   const now = nowHHMM();
   const [waterMl, setWaterMl] = useState(0);
   const [stepsLogged, setStepsLogged] = useState(0);
+  const [stepsSync, setStepsSync] = useState(null);
   const [savedFlash, setSavedFlash] = useState(false);
   const [currentWeight, setCurrentWeight] = useState(null);
   const [weightInput, setWeightInput] = useState("");
@@ -164,6 +165,11 @@ export default function Today() {
       if (cancelled) return;
       setWaterMl(l?.water_ml || 0);
       setStepsLogged(l?.steps || 0);
+      setStepsSync(l?.updated_at || l?.sent_at || l?.source ? {
+        updated_at: l?.updated_at || null,
+        sent_at: l?.sent_at || null,
+        source: l?.source || null
+      } : null);
       if (l?.weight_kg != null) {
         setCurrentWeight(l.weight_kg);
         setWeightInput(String(l.weight_kg));
@@ -452,6 +458,12 @@ export default function Today() {
             style={{ width: `${Math.min(100, Math.round((stepsLogged / day.stepTarget) * 100))}%` }}
           />
         </div>
+        {stepsSync?.updated_at && (
+          <div className="mt-2 mono text-[.54rem] text-mute uppercase tracking-[.14em]">
+            sync {new Date(stepsSync.updated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            {stepsSync.source ? ` · ${stepsSync.source}` : ""}
+          </div>
+        )}
       </div>
 
       {/* Training card */}
