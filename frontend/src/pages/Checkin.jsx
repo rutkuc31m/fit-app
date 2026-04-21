@@ -123,7 +123,7 @@ export default function Checkin() {
             <div key={f.id} className="card p-3">
               <div className="card-title mb-2">{f.label}</div>
               <input type="number" step="0.1" inputMode="decimal" className={`input mono text-lg text-${c}`}
-                value={data[f.id] ? ""} onChange={(e) => setField(f.id, e.target.value === "" ? "" : +e.target.value)} />
+                value={data[f.id] ?? ""} onChange={(e) => setField(f.id, e.target.value === "" ? "" : +e.target.value)} />
             </div>
           );
         }
@@ -159,7 +159,7 @@ export default function Checkin() {
             <div key={f.id} className="card p-3">
               <div className="flex justify-between items-baseline mb-2">
                 <div className="card-title">{f.label}</div>
-                <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{data[f.id] ? 0}%</div>
+                <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{data[f.id] ?? 0}%</div>
               </div>
               <input type="range" min="0" max="100" step="5" value={data[f.id] ? 80}
                 onChange={(e) => setField(f.id, +e.target.value)} className={`w-full accent-${c}`} />
@@ -171,7 +171,7 @@ export default function Checkin() {
             <div key={f.id} className="card p-3">
               <div className="card-title mb-2">{f.label}</div>
               <textarea className="input mono text-sm w-full min-h-[80px]" rows="3"
-                value={data[f.id] ? ""} onChange={(e) => setField(f.id, e.target.value)} />
+                value={data[f.id] ?? ""} onChange={(e) => setField(f.id, e.target.value)} />
             </div>
           );
         }

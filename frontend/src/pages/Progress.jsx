@@ -92,7 +92,7 @@ export default function Progress() {
               <label key={k} className="flex items-center gap-3">
                 <span className="mono text-xs text-mute uppercase tracking-[.14em] w-20">{t(`progress.${k}`)}</span>
                 <input type="number" step="0.1" className="input mono flex-1"
-                  value={draft[`${k}_cm`] ? ""}
+                  value={draft[`${k}_cm`] ?? ""}
                   onChange={(e) => setDraft({ ...draft, [`${k}_cm`]: numberOrBlank(e.target.value) })} />
                 <span className="mono text-xs text-mute">{t("progress.cm")}</span>
               </label>
