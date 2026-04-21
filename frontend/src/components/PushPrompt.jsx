@@ -30,16 +30,23 @@ export default function PushPrompt() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="card p-5 flex flex-col gap-3 max-w-sm w-full">
-        <div className="font-display text-[1.2rem] text-ink leading-tight">Daily Push</div>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="card p-4 flex flex-col gap-3 max-w-sm w-full border-signal/30">
+        <div>
+          <div className="mono text-[.58rem] text-signal uppercase tracking-[.22em] font-bold">
+            coach mode
+          </div>
+          <div className="font-display text-[1.25rem] text-ink leading-tight mt-1">
+            Smart schedule reminders
+          </div>
+        </div>
         <div className="mono text-[.7rem] text-mute leading-relaxed">
-          tägliche erinnerung zwischen 07:00–21:00 · motivations-zitat + reminder. jederzeit in den settings ausschaltbar.
+          Training, meals, cardio, supplements and sleep can ping at the exact start time. Routine and family reminders stay optional in Settings.
         </div>
         <div className="flex gap-2 mt-1">
           <button className="btn flex-1" onClick={dismiss} disabled={busy}>later</button>
           <button className="btn-primary flex-1" onClick={enable} disabled={busy}>
-            {busy ? "…" : "enable"}
+            {busy ? "..." : "enable"}
           </button>
         </div>
       </div>

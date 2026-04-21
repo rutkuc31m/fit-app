@@ -267,6 +267,51 @@ export default function Today() {
         </button>
       </div>
 
+      <div className="mission-hero p-4">
+        <div className="relative z-10 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="mono text-[.58rem] text-signal uppercase tracking-[.24em] font-bold">
+              six month cut
+            </div>
+            <div
+              className="font-display text-[2rem] min-[420px]:text-[2.35rem] text-ink leading-none mt-1"
+              style={{ fontVariationSettings: '"SOFT" 35, "opsz" 96', fontWeight: 700 }}
+            >
+              {sw.toFixed(0)} <span className="text-mute text-[1.25rem]">to</span> {tw.toFixed(0)}
+              <span className="text-[.9rem] text-ink2 font-light ml-2">kg</span>
+            </div>
+            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-2 leading-relaxed">
+              fat loss · smaller waist · keep muscle
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="mono text-[.56rem] text-mute uppercase tracking-[.18em]">lean target</div>
+            <div className="mono text-[1.05rem] text-cyan font-bold tabular-nums mt-[2px]">10-13%</div>
+            <div className="mono text-[.54rem] text-mute uppercase tracking-[.16em]">body fat</div>
+          </div>
+        </div>
+        <div className="relative z-10 grid grid-cols-3 gap-2 mt-4">
+          <div className="metric-tile">
+            <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em]">current</div>
+            <div className="mono text-sm text-ink tabular-nums mt-1">
+              {currentWeight != null ? currentWeight.toFixed(1) : "--"}<span className="text-mute text-[.62rem] ml-1">kg</span>
+            </div>
+          </div>
+          <div className="metric-tile">
+            <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em]">lost</div>
+            <div className="mono text-sm text-lime tabular-nums mt-1">
+              {lost.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span>
+            </div>
+          </div>
+          <div className="metric-tile">
+            <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em]">left</div>
+            <div className="mono text-sm text-amber tabular-nums mt-1">
+              {Math.max(0, totalJourney - lost).toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Phase transition celebration */}
       {isPhaseFirstDay && (
         <div className="card p-3 text-center border" style={{ borderColor: `${phase.color}66`, background: `${phase.color}0a` }}>

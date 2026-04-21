@@ -10,11 +10,11 @@
     color: theme(colors.ink);
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
-    --page-glow-a: rgba(48,209,88,.04);
-    --page-glow-b: rgba(100,210,255,.025);
+    --page-glow-a: rgba(48,209,88,.035);
+    --page-glow-b: rgba(251,191,36,.018);
     background:
-      radial-gradient(900px 500px at 15% -10%, var(--page-glow-a), transparent 55%),
-      radial-gradient(700px 400px at 100% 0%, var(--page-glow-b), transparent 55%),
+      linear-gradient(180deg, var(--page-glow-a), transparent 260px),
+      linear-gradient(115deg, transparent 0 62%, var(--page-glow-b) 62% 100%),
       theme(colors.bg);
   }
   input, button, select, textarea { font: inherit; color: inherit; }
@@ -38,7 +38,10 @@
   .mono { font-family: theme(fontFamily.mono); font-variant-numeric: tabular-nums; }
   .caps { text-transform: uppercase; letter-spacing: .14em; font-weight: 600; }
 
-  .card { @apply bg-surface border border-line/70 rounded-2xl relative; }
+  .card {
+    @apply bg-surface border border-line/70 rounded-lg relative;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 18px 48px -32px rgba(0,0,0,.85);
+  }
   .card-title { @apply mono text-[.66rem] text-ink2 uppercase tracking-[.22em] font-semibold; }
 
   .section-label {
@@ -88,16 +91,43 @@
   .hero-card {
     position: relative;
     background:
-      radial-gradient(800px 300px at 0% 0%, rgba(255,55,95,.08), transparent 55%),
-      radial-gradient(800px 300px at 100% 100%, rgba(48,209,88,.08), transparent 55%),
-      linear-gradient(180deg, theme(colors.surface) 0%, #151517 100%);
+      linear-gradient(135deg, rgba(74,222,128,.1), transparent 38%),
+      linear-gradient(180deg, #18191b 0%, #101112 100%);
     border: 1px solid theme(colors.line);
     box-shadow: theme(boxShadow.glow);
-    border-radius: 22px;
+    border-radius: 10px;
   }
 
   .page {
-    @apply relative z-10 max-w-[680px] mx-auto px-[14px] pt-4 pb-[128px] flex flex-col gap-[14px];
+    @apply relative z-10 max-w-[760px] mx-auto px-[14px] pt-4 pb-[128px] flex flex-col gap-[14px];
+  }
+
+  .mission-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 1px solid rgba(74,222,128,.26);
+    background:
+      linear-gradient(90deg, rgba(74,222,128,.1), transparent 36%),
+      linear-gradient(180deg, #1a1b1d 0%, #0f1011 100%);
+    box-shadow: 0 28px 70px -44px rgba(74,222,128,.5), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .mission-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(90deg, #000, transparent 78%);
+  }
+  .metric-tile {
+    @apply rounded-lg border border-line/70 bg-bg2/70 px-3 py-2 min-w-0;
+  }
+  .soft-band {
+    @apply rounded-lg border border-line/70 bg-bg2/50;
   }
 
   /* Corner bracket frame — subtle structural decoration */
@@ -199,14 +229,14 @@
   :focus-visible { outline: 1px solid theme(colors.lime); outline-offset: 2px; border-radius: 6px; }
 
   /* Per-page atmosphere — subtle tints via CSS vars */
-  body:has(.page-dashboard) { --page-glow-a: rgba(48,209,88,.05);  --page-glow-b: rgba(255,159,10,.025); }
-  body:has(.page-today)     { --page-glow-a: rgba(255,159,10,.045); --page-glow-b: rgba(100,210,255,.02); }
-  body:has(.page-log)       { --page-glow-a: rgba(255,159,10,.045); --page-glow-b: rgba(48,209,88,.02);   }
-  body:has(.page-training)  { --page-glow-a: rgba(255,55,95,.04);  --page-glow-b: rgba(48,209,88,.02);   }
-  body:has(.page-progress)  { --page-glow-a: rgba(255,55,95,.035); --page-glow-b: rgba(48,209,88,.03);   }
-  body:has(.page-habits)    { --page-glow-a: rgba(48,209,88,.05);  --page-glow-b: rgba(255,159,10,.02);  }
-  body:has(.page-checkin)   { --page-glow-a: rgba(100,210,255,.045); --page-glow-b: rgba(191,90,242,.02); }
-  body:has(.page-settings)  { --page-glow-a: rgba(100,210,255,.02); --page-glow-b: transparent;          }
+  body:has(.page-dashboard) { --page-glow-a: rgba(48,209,88,.04);  --page-glow-b: rgba(251,191,36,.02); }
+  body:has(.page-today)     { --page-glow-a: rgba(48,209,88,.04); --page-glow-b: rgba(125,211,252,.018); }
+  body:has(.page-log)       { --page-glow-a: rgba(251,191,36,.035); --page-glow-b: rgba(48,209,88,.018); }
+  body:has(.page-training)  { --page-glow-a: rgba(251,113,133,.035); --page-glow-b: rgba(48,209,88,.018); }
+  body:has(.page-progress)  { --page-glow-a: rgba(96,165,250,.03); --page-glow-b: rgba(48,209,88,.025); }
+  body:has(.page-habits)    { --page-glow-a: rgba(48,209,88,.035); --page-glow-b: rgba(251,191,36,.018); }
+  body:has(.page-checkin)   { --page-glow-a: rgba(125,211,252,.035); --page-glow-b: rgba(196,181,253,.018); }
+  body:has(.page-settings)  { --page-glow-a: rgba(125,211,252,.018); --page-glow-b: transparent; }
 
   /* Ring gauge — SVG progress */
   .ring-track { stroke: theme(colors.surface2); }
@@ -228,7 +258,7 @@
   .gif-modal-content {
     background: theme(colors.surface);
     border: 1px solid theme(colors.line);
-    border-radius: 16px;
+    border-radius: 10px;
     padding: 12px;
     max-width: 420px;
     width: 100%;

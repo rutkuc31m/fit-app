@@ -184,8 +184,8 @@ CREATE TABLE IF NOT EXISTS notification_prefs (
   meal_enabled    INTEGER DEFAULT 1,
   supp_enabled    INTEGER DEFAULT 1,
   cardio_enabled  INTEGER DEFAULT 1,
-  routine_enabled INTEGER DEFAULT 1,
-  family_enabled  INTEGER DEFAULT 1,
+  routine_enabled INTEGER DEFAULT 0,
+  family_enabled  INTEGER DEFAULT 0,
   sleep_enabled   INTEGER DEFAULT 1
 );
 
@@ -230,11 +230,14 @@ addDailyLogCol("sent_at", "TEXT");
 addDailyLogCol("updated_at", "TEXT");
 
 const prefCols = db.prepare("PRAGMA table_info(notification_prefs)").all().map((c) => c.name);
-const addPrefCol = (col) => {
+const addPrefCol = (col, def = 1) => {
   if (!prefCols.includes(col)) {
-    try { db.exec(`ALTER TABLE notification_prefs ADD COLUMN ${col} INTEGER DEFAULT 1;`); } catch {}
+    try { db.exec(`ALTER TABLE notification_prefs ADD COLUMN ${col} INTEGER DEFAULT ${def};`); } catch {}
   }
 };
-["cardio_enabled", "routine_enabled", "family_enabled", "sleep_enabled"].forEach(addPrefCol);
+addPrefCol("cardio_enabled", 1);
+addPrefCol("routine_enabled", 0);
+addPrefCol("family_enabled", 0);
+addPrefCol("sleep_enabled", 1);
 
 export default db;

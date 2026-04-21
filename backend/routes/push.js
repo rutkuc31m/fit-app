@@ -60,8 +60,8 @@ r.get("/prefs", (req, res) => {
       meal_enabled: 1,
       supp_enabled: 1,
       cardio_enabled: 1,
-      routine_enabled: 1,
-      family_enabled: 1,
+      routine_enabled: 0,
+      family_enabled: 0,
       sleep_enabled: 1
     };
   }
@@ -102,8 +102,8 @@ r.put("/prefs", (req, res) => {
     meal_enabled    == null ? 1 : +!!meal_enabled,
     supp_enabled    == null ? 1 : +!!supp_enabled,
     cardio_enabled  == null ? 1 : +!!cardio_enabled,
-    routine_enabled == null ? 1 : +!!routine_enabled,
-    family_enabled  == null ? 1 : +!!family_enabled,
+    routine_enabled == null ? 0 : +!!routine_enabled,
+    family_enabled  == null ? 0 : +!!family_enabled,
     sleep_enabled   == null ? 1 : +!!sleep_enabled
   );
   res.json({ ok: true });

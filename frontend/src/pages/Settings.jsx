@@ -7,48 +7,35 @@ import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, push
 const numberOrBlank = (value) => value === "" ? "" : Number(value);
 const numberOrNull = (value) => value === "" || value == null || Number.isNaN(Number(value)) ? null : Number(value);
 
+const DEFAULT_PREFS = {
+  quote_enabled: 1,
+  workout_enabled: 1,
+  meal_enabled: 1,
+  supp_enabled: 1,
+  cardio_enabled: 1,
+  routine_enabled: 0,
+  family_enabled: 0,
+  sleep_enabled: 1
+};
+
+const PREF_ROWS = [
+  { key: "quote_enabled", label: "Daily quote", sub: "07:00 motivation" },
+  { key: "workout_enabled", label: "Training", sub: "Check-in, gym prep and workout blocks" },
+  { key: "meal_enabled", label: "Meals", sub: "OMAD, shake and nutrition windows" },
+  { key: "supp_enabled", label: "Supplements", sub: "Morning and evening supplement blocks" },
+  { key: "cardio_enabled", label: "Cardio", sub: "Walks, LISS, HIIT and football blocks" },
+  { key: "sleep_enabled", label: "Sleep", sub: "Bedtime target and wind-down" },
+  { key: "routine_enabled", label: "Routine", sub: "Wake-up, commute, prep and transitions" },
+  { key: "family_enabled", label: "Family", sub: "Kids and family blocks" }
+];
+
 export default function Settings() {
   const { t } = useTranslation();
   const { user, logout, refresh } = useAuth();
   const [pushStatus, setPushStatus] = useState("default");
   const [pushBusy, setPushBusy] = useState(false);
-  const [prefs, setPrefs] = useState({
-    quote_enabled: 1,
-    workout_enabled: 1,
-    meal_enabled: 1,
-    supp_enabled: 1,
-    cardio_enabled: 1,
-    routine_enabled: 1,
-    family_enabled: 1,
-    sleep_enabled: 1
-  });
+  const [prefs, setPrefs] = useState(DEFAULT_PREFS);
   const [prefsBusy, setPrefsBusy] = useState(false);
-
-  useEffect(() => { getPushStatus().then(setPushStatus); }, []);
-  useEffect(() => {
-    api.get("/push/prefs").then(setPrefs).catch(() => {});
-  }, []);
-
-  const onPushEnable = async () => {
-    setPushBusy(true);
-    try { setPushStatus(await subscribeToPush()); }
-    catch (e) { setPushStatus(e.message || "denied"); }
-    finally { setPushBusy(false); }
-  };
-  const onPushDisable = async () => {
-    setPushBusy(true);
-    try { await unsubscribeFromPush(); setPushStatus("default"); }
-    finally { setPushBusy(false); }
-  };
-  const onPushTest = async () => { try { await sendTestPush(); } catch {} };
-
-  const togglePref = async (key) => {
-    const next = { ...prefs, [key]: prefs[key] ? 0 : 1 };
-    setPrefs(next);
-    setPrefsBusy(true);
-    try { await api.put("/push/prefs", next); }
-    finally { setPrefsBusy(false); }
-  };
   const [form, setForm] = useState({
     name: user?.name || "",
     start_date: user?.start_date || "2026-04-20",
@@ -58,6 +45,39 @@ export default function Settings() {
   });
   const [msg, setMsg] = useState(null);
 
+  useEffect(() => { getPushStatus().then(setPushStatus); }, []);
+  useEffect(() => {
+    api.get("/push/prefs").then((p) => setPrefs({ ...DEFAULT_PREFS, ...p })).catch(() => {});
+  }, []);
+
+  const flash = (text) => {
+    setMsg(text);
+    setTimeout(() => setMsg(null), 1500);
+  };
+
+  const onPushEnable = async () => {
+    setPushBusy(true);
+    try { setPushStatus(await subscribeToPush()); }
+    catch (e) { setPushStatus(e.message || "denied"); }
+    finally { setPushBusy(false); }
+  };
+
+  const onPushDisable = async () => {
+    setPushBusy(true);
+    try { await unsubscribeFromPush(); setPushStatus("default"); }
+    finally { setPushBusy(false); }
+  };
+
+  const onPushTest = async () => { try { await sendTestPush(); } catch {} };
+
+  const togglePref = async (key) => {
+    const next = { ...DEFAULT_PREFS, ...prefs, [key]: prefs[key] ? 0 : 1 };
+    setPrefs(next);
+    setPrefsBusy(true);
+    try { await api.put("/push/prefs", next); }
+    finally { setPrefsBusy(false); }
+  };
+
   const save = async () => {
     await api.put("/auth/me", {
       ...form,
@@ -66,12 +86,21 @@ export default function Settings() {
       height_cm: numberOrNull(form.height_cm)
     });
     await refresh();
-    setMsg(t("settings.saved"));
-    setTimeout(() => setMsg(null), 1500);
+    flash(t("settings.saved"));
   };
 
   return (
     <div className="page page-settings">
+      <div className="mission-hero p-4">
+        <div className="relative z-10">
+          <div className="mono text-[.58rem] text-signal uppercase tracking-[.24em] font-bold">system setup</div>
+          <div className="font-display text-[1.65rem] text-ink leading-none mt-1">Keep the cut quiet, precise and useful.</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-3">
+            Smart reminders · clean data · no noise by default
+          </div>
+        </div>
+      </div>
+
       <div className="section-label">{t("settings.profile")}</div>
       <div className="card p-4 flex flex-col gap-3">
         <label className="flex flex-col gap-1">
@@ -97,13 +126,16 @@ export default function Settings() {
         {msg && <div className="mono text-xs text-signal text-center">{msg}</div>}
       </div>
 
-{pushSupported() && (
+      {pushSupported() && (
         <>
-          <div className="section-label">Push Bildirimleri</div>
-          <div className="card p-3 flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
-                07:00 özlü söz · günlük hatırlatmalar
+          <div className="section-label">Notifications</div>
+          <div className="card p-3 flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">coach mode</div>
+                <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-[2px]">
+                  schedule starts · high-value reminders first
+                </div>
               </div>
               <div className="mono text-[.58rem] uppercase tracking-[.14em]"
                 style={{ color: pushStatus === "subscribed" ? "#4ade80" : pushStatus === "denied" ? "#fb7185" : "#6d6d70" }}>
@@ -111,49 +143,41 @@ export default function Settings() {
               </div>
             </div>
             {pushStatus === "subscribed" ? (
-              <div className="flex gap-2">
-                <button className="btn flex-1" onClick={onPushTest} disabled={pushBusy}>send test</button>
-                <button className="btn flex-1 text-warn" onClick={onPushDisable} disabled={pushBusy}>disable</button>
+              <div className="grid grid-cols-2 gap-2">
+                <button className="btn" onClick={onPushTest} disabled={pushBusy}>send test</button>
+                <button className="btn text-warn" onClick={onPushDisable} disabled={pushBusy}>disable</button>
               </div>
             ) : pushStatus === "denied" ? (
-              <div className="mono text-[.6rem] text-warn">Blocked — enable in browser settings</div>
+              <div className="mono text-[.64rem] text-warn">Blocked in browser settings.</div>
             ) : (
               <button className="btn-primary" onClick={onPushEnable} disabled={pushBusy}>
-                {pushBusy ? "…" : "enable push"}
+                {pushBusy ? "..." : "enable push"}
               </button>
             )}
           </div>
 
           {pushStatus === "subscribed" && (
             <>
-              <div className="section-label">Bildirim Kategorileri</div>
+              <div className="section-label">Reminder Groups</div>
               <div className="card p-3 flex flex-col gap-[2px]">
-                {[
-                  { key: "quote_enabled",   label: "Günlük özlü söz",     sub: "Her sabah 07:00" },
-                  { key: "workout_enabled", label: "Antrenman hatırlatmaları", sub: "Gym hazırlık · post-workout · check-in" },
-                  { key: "meal_enabled",    label: "Öğün hatırlatmaları",  sub: "OMAD · oruç · düşük kalori · su" },
-                  { key: "supp_enabled",    label: "Supplement & uyku",    sub: "21:00 Mg+B12 · 22:45 uyku hazırlığı" },
-                ].concat([
-                  { key: "cardio_enabled",  label: "Cardio & activity", sub: "Walks · short breaks · LISS · HIIT" },
-                  { key: "routine_enabled", label: "Routine",           sub: "Wake-up · commute · prep · transitions" },
-                  { key: "family_enabled",  label: "Family",            sub: "Kids and family blocks" },
-                  { key: "sleep_enabled",   label: "Sleep",             sub: "Bedtime target" },
-                ]).map(({ key, label, sub }) => (
-                  <label key={key} className="flex items-center justify-between py-2 border-b border-line/40 last:border-0 cursor-pointer">
-                    <div>
-                      <div className="text-[.76rem] text-ink">{label}</div>
-                      <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em] mt-[2px]">{sub}</div>
+                {PREF_ROWS.map(({ key, label, sub }) => (
+                  <label key={key} className="flex items-center justify-between gap-3 py-2 border-b border-line/40 last:border-0 cursor-pointer">
+                    <div className="min-w-0">
+                      <div className="text-[.78rem] text-ink">{label}</div>
+                      <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em] mt-[2px] leading-tight">{sub}</div>
                     </div>
-                    <div
+                    <button
+                      type="button"
+                      aria-label={`${label} notifications`}
                       className="relative w-10 h-6 rounded-full transition-colors duration-200 shrink-0"
-                      style={{ background: prefs[key] ? "#30d158" : "#3a3a3c" }}
+                      style={{ background: prefs[key] ? "#4ade80" : "#3a3a3c" }}
                       onClick={() => !prefsBusy && togglePref(key)}
                     >
-                      <div
+                      <span
                         className="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
                         style={{ transform: prefs[key] ? "translateX(20px)" : "translateX(4px)" }}
                       />
-                    </div>
+                    </button>
                   </label>
                 ))}
               </div>
@@ -165,7 +189,7 @@ export default function Settings() {
       <div className="section-label">Shortcut Auto-Sync</div>
       <div className="card p-3 flex flex-col gap-2">
         <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
-          iphone shortcut → steps otomatik sync
+          iPhone shortcut to API steps sync
         </div>
         <button
           className="btn"
@@ -173,8 +197,7 @@ export default function Settings() {
             const token = getToken();
             if (!token) return;
             navigator.clipboard.writeText(token);
-            setMsg("token copied");
-            setTimeout(() => setMsg(null), 1500);
+            flash("token copied");
           }}
         >
           Copy API token
@@ -183,8 +206,7 @@ export default function Settings() {
           className="btn"
           onClick={() => {
             navigator.clipboard.writeText("https://api.fit.rutkuc.com/api");
-            setMsg("url copied");
-            setTimeout(() => setMsg(null), 1500);
+            flash("url copied");
           }}
         >
           Copy API URL

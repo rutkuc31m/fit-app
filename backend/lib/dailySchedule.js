@@ -100,7 +100,7 @@ function buildDaySchedule(opts) {
   }
 
   if (isTrainingDay) {
-    schedule.push({ time: "18:50", action: "Gym hazirlik", details: "Gym cantasi, su sisesi, kulaklik", category: "routine" });
+    schedule.push({ time: "18:50", action: "Gym hazirlik", details: "Gym cantasi, su sisesi, kulaklik", category: "training" });
     schedule.push({ time: "19:00", action: `GYM - Gun ${dayType}`, details: { A: "Ust Vucut (Push/Pull)", B: "Alt Vucut", C: "Full Body + Kardiyo" }[dayType], category: "training", duration: "45-60dk" });
     if (dayType === "C") {
       schedule.push({ time: "19:45", action: "Post-training LISS", details: `${cardio.liss.durationMin}dk egimli yuruyus bandi veya bisiklet`, category: "cardio" });
