@@ -80,7 +80,9 @@ export const PLAN = {
         { id: "lp", name: "Lat Pulldown",    sets: 3, reps: 10 },
         { id: "fp", name: "Face Pull",       sets: 3, reps: 15 },
         { id: "bc", name: "Bicep Curl",      sets: 3, reps: 12 },
-        { id: "tp", name: "Tricep Pushdown", sets: 3, reps: 12 }
+        { id: "tp", name: "Tricep Pushdown", sets: 3, reps: 12 },
+        { id: "db", name: "Dead Bug",        sets: 2, reps: 10, unit: "each",
+          coreFinisher: true, reason: "core_stability" }
       ]
     },
     B: {
@@ -93,14 +95,10 @@ export const PLAN = {
         { id: "lc", name: "Leg Curl",           sets: 3, reps: 12 },
         { id: "le", name: "Leg Extension",      sets: 3, reps: 12 },
         { id: "cr", name: "Calf Raise",         sets: 3, reps: 15 },
-        { id: "pl", name: "Plank",              sets: 3, reps: 45, unit: "s" },
-        // Phase 1 additions — core & back rehab
-        { id: "db", name: "Dead Bug",           sets: 3, reps: 10, unit: "each",
-          phase1Only: true, reason: "back_core" },
-        { id: "bd", name: "Bird Dog",           sets: 3, reps: 10, unit: "each",
-          phase1Only: true, reason: "back_core" },
-        { id: "gb", name: "Glute Bridge",       sets: 3, reps: 15,
-          phase1Only: true, reason: "back_core" }
+        { id: "pl", name: "Plank",              sets: 3, reps: 45, unit: "s",
+          coreFinisher: true, reason: "core_stability" },
+        { id: "gb", name: "Glute Bridge",       sets: 2, reps: 15,
+          coreFinisher: true, reason: "posterior_chain_stability" }
       ]
     },
     C: {
@@ -113,6 +111,8 @@ export const PLAN = {
         { id: "gs", name: "Goblet Squat",        sets: 3, reps: 12,
           phase1Alt: { name: "Leg Press (light)", reason: "back_safe" } },
         { id: "lr", name: "Lateral Raise",       sets: 3, reps: 15 },
+        { id: "bd", name: "Bird Dog",            sets: 2, reps: 10, unit: "each",
+          coreFinisher: true, reason: "core_stability" },
         { id: "cd", name: "Cardio (incline walk)", sets: 1, reps: 20, unit: "min" }
       ]
     }

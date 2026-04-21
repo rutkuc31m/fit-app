@@ -152,6 +152,7 @@
   "training_v2": {
     "substituted": "Substituted for back safety",
     "core_rehab": "Core & Rehab",
+    "core_stability": "Core & Stability",
     "phase1_note": "Phase 1: back-safe modifications active"
   },
   "cardio": {

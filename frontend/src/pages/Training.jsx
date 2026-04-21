@@ -82,8 +82,9 @@ export default function Training() {
   const [rest, setRest] = useState(null); // { seconds } when active
   const [previewGif, setPreviewGif] = useState(null);
 
-  const mainExercises = day.exercises.filter((e) => !e.phase1Only);
-  const coreExercises = day.exercises.filter((e) => e.phase1Only);
+  const mainExercises = day.exercises.filter((e) => !e.phase1Only && !e.coreFinisher);
+  const coreExercises = day.exercises.filter((e) => e.phase1Only || e.coreFinisher);
+  const hasPhase1Core = coreExercises.some((e) => e.phase1Only);
 
   const load = async () => {
     const s = await api.get(`/training/session?date=${date}&day_type=${dayType}`);
@@ -294,12 +295,14 @@ export default function Training() {
       {/* Main exercises */}
       {mainExercises.map(renderExerciseCard)}
 
-      {/* Core & Rehab section (Phase 1 only) */}
+      {/* Core & stability finisher */}
       {coreExercises.length > 0 && (
         <>
           <div className="section-label flex items-center gap-2">
-            <span>{t("training_v2.core_rehab")}</span>
-            <span className="mono text-[.55rem] text-warn uppercase tracking-[.14em] bg-warn/10 px-[6px] py-[1px] rounded">P1</span>
+            <span>{t("training_v2.core_stability", "Core & Stability")}</span>
+            {hasPhase1Core && (
+              <span className="mono text-[.55rem] text-warn uppercase tracking-[.14em] bg-warn/10 px-[6px] py-[1px] rounded">P1</span>
+            )}
           </div>
           {coreExercises.map(renderExerciseCard)}
         </>
