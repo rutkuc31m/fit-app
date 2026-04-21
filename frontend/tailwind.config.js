@@ -47,9 +47,9 @@ export default {
         cool:    "#7dd3fc"
       },
       fontFamily: {
-        mono:    ["'IBM Plex Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
-        sans:    ["'Bricolage Grotesque'", "system-ui", "-apple-system", "sans-serif"],
-        display: ["'Fraunces'", "'Bricolage Grotesque'", "Georgia", "serif"]
+        mono:    ["'JetBrains Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        sans:    ["'Inter'", "system-ui", "-apple-system", "sans-serif"],
+        display: ["'Inter Tight'", "'Inter'", "system-ui", "-apple-system", "sans-serif"]
       },
       borderRadius: { xl: "16px", lg: "12px", "2xl": "22px" },
       boxShadow: {

@@ -7,6 +7,7 @@
   html, body, #root { background: theme(colors.bg); min-height: 100vh; min-height: 100dvh; }
   body {
     font-family: theme(fontFamily.sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     color: theme(colors.ink);
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
@@ -36,16 +37,16 @@
 
 @layer components {
   .mono { font-family: theme(fontFamily.mono); font-variant-numeric: tabular-nums; }
-  .caps { text-transform: uppercase; letter-spacing: .14em; font-weight: 600; }
+  .caps { text-transform: uppercase; letter-spacing: .11em; font-weight: 650; }
 
   .card {
     @apply bg-surface border border-line/70 rounded-lg relative;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 18px 48px -32px rgba(0,0,0,.85);
   }
-  .card-title { @apply mono text-[.66rem] text-ink2 uppercase tracking-[.22em] font-semibold; }
+  .card-title { @apply mono text-[.66rem] text-ink2 uppercase tracking-[.14em] font-semibold; }
 
   .section-label {
-    @apply mono text-[.66rem] text-mute uppercase tracking-[.22em] flex items-center gap-[10px] px-1 select-none;
+    @apply mono text-[.66rem] text-mute uppercase tracking-[.16em] flex items-center gap-[10px] px-1 select-none;
   }
   .section-label::before { content: ""; width: 10px; height: 1px; background: theme(colors.line2); }
   .section-label::after  { content: ""; flex: 1; height: 1px; background: theme(colors.line); }
@@ -137,14 +138,15 @@
   }
   .page-hero-title {
     @apply font-display text-[1.7rem] min-[420px]:text-[2rem] text-ink leading-none mt-1;
-    font-variation-settings: "SOFT" 35, "opsz" 96;
+    letter-spacing: 0;
+    line-height: 1.03;
     font-weight: 700;
   }
   .page-hero-sub {
-    @apply mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-3 leading-relaxed;
+    @apply mono text-[.62rem] text-mute uppercase tracking-[.11em] mt-3 leading-relaxed;
   }
   .metric-label {
-    @apply mono text-[.52rem] text-mute uppercase tracking-[.18em];
+    @apply mono text-[.52rem] text-mute uppercase tracking-[.12em];
   }
   .metric-value {
     @apply mono text-sm text-ink tabular-nums mt-1;
