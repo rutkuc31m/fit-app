@@ -207,8 +207,8 @@ export function LiveClock({ className = "" }) {
 
 /* ─────────── Number stepper (good for quick weight / reps) ─────────── */
 export function Stepper({ value, onChange, step = 0.1, min, max, suffix, big = false }) {
-  const dec = () => onChange(Math.max(min ? -Infinity, +(Number(value || 0) - step).toFixed(2)));
-  const inc = () => onChange(Math.min(max ? Infinity,  +(Number(value || 0) + step).toFixed(2)));
+  const dec = () => onChange(Math.max(min ?? -Infinity, +(Number(value || 0) - step).toFixed(2)));
+  const inc = () => onChange(Math.min(max ?? Infinity, +(Number(value || 0) + step).toFixed(2)));
   return (
     <div className="flex items-stretch gap-2">
       <button type="button" className="step-btn" onClick={dec} aria-label="decrement">−</button>
