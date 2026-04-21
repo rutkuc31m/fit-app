@@ -13,7 +13,16 @@ echo "caddy: active"
 
 echo ""
 echo "=== api ==="
-curl -fsS --max-time 8 "$API_BASE/health"
+for attempt in {1..12}; do
+  if curl -fsS --max-time 8 "$API_BASE/health"; then
+    break
+  fi
+  if [ "$attempt" -eq 12 ]; then
+    echo "api health failed after retries" >&2
+    exit 1
+  fi
+  sleep 1
+done
 echo ""
 
 echo ""
