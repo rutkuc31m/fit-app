@@ -120,9 +120,18 @@ export const PLAN = {
 };
 
 // ─── Helpers ───
-export const fmtDate = (d) => (d instanceof Date ? d : new Date(d)).toISOString().split("T")[0];
+const pad2 = (n) => String(n).padStart(2, "0");
+const localNoon = (dateStr) => {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0, 0);
+};
+
+export const fmtDate = (d) => {
+  const date = d instanceof Date ? d : localNoon(d);
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+};
 export const todayStr = () => fmtDate(new Date());
-export const daysBetween = (a, b) => Math.floor((new Date(b) - new Date(a)) / 86400000);
+export const daysBetween = (a, b) => Math.round((localNoon(b) - localNoon(a)) / 86400000);
 
 export const getWeekNum = (dateStr = todayStr(), startDate = PLAN.startDate) =>
   Math.max(1, Math.floor(daysBetween(startDate, dateStr) / 7) + 1);
@@ -131,7 +140,7 @@ export const getPhase = (weekNum) =>
   PLAN.phases.find((p) => weekNum >= p.weeks[0] && weekNum <= p.weeks[1]) || PLAN.phases[PLAN.phases.length - 1];
 
 export const getDayPlan = (dateStr = todayStr()) => {
-  const dow = new Date(dateStr).getDay();
+  const dow = localNoon(dateStr).getDay();
   return PLAN.weeklyPattern[dow];
 };
 
