@@ -66,7 +66,7 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
-        {children ? (
+        {children ?? (
           <>
             <div className={`mono font-bold leading-none ${over ? "text-warn" : "text-signal"}`} style={{ fontSize: size * 0.26 }}>
               {Math.round(value)}
