@@ -161,7 +161,7 @@ export default function Checkin() {
                 <div className="card-title">{f.label}</div>
                 <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{data[f.id] ?? 0}%</div>
               </div>
-              <input type="range" min="0" max="100" step="5" value={data[f.id] ? 80}
+              <input type="range" min="0" max="100" step="5" value={data[f.id] ?? 80}
                 onChange={(e) => setField(f.id, +e.target.value)} className={`w-full accent-${c}`} />
             </div>
           );
