@@ -22,9 +22,13 @@ export default function Login() {
 
   return (
     <div className="page pt-[80px]">
-      <div className="text-center mb-2">
-        <div className="inline-block w-[44px] h-[44px] rounded-lg bg-signal grid place-items-center text-[#000000] mono font-bold text-xl shadow-[0_0_30px_-6px_theme(colors.signal)]">F</div>
-        <div className="mt-3 mono text-xs caps text-ink2">fit · rutkuc</div>
+      <div className="page-hero">
+        <div className="relative z-10 text-center">
+          <div className="mx-auto w-[48px] h-[48px] rounded-lg bg-signal grid place-items-center text-[#000000] mono font-bold text-xl shadow-[0_0_30px_-6px_theme(colors.signal)]">F</div>
+          <div className="page-hero-kicker mt-4">fit rutkuc</div>
+          <div className="page-hero-title">Six months. One direction.</div>
+          <div className="page-hero-sub">93 to 73 · fat loss · waist down · muscle kept</div>
+        </div>
       </div>
 
       <form onSubmit={submit} className="card p-4 flex flex-col gap-3">
@@ -41,13 +45,12 @@ export default function Login() {
 
         {err && <div className="mono text-xs text-warn">{t(`auth.${err}`, err)}</div>}
 
-        <button className="btn-primary" disabled={busy}>{busy ? "…" : t(`auth.${mode}`)}</button>
+        <button className="btn-primary" disabled={busy}>{busy ? "..." : t(`auth.${mode}`)}</button>
 
         <button type="button" className="mono text-xs text-ink2 hover:text-signal transition"
           onClick={() => { setMode(mode === "login" ? "register" : "login"); setErr(null); }}>
           {mode === "login" ? t("auth.or_register") : t("auth.or_login")}
         </button>
-
       </form>
     </div>
   );

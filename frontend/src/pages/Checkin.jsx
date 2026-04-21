@@ -85,6 +85,28 @@ export default function Checkin() {
 
   return (
     <div className="page page-checkin">
+      <div className="page-hero">
+        <div className="relative z-10">
+          <div className="page-hero-kicker">weekly check-in</div>
+          <div className="page-hero-title">Measure the signal.</div>
+          <div className="page-hero-sub">Photos · waist · adherence · recovery</div>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <div className="metric-tile">
+              <div className="metric-label">week</div>
+              <div className="metric-value text-cyan">W{String(week).padStart(2, "0")}</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">fields</div>
+              <div className="metric-value">{visible.length}</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">measure</div>
+              <div className="metric-value text-amber">{isBiweekly ? "full" : "core"}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="section-label">{t("checkin.title")} · W{week}</div>
 
       <Brackets>

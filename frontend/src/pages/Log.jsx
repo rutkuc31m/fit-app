@@ -171,6 +171,32 @@ export default function Log() {
 
   return (
     <div className="page page-log">
+      <div className="page-hero">
+        <div className="relative z-10">
+          <div className="page-hero-kicker">nutrition control</div>
+          <div className="page-hero-title">Log fast. Stay honest.</div>
+          <div className="page-hero-sub">Scan · edit grams · protect protein</div>
+          <div className="grid grid-cols-4 gap-2 mt-4">
+            <div className="metric-tile">
+              <div className="metric-label">kcal</div>
+              <div className="metric-value text-amber">{Math.round(totals.kcal)}</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">protein</div>
+              <div className="metric-value text-lime">{Math.round(totals.protein)}g</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">carbs</div>
+              <div className="metric-value text-amber">{Math.round(totals.carbs)}g</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">fat</div>
+              <div className="metric-value text-ink2">{Math.round(totals.fat)}g</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Date navigator */}
       <div className="card p-2 flex items-center gap-2">
         <button className="btn-icon" aria-label="prev day" onClick={() => shiftDate(-1)}>
@@ -190,21 +216,8 @@ export default function Log() {
         )}
       </div>
 
-      {/* Totals */}
-      <div className="card p-4">
-        <div className="flex justify-between items-baseline mb-2">
-          <div className="card-title">{t("log.totals")}</div>
-          <div className="mono text-amber text-sm font-bold tabular-nums">{Math.round(totals.kcal)} <span className="text-amber/70 text-[.66rem]">kcal</span></div>
-        </div>
-        <div className="flex gap-3 mono text-xs">
-          <span><span className="text-lime">P</span> <span className="text-ink tabular-nums">{Math.round(totals.protein)}g</span></span>
-          <span><span className="text-amber">C</span> <span className="text-ink tabular-nums">{Math.round(totals.carbs)}g</span></span>
-          <span><span className="text-ink2">F</span> <span className="text-ink tabular-nums">{Math.round(totals.fat)}g</span></span>
-        </div>
-      </div>
-
       {/* Action buttons */}
-      <div className="flex gap-2">
+      <div className="action-row">
         <button className="btn flex-1 flex items-center justify-center gap-2" onClick={openScan}>
           <Icon.scan size={15} /> Tarama
         </button>
@@ -219,10 +232,10 @@ export default function Log() {
       )}
 
       {allItems.length > 0 && (
-        <div className="card overflow-hidden">
+        <div className="list-card">
           <div className="divide-y divide-line">
             {allItems.map((it) => (
-              <div key={it.id} className="px-4 py-2 flex items-start justify-between gap-3">
+              <div key={it.id} className="px-4 py-3 flex items-start justify-between gap-3">
                 <button type="button" className="min-w-0 flex-1 text-left" onClick={() => openEdit(it)}>
                   {/* Name: 2-line clamp instead of truncate */}
                   <div className="text-sm text-ink leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
@@ -274,12 +287,12 @@ export default function Log() {
 
       {/* Add item modal */}
       {draft && (
-        <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
-          <div className="card w-full max-w-md p-4 flex flex-col gap-3 relative max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-32px)] overflow-y-auto">
+        <div className="modal-shell">
+          <div className="modal-panel">
             <div className="section-label">{editingItemId ? t("log.edit_item") : t("log.add_item")}</div>
 
             {/* Mode toggle */}
-            <div className="card p-1 flex gap-1">
+            <div className="soft-band p-1 flex gap-1">
               {["gram", "piece"].map((k) => (
                 <button key={k} onClick={() => setMode(k)}
                   className={`flex-1 mono text-[.66rem] caps py-[8px] rounded-lg transition ${mode === k ? "bg-signal text-[#000000] font-bold" : "text-ink2 hover:bg-bg2"}`}>
@@ -301,7 +314,7 @@ export default function Log() {
             {mode === "piece" && (
               <>
                 {pieceFood ? (
-                  <div className="card p-3 border-line2">
+                  <div className="soft-band p-3 border-line2">
                     <div className="flex justify-between items-center mb-2">
                       <div className="text-sm text-ink">{pieceFood.name[lang]}</div>
                       <button className="mono text-[.6rem] text-mute hover:text-warn uppercase tracking-[.14em]"
@@ -323,7 +336,7 @@ export default function Log() {
                   <div className="grid grid-cols-3 gap-1 max-h-[180px] overflow-y-auto rounded-xl">
                     {COMMON_FOODS.map((f) => (
                       <button key={f.id} onClick={() => pickPieceFood(f)}
-                        className="card py-[6px] px-2 text-center hover:border-signal/50 transition flex flex-col gap-[1px]">
+                        className="soft-band py-[6px] px-2 text-center hover:border-signal/50 transition flex flex-col gap-[1px]">
                         <div className="text-[.68rem] text-ink leading-tight truncate w-full">{f.name[lang]}</div>
                         <div className="mono text-[.52rem] text-mute">~{f.g_per_piece}g</div>
                       </button>
@@ -387,7 +400,7 @@ export default function Log() {
               </label>
             </div>
 
-            <div className="sticky bottom-[-1rem] -mx-4 -mb-4 flex gap-2 mt-1 p-4 bg-surface/95 border-t border-line/70 backdrop-blur">
+            <div className="modal-actions">
               <button className="btn flex-1" onClick={closeDraft}>{t("log.cancel")}</button>
               <button className="btn-primary flex-1" onClick={saveDraft}>{t("log.save")}</button>
             </div>

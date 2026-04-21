@@ -49,9 +49,34 @@ export default function Progress() {
   };
 
   const last = meas[meas.length - 1];
+  const latestWeight = [...logs].reverse().find((l) => l.weight_kg != null)?.weight_kg ?? null;
+  const lost = latestWeight != null ? Math.max(0, PLAN.startWeight - latestWeight) : 0;
+  const left = Math.max(0, (PLAN.startWeight - PLAN.targetWeight) - lost);
 
   return (
     <div className="page page-progress">
+      <div className="page-hero">
+        <div className="relative z-10">
+          <div className="page-hero-kicker">body data</div>
+          <div className="page-hero-title">Trend over mood.</div>
+          <div className="page-hero-sub">Weight · waist · phase checkpoints</div>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <div className="metric-tile">
+              <div className="metric-label">current</div>
+              <div className="metric-value">{latestWeight != null ? latestWeight.toFixed(1) : "--"}<span className="text-mute text-[.62rem] ml-1">kg</span></div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">lost</div>
+              <div className="metric-value text-lime">{lost.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">left</div>
+              <div className="metric-value text-amber">{left.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="section-label">{t("progress.weight_chart")}</div>
       <div className="card p-4"><WeightChart logs={logs} /></div>
 
@@ -85,8 +110,8 @@ export default function Progress() {
       )}
 
       {draft && (
-        <div className="fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4" onClick={() => setDraft(null)}>
-          <div className="card w-full max-w-md p-4 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-shell" onClick={() => setDraft(null)}>
+          <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
             <div className="section-label">{t("progress.add_measurement")}</div>
             {["waist", "chest", "arm", "hip", "thigh"].map((k) => (
               <label key={k} className="flex items-center gap-3">
@@ -97,7 +122,7 @@ export default function Progress() {
                 <span className="mono text-xs text-mute">{t("progress.cm")}</span>
               </label>
             ))}
-            <div className="flex gap-2 mt-1">
+            <div className="modal-actions">
               <button className="btn flex-1" onClick={() => setDraft(null)}>{t("log.cancel")}</button>
               <button className="btn-primary flex-1" onClick={saveMeas}>{t("log.save")}</button>
             </div>

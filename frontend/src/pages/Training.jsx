@@ -135,7 +135,7 @@ export default function Training() {
     const isOpen = !!openInfo[ex.id];
     const muscles = (lib?.targetMuscles || []).map((m) => MUSCLE_LABELS[m]?.[lang] || MUSCLE_LABELS[m]?.en || m);
     return (
-      <div key={ex.id} className="card overflow-hidden">
+      <div key={ex.id} className="list-card">
         <div className="px-4 py-3 border-b border-line flex justify-between items-baseline gap-2">
           <button
             type="button"
@@ -234,6 +234,32 @@ export default function Training() {
 
   return (
     <div className="page page-training">
+      <div className="page-hero">
+        <div className="relative z-10">
+          <div className="page-hero-kicker">training block</div>
+          <div className="page-hero-title">
+            {plan.type === "rest" ? "Recovery keeps the cut alive." : `${t("training.title")} ${dayType}`}
+          </div>
+          <div className="page-hero-sub">
+            {plan.type === "rest" ? "No ego lifting today · walk easy · sleep hard" : `${t(`training.${day.nameKey}`)} · ${day.exercises.length} exercises · log every set`}
+          </div>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <div className="metric-tile">
+              <div className="metric-label">day</div>
+              <div className="metric-value text-lime">{plan.type === "rest" ? "REST" : dayType}</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">week</div>
+              <div className="metric-value">W{String(week).padStart(2, "0")}</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-label">steps</div>
+              <div className="metric-value text-amber">{stepTarget?.toLocaleString() || "--"}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="section-label">
         {t("training.title")} · <span className="text-signal">{dayType}</span> · {t(`training.${day.nameKey}`)}
       </div>
