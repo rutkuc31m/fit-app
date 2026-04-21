@@ -134,13 +134,13 @@
     @apply mission-hero p-4;
   }
   .page-hero-kicker {
-    @apply mono text-[.58rem] text-signal uppercase tracking-[.24em] font-bold;
+    @apply mono text-[.58rem] text-signal uppercase tracking-[.18em] font-medium;
   }
   .page-hero-title {
     @apply font-display text-[1.7rem] min-[420px]:text-[2rem] text-ink leading-none mt-1;
     letter-spacing: 0;
     line-height: 1.03;
-    font-weight: 700;
+    font-weight: 600;
   }
   .page-hero-sub {
     @apply mono text-[.62rem] text-mute uppercase tracking-[.11em] mt-3 leading-relaxed;

@@ -267,20 +267,17 @@ export default function Today() {
         </button>
       </div>
 
-      <div className="mission-hero p-4">
+      <div className="page-hero">
         <div className="relative z-10 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="mono text-[.58rem] text-signal uppercase tracking-[.24em] font-bold">
+            <div className="page-hero-kicker">
               six month cut
             </div>
-            <div
-              className="font-display text-[2rem] min-[420px]:text-[2.35rem] text-ink leading-none mt-1"
-              style={{ fontVariationSettings: '"SOFT" 35, "opsz" 96', fontWeight: 700 }}
-            >
+            <div className="page-hero-title text-[2rem] min-[420px]:text-[2.35rem]">
               {sw.toFixed(0)} <span className="text-mute text-[1.25rem]">to</span> {tw.toFixed(0)}
               <span className="text-[.9rem] text-ink2 font-light ml-2">kg</span>
             </div>
-            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-2 leading-relaxed">
+            <div className="page-hero-sub mt-2">
               fat loss · smaller waist · keep muscle
             </div>
           </div>

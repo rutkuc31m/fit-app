@@ -91,11 +91,11 @@ export default function Settings() {
 
   return (
     <div className="page page-settings">
-      <div className="mission-hero p-4">
+      <div className="page-hero">
         <div className="relative z-10">
-          <div className="mono text-[.58rem] text-signal uppercase tracking-[.24em] font-bold">system setup</div>
-          <div className="font-display text-[1.65rem] text-ink leading-none mt-1">Keep the cut quiet, precise and useful.</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-3">
+          <div className="page-hero-kicker">system setup</div>
+          <div className="page-hero-title">Keep the cut quiet, precise and useful.</div>
+          <div className="page-hero-sub">
             Smart reminders · clean data · no noise by default
           </div>
         </div>
