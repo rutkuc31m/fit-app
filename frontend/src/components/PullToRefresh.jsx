@@ -31,7 +31,7 @@ export default function PullToRefresh() {
         const registration = await navigator.serviceWorker?.getRegistration?.();
         await registration?.update?.();
       } catch {}
-      window.setTimeout(() => window.location.reload(), 180);
+      window.setTimeout(() => window.location.reload(), 650);
     };
 
     const onTouchStart = (event) => {
@@ -81,11 +81,12 @@ export default function PullToRefresh() {
 
   const visible = refreshing || pull > 0;
   const armed = pull >= THRESHOLD;
+  const y = refreshing ? 58 : (visible ? Math.min(76, pull) : -72);
 
   return (
     <div
-      className={`pull-refresh ${visible ? "is-visible" : ""} ${armed || refreshing ? "is-armed" : ""}`}
-      style={{ transform: `translate3d(-50%, ${visible ? Math.min(76, pull) : -72}px, 0)` }}
+      className={`pull-refresh ${visible ? "is-visible" : ""} ${armed ? "is-armed" : ""} ${refreshing ? "is-refreshing" : ""}`}
+      style={{ transform: `translate3d(-50%, ${y}px, 0)` }}
       aria-hidden={!visible}
     >
       <div className="pull-refresh-dot">
