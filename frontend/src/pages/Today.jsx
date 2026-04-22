@@ -591,14 +591,14 @@ export default function Today() {
                 </div>
                 <div className="flex gap-1">
                   <button className="mono text-[.58rem] text-amber uppercase tracking-[.1em] bg-surface2 hover:bg-surface3 px-2 py-[6px] rounded-md transition"
-                    onClick={() => saveCoffee(coffeeMl + 200)}
-                    title="+200ml coffee">
+                    onClick={() => saveCoffee(coffeeMl + 250)}
+                    title="+250ml coffee">
                     +coffee
                   </button>
                   {coffeeMl > 0 && (
                     <button className="mono text-[.58rem] text-mute uppercase tracking-[.1em] bg-surface2 hover:bg-surface3 px-2 py-[6px] rounded-md transition"
-                      onClick={() => saveCoffee(coffeeMl - 200)}
-                      title="-200ml coffee">
+                      onClick={() => saveCoffee(coffeeMl - 250)}
+                      title="-250ml coffee">
                       -coffee
                     </button>
                   )}
