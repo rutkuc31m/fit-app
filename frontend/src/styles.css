@@ -315,3 +315,13 @@
     gap: 8px;
   }
 }
+
+/* iOS Safari/PWA final guard: keep every editable field at 16px or above
+   after all Tailwind layers, otherwise focusing numeric fields zooms the page. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
+}
