@@ -145,7 +145,16 @@ function FastDayAssistant({ day }) {
   );
 }
 
-function RecoveryCheck({ value, onChange, onSave, saving }) {
+const recoverySnapshotKey = (value = {}) => JSON.stringify({
+  energy: value.energy === "" || value.energy == null ? null : Number(value.energy),
+  hunger: value.hunger === "" || value.hunger == null ? null : Number(value.hunger),
+  headache: value.headache === "" || value.headache == null ? null : Number(value.headache)
+});
+
+const hasRecoveryValue = (value = {}) =>
+  ["energy", "hunger", "headache"].some((field) => value[field] !== "" && value[field] != null);
+
+function RecoveryCheck({ value, onChange, onSave, saving, saved }) {
   const fields = [
     { id: "energy", label: "energy", low: "flat", high: "sharp", color: "#30d158" },
     { id: "hunger", label: "hunger", low: "quiet", high: "loud", color: "#ff9f0a" },
@@ -160,8 +169,8 @@ function RecoveryCheck({ value, onChange, onSave, saving }) {
             fasting · sleep · training readiness
           </div>
         </div>
-        <button className="btn-ghost shrink-0" onClick={onSave} disabled={saving}>
-          {saving ? "..." : "save"}
+        <button className="btn-ghost shrink-0" onClick={onSave} disabled={saving || saved}>
+          {saving ? "..." : saved ? "saved" : "save"}
         </button>
       </div>
       <div className="grid gap-3">
@@ -214,6 +223,7 @@ export default function Today() {
   const [mealsTotals, setMealsTotals] = useState({ kcal: 0, protein: 0, carbs: 0, fat: 0, count: 0 });
   const [session, setSession] = useState(null);
   const [recovery, setRecovery] = useState({ energy: "", hunger: "", headache: "" });
+  const [savedRecoveryKey, setSavedRecoveryKey] = useState(null);
   const [recoverySaving, setRecoverySaving] = useState(false);
   const quote = useMemo(() => quoteForDate(date), [date]);
   const week = getWeekNum(date);
@@ -221,6 +231,7 @@ export default function Today() {
   const dayIdx = daysBetween(PLAN.startDate, date) + 1;
   const phaseStartDay = (phase.weeks[0] - 1) * 7 + 1;
   const isPhaseFirstDay = dayIdx === phaseStartDay;
+  const recoverySaved = hasRecoveryValue(recovery) && savedRecoveryKey === recoverySnapshotKey(recovery);
 
   const sw = user?.start_weight || PLAN.startWeight;
   const tw = user?.target_weight || PLAN.targetWeight;
@@ -249,6 +260,7 @@ export default function Today() {
 
   useEffect(() => {
     let cancelled = false;
+    setSavedRecoveryKey(null);
     api.get(`/logs/${date}`).then((l) => {
       if (cancelled) return;
       setWaterMl(l?.water_ml || 0);
@@ -259,11 +271,13 @@ export default function Today() {
       } else {
         setWeightInput("");
       }
-      setRecovery({
+      const nextRecovery = {
         energy: l?.energy ?? "",
         hunger: l?.hunger ?? "",
         headache: l?.headache ?? ""
-      });
+      };
+      setRecovery(nextRecovery);
+      setSavedRecoveryKey(hasRecoveryValue(nextRecovery) ? recoverySnapshotKey(nextRecovery) : null);
     }).catch(() => {});
     api.get(`/meals?date=${date}`).then((meals) => {
       if (cancelled) return;
@@ -312,6 +326,7 @@ export default function Today() {
         Object.entries(recovery).map(([key, value]) => [key, value === "" ? null : Number(value)])
       );
       await api.put(`/logs/${date}`, clean);
+      setSavedRecoveryKey(recoverySnapshotKey(clean));
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 600);
     } finally {
@@ -454,6 +469,7 @@ export default function Today() {
       <RecoveryCheck
         value={recovery}
         saving={recoverySaving}
+        saved={recoverySaved}
         onChange={(field, score) => setRecovery((prev) => ({ ...prev, [field]: score }))}
         onSave={saveRecovery}
       />
