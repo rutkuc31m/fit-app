@@ -40,8 +40,11 @@
   .caps { text-transform: uppercase; letter-spacing: .11em; font-weight: 650; }
 
   .card {
-    @apply bg-surface border border-line/70 rounded-lg relative;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 18px 48px -32px rgba(0,0,0,.85);
+    @apply border border-line/70 rounded-lg relative;
+    background:
+      linear-gradient(135deg, rgba(74,222,128,.035), transparent 42%),
+      linear-gradient(180deg, rgba(28,28,30,.96), rgba(16,17,18,.96));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 20px 54px -34px rgba(0,0,0,.9);
   }
   .card-title { @apply mono text-[.66rem] text-ink2 uppercase tracking-[.14em] font-semibold; }
 
@@ -133,6 +136,16 @@
   }
   .metric-tile {
     @apply rounded-lg border border-line/70 bg-bg2/70 px-3 py-2 min-w-0;
+  }
+  .command-card {
+    @apply card p-4 overflow-hidden;
+    box-shadow: 0 26px 72px -44px rgba(74,222,128,.65), inset 0 1px 0 rgba(255,255,255,.055);
+  }
+  .phase-badge {
+    @apply w-10 h-10 rounded-lg grid place-items-center mono text-sm font-bold border;
+  }
+  .command-metric {
+    @apply rounded-lg border border-line/60 bg-bg2/55 px-2 py-[7px] min-w-0;
   }
   .soft-band {
     @apply rounded-lg border border-line/70 bg-bg2/50;

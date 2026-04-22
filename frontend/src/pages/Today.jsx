@@ -5,7 +5,6 @@ import { PLAN, todayStr, fmtDate, getWeekNum, getPhase, daysBetween } from "../l
 import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
-import { quoteForDate } from "../lib/quotes";
 import { dailyReadiness, recoveryCoachNote } from "../lib/coaching";
 import { Icon, Empty } from "../components/ui";
 
@@ -33,118 +32,41 @@ const hhmmToMin = (s) => {
   return h * 60 + m;
 };
 
-function FastingClock({ eating }) {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 30000);
-    return () => clearInterval(id);
-  }, []);
+const windowState = (eating) => {
+  if (!eating?.window) {
+    return { label: "fasting all day", value: "0 kcal", nowPct: 0, startPct: 0, widthPct: 100, inWindow: false };
+  }
   const d = new Date();
   const nowMin = d.getHours() * 60 + d.getMinutes();
-
-  if (!eating?.window) {
-    // FAST day — whole day fasting
-    return (
-      <div className="card p-3 relative overflow-hidden">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">fasting</div>
-            <div className="font-display text-[1.5rem] text-cyan leading-none tabular-nums mt-[2px]"
-              style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-              all day
-            </div>
-          </div>
-          <div className="mono text-[.62rem] text-cyan uppercase tracking-[.14em]">0 kcal</div>
-        </div>
-      </div>
-    );
-  }
-
   const wStart = hhmmToMin(eating.window.start);
   const wEnd = hhmmToMin(eating.window.end);
   const inWindow = nowMin >= wStart && nowMin <= wEnd;
   const beforeWindow = nowMin < wStart;
-
-  let label, value, unit, color;
+  let label, value;
   if (inWindow) {
     const mins = wEnd - nowMin;
     label = "eat window · left";
     value = `${Math.floor(mins / 60)}h ${mins % 60}m`;
-    color = "lime";
   } else if (beforeWindow) {
     const mins = wStart - nowMin;
     label = "until eat window";
     value = `${Math.floor(mins / 60)}h ${mins % 60}m`;
-    color = "cyan";
   } else {
     const mins = (24 * 60 - nowMin) + wStart;
     label = "closed · next window";
     value = `${Math.floor(mins / 60)}h ${mins % 60}m`;
-    color = "cyan";
   }
+  return {
+    label,
+    value,
+    nowPct: (nowMin / (24 * 60)) * 100,
+    startPct: (wStart / (24 * 60)) * 100,
+    widthPct: ((wEnd - wStart) / (24 * 60)) * 100,
+    inWindow
+  };
+};
 
-  // 24h bar with eat window highlighted
-  const nowPct = (nowMin / (24 * 60)) * 100;
-  const wStartPct = (wStart / (24 * 60)) * 100;
-  const wWidthPct = ((wEnd - wStart) / (24 * 60)) * 100;
-
-  return (
-    <div className="card p-3">
-      <div className="flex items-baseline justify-between mb-2">
-        <div>
-          <div className={`mono text-[.58rem] text-${color} uppercase tracking-[.2em]`}>{label}</div>
-          <div className={`font-display text-[1.5rem] text-${color} leading-none tabular-nums mt-[2px]`}
-            style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-            {value}
-          </div>
-        </div>
-        <div className="mono text-[.58rem] text-ink2 tabular-nums">
-          {eating.window.start}<span className="text-mute">–</span>{eating.window.end}
-        </div>
-      </div>
-      <div className="relative h-[6px] bg-bg2 rounded-full overflow-hidden border border-line/50">
-        <div className="absolute top-0 bottom-0 bg-cyan/40 border-l border-r border-cyan/70"
-             style={{ left: `${wStartPct}%`, width: `${wWidthPct}%` }} />
-        <div className="absolute top-[-2px] bottom-[-2px] w-[2px] bg-amber shadow-[0_0_6px_theme(colors.amber)]"
-             style={{ left: `${nowPct}%` }} />
-      </div>
-      <div className="mt-1 flex justify-between mono text-[.5rem] text-mute uppercase tracking-[.16em]">
-        <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
-      </div>
-    </div>
-  );
-}
-
-function FastDayAssistant({ day }) {
-  if (day.eating?.window) return null;
-  const items = [
-    ["hydrate", "700ml water + 1/2 lemon + tiny pinch natron"],
-    ["salt", "Tiny pinch salt only if headache or flat energy appears"],
-    ["move", "Easy walk only; no bonus training, no ego cardio"],
-    ["sleep", "Protect sleep tonight; recovery is the fat-loss multiplier"]
-  ];
-  return (
-    <div className="card p-3 border-cyan/30 bg-cyan/[.035]">
-      <div className="flex items-start gap-2">
-        <Icon.zap size={16} className="text-cyan mt-[2px] shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="card-title text-cyan">Fast day assistant</div>
-          <div className="mt-2 grid gap-2">
-            {items.map(([key, text]) => (
-              <div key={key} className="flex items-start gap-2">
-                <span className="mt-[5px] w-[6px] h-[6px] rounded-full bg-cyan shadow-[0_0_8px_rgba(100,210,255,.5)] shrink-0" />
-                <div className="mono text-[.66rem] text-ink2 leading-snug">{text}</div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-2 mono text-[.58rem] text-mute uppercase tracking-[.14em]">
-            Dizziness or hard headache means slow down first.
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+const fastGuardrails = ["water", "coffee", "easy walk", "sleep"];
 
 const recoverySnapshotKey = (value = {}) => JSON.stringify({
   energy: value.energy === "" || value.energy == null ? null : Number(value.energy),
@@ -216,35 +138,92 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   );
 }
 
-function ReadinessCard({ readiness, day }) {
+function CommandCard({ readiness, day, leftKg, journeyPct }) {
   if (!readiness) return null;
   const fastDay = !day?.eating?.window;
+  const timing = windowState(day.eating);
+  const accent = readiness.color;
   return (
-    <div className="card p-3 overflow-hidden" style={{ borderColor: `${readiness.color}66`, background: `${readiness.color}0a` }}>
-      <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: readiness.color, boxShadow: `0 0 12px ${readiness.color}80` }} />
+    <div className="command-card" style={{ borderColor: `${accent}70`, background: `linear-gradient(135deg, ${accent}14 0%, rgba(28,28,30,.94) 48%, rgba(10,10,11,.94) 100%)` }}>
+      <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: accent, boxShadow: `0 0 14px ${accent}90` }} />
       <div className="pl-2 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="mono text-[.58rem] uppercase tracking-[.18em]" style={{ color: readiness.color }}>
+          <div className="mono text-[.58rem] uppercase tracking-[.18em]" style={{ color: accent }}>
             today's call
           </div>
-          <div className="font-display text-[1.35rem] leading-none text-ink mt-1"
+          <div className="font-display text-[1.65rem] leading-none text-ink mt-1"
             style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
             {readiness.label}
           </div>
           <div className="mono text-[.7rem] text-ink2 leading-snug mt-2">{readiness.action}</div>
           <div className="mono text-[.62rem] text-mute leading-snug mt-1">{readiness.detail}</div>
         </div>
-        <div className="grid gap-1 shrink-0 min-w-[82px]">
-          <div className="metric-tile px-2 py-1 text-right">
-            <div className="metric-label">food</div>
-            <div className="metric-value text-[.78rem]" style={{ color: fastDay ? "#64d2ff" : "#ff9f0a" }}>
-              {fastDay ? "FAST" : day.eating.mode}
-            </div>
+        <div className="shrink-0 text-right">
+          <div className="phase-badge" style={{ borderColor: `${day.phase.color}70`, color: day.phase.color, background: `${day.phase.color}14` }}>
+            P{day.phase.id}
           </div>
-          <div className="metric-tile px-2 py-1 text-right">
-            <div className="metric-label">gym</div>
-            <div className="metric-value text-[.78rem]">{day.training?.type || "REST"}</div>
+          <div className="mono text-[.52rem] text-mute uppercase tracking-[.14em] mt-1">W{day.weekNumber}</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 min-[420px]:grid-cols-4 gap-2 mt-4 pl-2">
+        <div className="command-metric">
+          <div className="metric-label">phase</div>
+          <div className="metric-value text-[.78rem] truncate">{day.phase.name}</div>
+        </div>
+        <div className="command-metric">
+          <div className="metric-label">food</div>
+          <div className="metric-value text-[.78rem]" style={{ color: fastDay ? "#64d2ff" : "#ff9f0a" }}>{fastDay ? "FAST" : day.eating.mode}</div>
+        </div>
+        <div className="command-metric">
+          <div className="metric-label">kcal</div>
+          <div className="metric-value text-[.78rem] text-amber">{day.eating.targets.kcal}</div>
+        </div>
+        <div className="command-metric">
+          <div className="metric-label">gym</div>
+          <div className="metric-value text-[.78rem] text-lime">{day.training?.type || "REST"}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 pl-2">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="mono text-[.56rem] uppercase tracking-[.16em]" style={{ color: fastDay ? "#64d2ff" : accent }}>
+            {timing.label}
           </div>
+          <div className="mono text-[.7rem] text-ink tabular-nums">{timing.value}</div>
+        </div>
+        {fastDay ? (
+          <div className="grid grid-cols-4 gap-1">
+            {fastGuardrails.map((item) => (
+              <div key={item} className="soft-band px-2 py-[6px] text-center mono text-[.52rem] text-cyan uppercase tracking-[.1em]">
+                {item}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="relative h-[7px] bg-bg2 rounded-full overflow-hidden border border-line/50">
+            <div className="absolute top-0 bottom-0 bg-cyan/35 border-l border-r border-cyan/70"
+                 style={{ left: `${timing.startPct}%`, width: `${timing.widthPct}%` }} />
+            <div className="absolute top-[-2px] bottom-[-2px] w-[2px] bg-amber shadow-[0_0_6px_rgba(251,191,36,.8)]"
+                 style={{ left: `${timing.nowPct}%` }} />
+          </div>
+        )}
+      </div>
+
+      <div className="mt-3 pl-2">
+        <div className="flex items-center justify-between mono text-[.56rem] uppercase tracking-[.14em] mb-1">
+          <span className="text-mute">journey</span>
+          <span className="text-lime tabular-nums">-{leftKg.toFixed(1)}kg left</span>
+        </div>
+        <div className="h-[4px] bg-bg2 rounded-full overflow-hidden border border-line/50">
+          <div
+            className="h-full transition-all duration-700"
+            style={{
+              width: `${journeyPct}%`,
+              background: `linear-gradient(90deg, #ff9f0a 0%, ${accent} 100%)`,
+              boxShadow: `0 0 8px ${accent}80`
+            }}
+          />
         </div>
       </div>
     </div>
@@ -266,7 +245,7 @@ export default function Today() {
   const [recovery, setRecovery] = useState({ energy: "", hunger: "", headache: "" });
   const [savedRecoveryKey, setSavedRecoveryKey] = useState(null);
   const [recoverySaving, setRecoverySaving] = useState(false);
-  const quote = useMemo(() => quoteForDate(date), [date]);
+  const [, setClockTick] = useState(0);
   const week = getWeekNum(date);
   const phase = getPhase(week);
   const dayIdx = daysBetween(PLAN.startDate, date) + 1;
@@ -278,7 +257,13 @@ export default function Today() {
   const tw = user?.target_weight || PLAN.targetWeight;
   const totalJourney = sw - tw;
   const lost = currentWeight ? Math.max(0, sw - currentWeight) : 0;
+  const leftKg = Math.max(0, totalJourney - lost);
   const journeyPct = totalJourney > 0 ? Math.min(100, Math.round((lost / totalJourney) * 100)) : 0;
+
+  useEffect(() => {
+    const id = setInterval(() => setClockTick((tick) => tick + 1), 30000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     const from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
@@ -485,32 +470,8 @@ export default function Today() {
         </div>
       )}
 
-      {/* Phase + eating header */}
-      <div className="card p-3 flex items-center gap-3">
-        <div
-          className="w-8 h-8 rounded-md grid place-items-center mono text-xs font-bold shrink-0"
-          style={{ background: day.phase.color + "22", color: day.phase.color, border: `1px solid ${day.phase.color}55` }}
-        >
-          P{day.phase.id}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="card-title truncate">{day.phase.name}</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">
-            {day.eating.label}
-            {day.eating.window && ` · ${day.eating.window.start}–${day.eating.window.end}`}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="mono text-sm text-amber font-bold tabular-nums">{day.eating.targets.kcal}</div>
-          <div className="mono text-[.58rem] text-amber/70 uppercase tracking-[.14em]">kcal</div>
-        </div>
-      </div>
+      <CommandCard readiness={readiness} day={day} leftKg={leftKg} journeyPct={journeyPct} />
 
-      <ReadinessCard readiness={readiness} day={day} />
-
-      {/* Fasting window clock */}
-      <FastingClock eating={day.eating} />
-      <FastDayAssistant day={day} />
       <RecoveryCheck
         value={recovery}
         saving={recoverySaving}
@@ -519,30 +480,6 @@ export default function Today() {
         onChange={(field, score) => setRecovery((prev) => ({ ...prev, [field]: score }))}
         onSave={saveRecovery}
       />
-
-      {/* Journey — to go */}
-      <div className="card p-3">
-        <div className="flex items-center justify-between mb-[6px]">
-          <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">journey</div>
-          <div className="mono text-[.62rem] uppercase tracking-[.14em] flex items-center gap-[6px]">
-            <span className="text-lime tabular-nums">−{Math.max(0, totalJourney - lost).toFixed(1)}kg to go</span>
-          </div>
-        </div>
-        <div className="h-[3px] bg-bg2 rounded-full overflow-hidden border border-line/50">
-          <div
-            className="h-full transition-all duration-700"
-            style={{
-              width: `${journeyPct}%`,
-              background: "linear-gradient(90deg, #ff9f0a 0%, #30d158 100%)",
-              boxShadow: "0 0 8px rgba(48,209,88,.4)"
-            }}
-          />
-        </div>
-        <div className="mt-[6px] flex justify-between mono text-[.52rem] uppercase tracking-[.18em] tabular-nums">
-          <span className="text-mute">start {sw.toFixed(0)}</span>
-          <span className="text-lime">target {tw.toFixed(0)}</span>
-        </div>
-      </div>
 
       {/* Weight card */}
       <div className="card p-3">
@@ -717,17 +654,6 @@ export default function Today() {
           <div className="mono text-[.7rem] text-ink2 mt-1">rest day · recovery</div>
         </div>
       )}
-
-      {/* Quote of the day — amber/lime subtle tint */}
-      <div className="card p-4 relative overflow-hidden" style={{
-        background: "linear-gradient(135deg, rgba(255,159,10,.04) 0%, rgba(48,209,88,.04) 100%)"
-      }}>
-        <div className="absolute top-2 left-3 font-display text-[2.5rem] leading-none text-amber/40 select-none italic">"</div>
-        <div className="pl-6 pt-1">
-          <div className="mono text-[.78rem] text-ink leading-snug italic">{quote.q}</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-2">— {quote.a}</div>
-        </div>
-      </div>
 
       {/* Checkpoint banner */}
       {day.isCheckpointDay && day.checkpoint && (
