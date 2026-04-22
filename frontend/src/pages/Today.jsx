@@ -77,6 +77,23 @@ const recoverySnapshotKey = (value = {}) => JSON.stringify({
 const hasRecoveryValue = (value = {}) =>
   ["energy", "hunger", "headache"].some((field) => value[field] !== "" && value[field] != null);
 
+function TodayCard({ accent = "#30d158", as: Component = "div", className = "", style, children, ...props }) {
+  return (
+    <Component
+      className={`today-card ${className}`}
+      style={{
+        borderColor: `${accent}66`,
+        background: `linear-gradient(135deg, ${accent}10 0%, rgba(28,28,30,.96) 48%, rgba(10,10,11,.96) 100%)`,
+        ...style
+      }}
+      {...props}
+    >
+      <div className="today-card-rail" style={{ background: accent, boxShadow: `0 0 12px ${accent}80` }} />
+      <div className="relative z-10 pl-2">{children}</div>
+    </Component>
+  );
+}
+
 function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   const fields = [
     { id: "energy", label: "energy", low: "flat", high: "sharp", color: "#30d158" },
@@ -84,7 +101,7 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
     { id: "headache", label: "headache", low: "none", high: "hard", color: "#64d2ff" }
   ];
   return (
-    <div className="card p-3">
+    <TodayCard accent="#64d2ff">
       <div className="flex items-center justify-between mb-2">
         <div>
           <div className="card-title">Recovery signal</div>
@@ -134,7 +151,7 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
           {coachNote}
         </div>
       )}
-    </div>
+    </TodayCard>
   );
 }
 
@@ -157,12 +174,6 @@ function CommandCard({ readiness, day, leftKg, journeyPct }) {
           </div>
           <div className="mono text-[.7rem] text-ink2 leading-snug mt-2">{readiness.action}</div>
           <div className="mono text-[.62rem] text-mute leading-snug mt-1">{readiness.detail}</div>
-        </div>
-        <div className="shrink-0 text-right">
-          <div className="phase-badge" style={{ borderColor: `${day.phase.color}70`, color: day.phase.color, background: `${day.phase.color}14` }}>
-            P{day.phase.id}
-          </div>
-          <div className="mono text-[.52rem] text-mute uppercase tracking-[.14em] mt-1">W{day.weekNumber}</div>
         </div>
       </div>
 
@@ -395,11 +406,11 @@ export default function Today() {
   return (
     <div className="page page-today">
       {preStart && (
-        <div className="card p-3 text-center border-amber/40 bg-amber/[.06]">
+        <TodayCard accent="#ff9f0a" className="text-center">
           <div className="mono text-[.62rem] text-amber uppercase tracking-[.22em] font-bold">
             plan starts {PLAN.startDate} · preview of day 1
           </div>
-        </div>
+        </TodayCard>
       )}
 
       {/* Date nav */}
@@ -418,56 +429,14 @@ export default function Today() {
         </button>
       </div>
 
-      <div className="page-hero">
-        <div className="relative z-10 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="page-hero-kicker">
-              six month cut
-            </div>
-            <div className="page-hero-title text-[2rem] min-[420px]:text-[2.35rem]">
-              {sw.toFixed(0)} <span className="text-mute text-[1.25rem]">to</span> {tw.toFixed(0)}
-              <span className="text-[.9rem] text-ink2 font-light ml-2">kg</span>
-            </div>
-            <div className="page-hero-sub mt-2">
-              fat loss · smaller waist · keep muscle
-            </div>
-          </div>
-          <div className="text-right shrink-0">
-            <div className="mono text-[.56rem] text-mute uppercase tracking-[.18em]">lean target</div>
-            <div className="mono text-[1.05rem] text-cyan font-bold tabular-nums mt-[2px]">10-13%</div>
-            <div className="mono text-[.54rem] text-mute uppercase tracking-[.16em]">body fat</div>
-          </div>
-        </div>
-        <div className="relative z-10 grid grid-cols-3 gap-2 mt-4">
-          <div className="metric-tile">
-            <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em]">current</div>
-            <div className="mono text-sm text-ink tabular-nums mt-1">
-              {currentWeight != null ? currentWeight.toFixed(1) : "--"}<span className="text-mute text-[.62rem] ml-1">kg</span>
-            </div>
-          </div>
-          <div className="metric-tile">
-            <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em]">lost</div>
-            <div className="mono text-sm text-lime tabular-nums mt-1">
-              {lost.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span>
-            </div>
-          </div>
-          <div className="metric-tile">
-            <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em]">left</div>
-            <div className="mono text-sm text-amber tabular-nums mt-1">
-              {Math.max(0, totalJourney - lost).toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Phase transition celebration */}
       {isPhaseFirstDay && (
-        <div className="card p-3 text-center border" style={{ borderColor: `${phase.color}66`, background: `${phase.color}0a` }}>
+        <TodayCard accent={phase.color} className="text-center">
           <div className="mono text-[.62rem] uppercase tracking-[.22em] font-bold animate-pulse"
             style={{ color: phase.color, textShadow: `0 0 10px ${phase.color}99` }}>
             ★ phase {phase.id} unlocked
           </div>
-        </div>
+        </TodayCard>
       )}
 
       <CommandCard readiness={readiness} day={day} leftKg={leftKg} journeyPct={journeyPct} />
@@ -482,7 +451,7 @@ export default function Today() {
       />
 
       {/* Weight card */}
-      <div className="card p-3">
+      <TodayCard accent="#30d158">
         <div className="flex items-center justify-between mb-2">
           <div>
             <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">weight</div>
@@ -513,7 +482,7 @@ export default function Today() {
           <button className="btn-ghost" onClick={saveWeight}>save</button>
           {savedFlash && <span className="mono text-[.58rem] text-signal uppercase tracking-[.14em]">✓</span>}
         </div>
-      </div>
+      </TodayCard>
 
       {/* Meals ring */}
       {(() => {
@@ -542,7 +511,7 @@ export default function Today() {
           );
         };
         return (
-          <Link to="/recipes" className="card p-3 block hover:border-line/80 transition">
+          <TodayCard as={Link} to="/recipes" accent="#ff9f0a" className="block hover:brightness-110">
             <div className="flex items-center justify-between mb-2">
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">nutrition</div>
               <div className="mono text-[.58rem] text-ink2 uppercase tracking-[.14em]">
@@ -557,7 +526,7 @@ export default function Today() {
                 {ring(protPct, "#30d158", "protein", Math.round(mealsTotals.protein), protTarget, "g")}
               </div>
             )}
-          </Link>
+          </TodayCard>
         );
       })()}
 
@@ -595,7 +564,7 @@ export default function Today() {
           </div>
         );
         return (
-          <div className="card p-3">
+          <TodayCard accent="#64d2ff">
             <div className="flex items-start justify-between mb-2 gap-3">
               <div>
                 <div className="mono text-[.58rem] text-cyan uppercase tracking-[.2em]">hydration</div>
@@ -619,13 +588,13 @@ export default function Today() {
               ))}
             </div>
             <div className="mt-1 mono text-[.52rem] text-mute uppercase tracking-[.18em] text-right">{pct}%</div>
-          </div>
+          </TodayCard>
         );
       })()}
 
       {/* Training card */}
       {day.training ? (
-        <Link to="/training" className="card p-3 block hover:border-line/80 transition">
+        <TodayCard as={Link} to="/training" accent="#30d158" className="block hover:brightness-110">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <div className="mono text-[.58rem] text-lime uppercase tracking-[.2em]">training · day {day.training.type}</div>
@@ -647,22 +616,22 @@ export default function Today() {
               )}
             </div>
           </div>
-        </Link>
+        </TodayCard>
       ) : (
-        <div className="card p-3">
+        <TodayCard accent="#64d2ff">
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">training</div>
           <div className="mono text-[.7rem] text-ink2 mt-1">rest day · recovery</div>
-        </div>
+        </TodayCard>
       )}
 
       {/* Checkpoint banner */}
       {day.isCheckpointDay && day.checkpoint && (
-        <Link to="/checkin" className="card p-3 border-cyan/40 bg-cyan/[.05] hover:border-cyan/60 transition block">
+        <TodayCard as={Link} to="/checkin" accent="#64d2ff" className="block hover:brightness-110">
           <div className="mono text-[.62rem] text-cyan uppercase tracking-[.14em] mb-1">
             {t("checkin.title")}
           </div>
           <div className="mono text-xs text-ink2">{day.checkpoint.tasks.join(" · ")}</div>
-        </Link>
+        </TodayCard>
       )}
 
       {/* Timeline */}
@@ -673,59 +642,58 @@ export default function Today() {
           const isCurrent = i === currentIdx && date === todayStr();
           const isPast = i < currentIdx && date === todayStr();
           return (
-            <div
+            <TodayCard
               key={`${item.time}-${i}`}
-              className={`card p-2 flex items-start gap-2 transition ${
-                isCurrent ? "border-amber/60 bg-amber/[.06] shadow-[0_0_0_1px_rgba(255,159,10,.15)]" : ""
-              } ${isPast ? "opacity-50" : ""}`}
+              accent={isCurrent ? "#ff9f0a" : style.dot}
+              className={`py-2 ${isCurrent ? "shadow-[0_0_0_1px_rgba(255,159,10,.15)]" : ""} ${isPast ? "opacity-50" : ""}`}
             >
-              <div className="mono text-[.7rem] text-ink tabular-nums w-11 shrink-0 pt-[2px]">
-                {item.time}
-              </div>
-              <div className="shrink-0 pt-[6px]">
-                <span
-                  className="inline-block w-2 h-2 rounded-full"
-                  style={{ background: style.dot }}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="mono text-xs text-ink truncate">{item.action}</div>
-                  {item.duration && (
-                    <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] shrink-0">
-                      {item.duration}
-                    </div>
-                  )}
+              <div className="flex items-start gap-2">
+                <div className="mono text-[.7rem] text-ink tabular-nums w-11 shrink-0 pt-[2px]">
+                  {item.time}
                 </div>
-                <div className="mono text-[.64rem] text-mute leading-tight mt-[2px]">
-                  {item.details}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="mono text-xs text-ink truncate">{item.action}</div>
+                    {item.duration && (
+                      <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] shrink-0">
+                        {item.duration}
+                      </div>
+                    )}
+                  </div>
+                  <div className="mono text-[.64rem] text-mute leading-tight mt-[2px]">
+                    {item.details}
+                  </div>
+                </div>
+                <div
+                  className="mono text-[.54rem] uppercase tracking-[.18em] shrink-0 pt-[3px]"
+                  style={{ color: style.dot }}
+                >
+                  {style.label}
                 </div>
               </div>
-              <div
-                className="mono text-[.54rem] uppercase tracking-[.18em] shrink-0 pt-[3px]"
-                style={{ color: style.dot }}
-              >
-                {style.label}
-              </div>
-            </div>
+            </TodayCard>
           );
         })}
       </div>
 
       {/* Supplements footer */}
       {day.supplements && (
-        <div className="card p-3">
+        <TodayCard accent="#bf5af2">
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mb-1">Supplements</div>
-          <div className="mono text-[.7rem] text-ink2">
-            AM: {day.supplements.morning.join(", ")}
-          </div>
-          <div className="mono text-[.7rem] text-ink2">
-            PM: {day.supplements.evening.join(", ")}
+          <div className="grid min-[420px]:grid-cols-2 gap-2">
+            <div className="soft-band px-2 py-2">
+              <div className="mono text-[.52rem] text-mute uppercase tracking-[.14em]">AM</div>
+              <div className="mono text-[.66rem] text-ink2 mt-1">{day.supplements.morning.join(", ")}</div>
+            </div>
+            <div className="soft-band px-2 py-2">
+              <div className="mono text-[.52rem] text-mute uppercase tracking-[.14em]">PM</div>
+              <div className="mono text-[.66rem] text-ink2 mt-1">{day.supplements.evening.join(", ")}</div>
+            </div>
           </div>
           {day.supplements.note && (
-            <div className="mono text-[.62rem] text-mute mt-1">{day.supplements.note}</div>
+            <div className="mono text-[.62rem] text-mute mt-2">{day.supplements.note}</div>
           )}
-        </div>
+        </TodayCard>
       )}
     </div>
   );

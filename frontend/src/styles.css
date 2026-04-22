@@ -141,8 +141,11 @@
     @apply card p-4 overflow-hidden;
     box-shadow: 0 26px 72px -44px rgba(74,222,128,.65), inset 0 1px 0 rgba(255,255,255,.055);
   }
-  .phase-badge {
-    @apply w-10 h-10 rounded-lg grid place-items-center mono text-sm font-bold border;
+  .today-card {
+    @apply card p-3 overflow-hidden transition;
+  }
+  .today-card-rail {
+    @apply absolute left-0 top-0 bottom-0 w-[3px];
   }
   .command-metric {
     @apply rounded-lg border border-line/60 bg-bg2/55 px-2 py-[7px] min-w-0;
