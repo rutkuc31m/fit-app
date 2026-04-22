@@ -75,6 +75,13 @@
     line-height: 44px;       /* center value vertically across all input types incl. number */
     min-height: 44px;
   }
+  @supports (-webkit-touch-callout: none) {
+    input.input,
+    select.input,
+    textarea.input {
+      font-size: 16px !important;
+    }
+  }
   /* Multiline (textarea) doesn't want fixed height/line-height */
   textarea.input { height: auto; line-height: 1.45; padding-top: 10px; padding-bottom: 10px; }
 
