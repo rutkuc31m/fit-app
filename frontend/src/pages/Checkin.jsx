@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
 import { PROTOCOLS } from "../lib/protocols";
-import { Brackets, Icon } from "../components/ui";
+import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const PHOTO_BASE = (import.meta.env.DEV ? "" : (import.meta.env.VITE_API_BASE?.replace(/\/api$/, "") || "https://api.fit.rutkuc.com"));
 
@@ -35,6 +35,8 @@ const FIELD_COLOR = {
   adherence_pct: "lime"
 };
 const colorOf = (id) => FIELD_COLOR[id] || "lime";
+const ACCENT_HEX = { lime: "#30d158", cyan: "#64d2ff", amber: "#ff9f0a" };
+const accentOf = (id) => ACCENT_HEX[colorOf(id)] || "#30d158";
 
 export default function Checkin() {
   const { t } = useTranslation();
@@ -85,42 +87,30 @@ export default function Checkin() {
 
   return (
     <div className="page page-checkin">
-      <div className="page-hero">
-        <div className="relative z-10">
-          <div className="page-hero-kicker">weekly check-in</div>
-          <div className="page-hero-title">Measure the signal.</div>
-          <div className="page-hero-sub">Photos · waist · adherence · recovery</div>
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            <div className="metric-tile">
-              <div className="metric-label">week</div>
-              <div className="metric-value text-cyan">W{String(week).padStart(2, "0")}</div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">fields</div>
-              <div className="metric-value">{visible.length}</div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">measure</div>
-              <div className="metric-value text-amber">{isBiweekly ? "full" : "core"}</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageCommand
+        accent="#64d2ff"
+        kicker="weekly check-in"
+        title="Measure the signal."
+        sub="Photos · waist · adherence · recovery"
+        metrics={[
+          { label: "week", value: `W${String(week).padStart(2, "0")}`, className: "text-cyan" },
+          { label: "fields", value: visible.length },
+          { label: "measure", value: isBiweekly ? "full" : "core", className: "text-amber" }
+        ]}
+      />
 
       <div className="section-label">{t("checkin.title")} · W{week}</div>
 
-      <Brackets>
-        <div className="card p-3 flex items-start gap-2">
-          <Icon.clock size={16} className="text-cyan mt-[2px] shrink-0" />
-          <div className="mono text-[.7rem] text-ink2 leading-relaxed">{t("checkin.reminder")}</div>
-        </div>
-      </Brackets>
+      <AccentCard accent="#64d2ff" contentClassName="pl-2 flex items-start gap-2">
+        <Icon.clock size={16} className="text-cyan mt-[2px] shrink-0" />
+        <div className="mono text-[.7rem] text-ink2 leading-relaxed">{t("checkin.reminder")}</div>
+      </AccentCard>
 
       {visible.map((f) => {
         if (PHOTO_FIELDS[f.id]) {
           const angleKey = f.id.replace("photo_", "");
           return (
-            <div key={f.id} className="card p-3">
+            <AccentCard key={f.id} accent="#64d2ff">
               <div className="flex justify-between items-center">
                 <div className="card-title">{t(`checkin.${angleKey}`)}</div>
                 {data[f.id] && <span className="mono text-[.6rem] text-cyan">✓</span>}
@@ -136,17 +126,17 @@ export default function Checkin() {
                 <input type="file" accept="image/*" capture="environment" className="hidden"
                   onChange={(e) => onPhoto(f.id, e.target.files?.[0])} />
               </label>
-            </div>
+            </AccentCard>
           );
         }
         if (f.type === "number") {
           const c = colorOf(f.id);
           return (
-            <div key={f.id} className="card p-3">
+            <AccentCard key={f.id} accent={accentOf(f.id)}>
               <div className="card-title mb-2">{f.label}</div>
               <input type="number" step="0.1" inputMode="decimal" className={`input mono text-lg text-${c}`}
                 value={data[f.id] ?? ""} onChange={(e) => setField(f.id, e.target.value === "" ? "" : +e.target.value)} />
-            </div>
+            </AccentCard>
           );
         }
         if (f.type === "scale") {
@@ -155,7 +145,7 @@ export default function Checkin() {
           const cur = data[f.id];
           const c = colorOf(f.id);
           return (
-            <div key={f.id} className="card p-3">
+            <AccentCard key={f.id} accent={accentOf(f.id)}>
               <div className="flex justify-between items-baseline mb-2">
                 <div className="card-title">{f.label}</div>
                 {cur != null && <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{cur}</div>}
@@ -172,29 +162,29 @@ export default function Checkin() {
                   );
                 })}
               </div>
-            </div>
+            </AccentCard>
           );
         }
         if (f.type === "percent") {
           const c = colorOf(f.id);
           return (
-            <div key={f.id} className="card p-3">
+            <AccentCard key={f.id} accent={accentOf(f.id)}>
               <div className="flex justify-between items-baseline mb-2">
                 <div className="card-title">{f.label}</div>
                 <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{data[f.id] ?? 0}%</div>
               </div>
               <input type="range" min="0" max="100" step="5" value={data[f.id] ?? 80}
                 onChange={(e) => setField(f.id, +e.target.value)} className={`w-full accent-${c}`} />
-            </div>
+            </AccentCard>
           );
         }
         if (f.type === "text") {
           return (
-            <div key={f.id} className="card p-3">
+            <AccentCard key={f.id} accent="#bf5af2">
               <div className="card-title mb-2">{f.label}</div>
               <textarea className="input mono text-sm w-full min-h-[80px]" rows="3"
                 value={data[f.id] ?? ""} onChange={(e) => setField(f.id, e.target.value)} />
-            </div>
+            </AccentCard>
           );
         }
         return null;

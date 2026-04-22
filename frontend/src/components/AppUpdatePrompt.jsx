@@ -1,5 +1,6 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useTranslation } from "react-i18next";
+import { AccentCard } from "./ui";
 
 export default function AppUpdatePrompt() {
   const { t } = useTranslation();
@@ -18,7 +19,7 @@ export default function AppUpdatePrompt() {
 
   return (
     <div className="fixed left-0 right-0 bottom-[76px] z-[70] px-3 pointer-events-none">
-      <div className="max-w-[680px] mx-auto card p-3 pointer-events-auto flex items-center gap-3 border-signal/50">
+      <AccentCard accent="#30d158" className="max-w-[680px] mx-auto pointer-events-auto border-signal/50" contentClassName="pl-2 flex items-center gap-3 w-full">
         <div className="flex-1 min-w-0">
           <div className="mono text-[.58rem] text-signal uppercase tracking-[.2em]">
             {needRefresh ? t("app_update.ready") : t("app_update.offline")}
@@ -36,7 +37,7 @@ export default function AppUpdatePrompt() {
             {t("common.close")}
           </button>
         )}
-      </div>
+      </AccentCard>
     </div>
   );
 }

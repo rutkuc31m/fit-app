@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { pushSupported, getPushStatus, subscribeToPush } from "../lib/notify";
+import { AccentCard } from "./ui";
 
 const FLAG = "fit.push_asked";
 
@@ -31,7 +32,7 @@ export default function PushPrompt() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="card p-4 flex flex-col gap-3 max-w-sm w-full border-signal/30">
+      <AccentCard accent="#30d158" className="p-4 max-w-sm w-full border-signal/30" contentClassName="pl-2 flex flex-col gap-3">
         <div>
           <div className="mono text-[.58rem] text-signal uppercase tracking-[.22em] font-bold">
             coach mode
@@ -49,7 +50,7 @@ export default function PushPrompt() {
             {busy ? "..." : "enable"}
           </button>
         </div>
-      </div>
+      </AccentCard>
     </div>
   );
 }

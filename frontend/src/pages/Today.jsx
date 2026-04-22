@@ -6,7 +6,7 @@ import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { dailyReadiness, recoveryCoachNote } from "../lib/coaching";
-import { Icon, Empty } from "../components/ui";
+import { AccentCard, Icon, Empty } from "../components/ui";
 
 const CAT_STYLE = {
   routine:    { dot: "#a1a1a6", label: "ROUT" },
@@ -77,23 +77,6 @@ const recoverySnapshotKey = (value = {}) => JSON.stringify({
 const hasRecoveryValue = (value = {}) =>
   ["energy", "hunger", "headache"].some((field) => value[field] !== "" && value[field] != null);
 
-function TodayCard({ accent = "#30d158", as: Component = "div", className = "", style, children, ...props }) {
-  return (
-    <Component
-      className={`today-card ${className}`}
-      style={{
-        borderColor: `${accent}66`,
-        background: `linear-gradient(135deg, ${accent}10 0%, rgba(28,28,30,.96) 48%, rgba(10,10,11,.96) 100%)`,
-        ...style
-      }}
-      {...props}
-    >
-      <div className="today-card-rail" style={{ background: accent, boxShadow: `0 0 12px ${accent}80` }} />
-      <div className="relative z-10 pl-2">{children}</div>
-    </Component>
-  );
-}
-
 function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   const fields = [
     { id: "energy", label: "energy", low: "flat", high: "sharp", color: "#30d158" },
@@ -101,7 +84,7 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
     { id: "headache", label: "headache", low: "none", high: "hard", color: "#64d2ff" }
   ];
   return (
-    <TodayCard accent="#64d2ff">
+    <AccentCard accent="#64d2ff">
       <div className="flex items-center justify-between mb-2">
         <div>
           <div className="card-title">Recovery signal</div>
@@ -151,7 +134,7 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
           {coachNote}
         </div>
       )}
-    </TodayCard>
+    </AccentCard>
   );
 }
 
@@ -406,11 +389,11 @@ export default function Today() {
   return (
     <div className="page page-today">
       {preStart && (
-        <TodayCard accent="#ff9f0a" className="text-center">
+        <AccentCard accent="#ff9f0a" className="text-center">
           <div className="mono text-[.62rem] text-amber uppercase tracking-[.22em] font-bold">
             plan starts {PLAN.startDate} · preview of day 1
           </div>
-        </TodayCard>
+        </AccentCard>
       )}
 
       {/* Date nav */}
@@ -431,12 +414,12 @@ export default function Today() {
 
       {/* Phase transition celebration */}
       {isPhaseFirstDay && (
-        <TodayCard accent={phase.color} className="text-center">
+        <AccentCard accent={phase.color} className="text-center">
           <div className="mono text-[.62rem] uppercase tracking-[.22em] font-bold animate-pulse"
             style={{ color: phase.color, textShadow: `0 0 10px ${phase.color}99` }}>
             ★ phase {phase.id} unlocked
           </div>
-        </TodayCard>
+        </AccentCard>
       )}
 
       <CommandCard readiness={readiness} day={day} leftKg={leftKg} journeyPct={journeyPct} />
@@ -451,7 +434,7 @@ export default function Today() {
       />
 
       {/* Weight card */}
-      <TodayCard accent="#30d158">
+      <AccentCard accent="#30d158">
         <div className="flex items-center justify-between mb-2">
           <div>
             <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">weight</div>
@@ -482,7 +465,7 @@ export default function Today() {
           <button className="btn-ghost" onClick={saveWeight}>save</button>
           {savedFlash && <span className="mono text-[.58rem] text-signal uppercase tracking-[.14em]">✓</span>}
         </div>
-      </TodayCard>
+      </AccentCard>
 
       {/* Meals ring */}
       {(() => {
@@ -511,7 +494,7 @@ export default function Today() {
           );
         };
         return (
-          <TodayCard as={Link} to="/recipes" accent="#ff9f0a" className="block hover:brightness-110">
+          <AccentCard as={Link} to="/recipes" accent="#ff9f0a" className="block hover:brightness-110">
             <div className="flex items-center justify-between mb-2">
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">nutrition</div>
               <div className="mono text-[.58rem] text-ink2 uppercase tracking-[.14em]">
@@ -526,7 +509,7 @@ export default function Today() {
                 {ring(protPct, "#30d158", "protein", Math.round(mealsTotals.protein), protTarget, "g")}
               </div>
             )}
-          </TodayCard>
+          </AccentCard>
         );
       })()}
 
@@ -564,7 +547,7 @@ export default function Today() {
           </div>
         );
         return (
-          <TodayCard accent="#64d2ff">
+          <AccentCard accent="#64d2ff">
             <div className="flex items-start justify-between mb-2 gap-3">
               <div>
                 <div className="mono text-[.58rem] text-cyan uppercase tracking-[.2em]">hydration</div>
@@ -588,13 +571,13 @@ export default function Today() {
               ))}
             </div>
             <div className="mt-1 mono text-[.52rem] text-mute uppercase tracking-[.18em] text-right">{pct}%</div>
-          </TodayCard>
+          </AccentCard>
         );
       })()}
 
       {/* Training card */}
       {day.training ? (
-        <TodayCard as={Link} to="/training" accent="#30d158" className="block hover:brightness-110">
+        <AccentCard as={Link} to="/training" accent="#30d158" className="block hover:brightness-110">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <div className="mono text-[.58rem] text-lime uppercase tracking-[.2em]">training · day {day.training.type}</div>
@@ -616,22 +599,22 @@ export default function Today() {
               )}
             </div>
           </div>
-        </TodayCard>
+        </AccentCard>
       ) : (
-        <TodayCard accent="#64d2ff">
+        <AccentCard accent="#64d2ff">
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">training</div>
           <div className="mono text-[.7rem] text-ink2 mt-1">rest day · recovery</div>
-        </TodayCard>
+        </AccentCard>
       )}
 
       {/* Checkpoint banner */}
       {day.isCheckpointDay && day.checkpoint && (
-        <TodayCard as={Link} to="/checkin" accent="#64d2ff" className="block hover:brightness-110">
+        <AccentCard as={Link} to="/checkin" accent="#64d2ff" className="block hover:brightness-110">
           <div className="mono text-[.62rem] text-cyan uppercase tracking-[.14em] mb-1">
             {t("checkin.title")}
           </div>
           <div className="mono text-xs text-ink2">{day.checkpoint.tasks.join(" · ")}</div>
-        </TodayCard>
+        </AccentCard>
       )}
 
       {/* Timeline */}
@@ -642,7 +625,7 @@ export default function Today() {
           const isCurrent = i === currentIdx && date === todayStr();
           const isPast = i < currentIdx && date === todayStr();
           return (
-            <TodayCard
+            <AccentCard
               key={`${item.time}-${i}`}
               accent={isCurrent ? "#ff9f0a" : style.dot}
               className={`py-2 ${isCurrent ? "shadow-[0_0_0_1px_rgba(255,159,10,.15)]" : ""} ${isPast ? "opacity-50" : ""}`}
@@ -671,14 +654,14 @@ export default function Today() {
                   {style.label}
                 </div>
               </div>
-            </TodayCard>
+            </AccentCard>
           );
         })}
       </div>
 
       {/* Supplements footer */}
       {day.supplements && (
-        <TodayCard accent="#bf5af2">
+        <AccentCard accent="#bf5af2">
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mb-1">Supplements</div>
           <div className="grid min-[420px]:grid-cols-2 gap-2">
             <div className="soft-band px-2 py-2">
@@ -693,7 +676,7 @@ export default function Today() {
           {day.supplements.note && (
             <div className="mono text-[.62rem] text-mute mt-2">{day.supplements.note}</div>
           )}
-        </TodayCard>
+        </AccentCard>
       )}
     </div>
   );

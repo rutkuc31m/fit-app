@@ -32,13 +32,44 @@ export const Icon = {
   cart:    (p) => <Svg {...p} d={<><circle cx="9" cy="20" r="1.4" /><circle cx="17" cy="20" r="1.4" /><path d="M2 3h3l3 12h11l2-8H6" /></>} />
 };
 
-/* ─────────── Bracket corners wrapper ─────────── */
-export const Brackets = ({ children, className = "" }) => (
-  <div className={`brackets ${className}`}>
-    <span className="bk tl" /><span className="bk tr" /><span className="bk bl" /><span className="bk br" />
-    {children}
-  </div>
-);
+/* ─────────── Shared accent card ─────────── */
+export function AccentCard({ accent = "#30d158", as: Component = "div", className = "", contentClassName = "pl-2", style, children, ...props }) {
+  return (
+    <Component
+      className={`accent-card ${className}`}
+      style={{
+        borderColor: `${accent}66`,
+        background: `linear-gradient(135deg, ${accent}10 0%, rgba(28,28,30,.96) 48%, rgba(10,10,11,.96) 100%)`,
+        ...style
+      }}
+      {...props}
+    >
+      <div className="accent-card-rail" style={{ background: accent, boxShadow: `0 0 12px ${accent}80` }} />
+      <div className={`relative z-10 ${contentClassName}`}>{children}</div>
+    </Component>
+  );
+}
+
+export function PageCommand({ accent = "#30d158", kicker, title, sub, metrics = [], className = "", children }) {
+  return (
+    <AccentCard accent={accent} className={`p-4 ${className}`}>
+      {children}
+      <div className="page-hero-kicker" style={{ color: accent }}>{kicker}</div>
+      <div className="page-hero-title">{title}</div>
+      {sub && <div className="page-hero-sub">{sub}</div>}
+      {metrics.length > 0 && (
+        <div className={`grid ${metrics.length === 4 ? "grid-cols-4" : "grid-cols-3"} gap-2 mt-4`}>
+          {metrics.map((metric) => (
+            <div key={metric.label} className="metric-tile">
+              <div className="metric-label">{metric.label}</div>
+              <div className={`metric-value ${metric.className || ""}`}>{metric.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </AccentCard>
+  );
+}
 
 /* ─────────── Ring gauge ─────────── */
 export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, unit, over = false, children }) {
@@ -168,15 +199,12 @@ export const Skeleton = ({ className = "h-4 w-full" }) => <div className={`skele
 /* ─────────── Empty state ─────────── */
 export function Empty({ label, hint, icon, action }) {
   return (
-    <div className="card p-6 text-center relative overflow-hidden">
-      <div className="absolute inset-0 hatch opacity-60 pointer-events-none" />
-      <div className="relative flex flex-col items-center gap-2">
-        {icon && <div className="text-mute2 mb-1">{icon}</div>}
-        <div className="mono text-xs text-ink2 caps">{label}</div>
-        {hint && <div className="mono text-[.68rem] text-mute max-w-[28ch] leading-relaxed">{hint}</div>}
-        {action}
-      </div>
-    </div>
+    <AccentCard accent="#64d2ff" className="p-6 text-center" contentClassName="pl-2 flex flex-col items-center gap-2">
+      {icon && <div className="text-mute2 mb-1">{icon}</div>}
+      <div className="mono text-xs text-ink2 caps">{label}</div>
+      {hint && <div className="mono text-[.68rem] text-mute max-w-[28ch] leading-relaxed">{hint}</div>}
+      {action}
+    </AccentCard>
   );
 }
 

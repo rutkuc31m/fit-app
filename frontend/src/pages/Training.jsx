@@ -5,7 +5,7 @@ import { todayStr, getDayPlan, getWeekNum, getExercisesForDay } from "../lib/pla
 import { getCardioProtocol } from "../lib/protocols";
 import { EXERCISES, MUSCLE_LABELS } from "../lib/exercises";
 import { trainingAdjustment } from "../lib/coaching";
-import { Empty, Icon } from "../components/ui";
+import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
 import ExerciseGifPreview from "../components/ExerciseGifPreview";
 
 const numberOrNull = (value) => value === "" ? null : Number(value);
@@ -36,8 +36,12 @@ function RestTimer({ seconds, onClose }) {
   const done = left <= 0;
   return (
     <div className="fixed bottom-[76px] left-0 right-0 z-40 px-3 pointer-events-none">
-      <div className={`max-w-[680px] mx-auto card p-3 pointer-events-auto flex items-center gap-3 ${done ? "border-lime/60" : ""}`}
-           style={done ? { boxShadow: "0 0 24px -4px rgba(48,209,88,.6)" } : {}}>
+      <AccentCard
+        accent={done ? "#30d158" : "#64d2ff"}
+        className={`max-w-[680px] mx-auto pointer-events-auto ${done ? "border-lime/60" : ""}`}
+        contentClassName="pl-2 flex items-center gap-3 w-full"
+        style={done ? { boxShadow: "0 0 24px -4px rgba(48,209,88,.6)" } : {}}
+      >
         <div className="relative w-[56px] h-[56px] shrink-0">
           <svg viewBox="0 0 56 56" className="w-full h-full -rotate-90">
             <circle cx="28" cy="28" r="24" stroke="#2c2c2e" strokeWidth="4" fill="none" />
@@ -62,7 +66,7 @@ function RestTimer({ seconds, onClose }) {
           {!done && <button className="btn-icon" onClick={() => setLeft((n) => n + 15)} title="+15s">+15</button>}
           <button className="btn-icon" onClick={onClose} title="close"><Icon.close size={14} /></button>
         </div>
-      </div>
+      </AccentCard>
     </div>
   );
 }
@@ -157,7 +161,7 @@ export default function Training() {
         : `${lastWeight > 0 ? `${lastWeight}kg ` : ""}x ${Math.min(repGoal || lastReps + 1, lastReps + 1)}`
       : null;
     return (
-      <div key={ex.id} className="list-card">
+      <AccentCard key={ex.id} accent="#30d158" className="overflow-hidden" contentClassName="pl-2">
         <div className="px-4 py-3 border-b border-line flex justify-between items-baseline gap-2">
           <button
             type="button"
@@ -255,43 +259,29 @@ export default function Training() {
             </button>
           </div>
         </div>
-      </div>
+      </AccentCard>
     );
   };
 
   return (
     <div className="page page-training">
-      <div className="page-hero">
-        <div className="relative z-10">
-          <div className="page-hero-kicker">training block</div>
-          <div className="page-hero-title">
-            {plan.type === "rest" ? "Recovery keeps the cut alive." : `${t("training.title")} ${dayType}`}
-          </div>
-          <div className="page-hero-sub">
-            {plan.type === "rest" ? "No ego lifting today · walk easy · sleep hard" : `${t(`training.${day.nameKey}`)} · ${day.exercises.length} exercises · log every set`}
-          </div>
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            <div className="metric-tile">
-              <div className="metric-label">day</div>
-              <div className="metric-value text-lime">{plan.type === "rest" ? "REST" : dayType}</div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">week</div>
-              <div className="metric-value">W{String(week).padStart(2, "0")}</div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">liss</div>
-              <div className="metric-value text-amber">{cardio?.liss?.durationMin || "--"}min</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageCommand
+        accent={plan.type === "rest" ? "#64d2ff" : "#30d158"}
+        kicker="training block"
+        title={plan.type === "rest" ? "Recovery keeps the cut alive." : `${t("training.title")} ${dayType}`}
+        sub={plan.type === "rest" ? "No ego lifting today · walk easy · sleep hard" : `${t(`training.${day.nameKey}`)} · ${day.exercises.length} exercises · log every set`}
+        metrics={[
+          { label: "day", value: plan.type === "rest" ? "REST" : dayType, className: "text-lime" },
+          { label: "week", value: `W${String(week).padStart(2, "0")}` },
+          { label: "liss", value: `${cardio?.liss?.durationMin || "--"}min`, className: "text-amber" }
+        ]}
+      />
 
       <div className="section-label">
         {t("training.title")} · <span className="text-signal">{dayType}</span> · {t(`training.${day.nameKey}`)}
       </div>
 
-      <div className="card p-3">
+      <AccentCard accent={adjustment.tone === "text-cyan" ? "#64d2ff" : adjustment.tone === "text-amber" ? "#ff9f0a" : "#30d158"}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className={`mono text-[.58rem] uppercase tracking-[.18em] ${adjustment.tone}`}>auto-adjust</div>
@@ -305,7 +295,7 @@ export default function Training() {
             </div>
           </div>
         </div>
-      </div>
+      </AccentCard>
 
       {plan.type === "rest" && (
         <Empty icon={<Icon.moon size={22} />} label={t("training.rest")} hint={t("dashboard.rest_day")} />
@@ -313,14 +303,13 @@ export default function Training() {
 
       {/* Day C: cardio block on top */}
       {plan.type === "C" && cardio && (
-        <div className="card p-3 border-cyan/30 relative overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-cyan shadow-[0_0_10px_rgba(100,210,255,.5)]" />
-          <div className="flex justify-between items-baseline pl-2">
+        <AccentCard accent="#64d2ff" className="border-cyan/30">
+          <div className="flex justify-between items-baseline">
             <div className="card-title text-cyan">{t("cardio.liss_today")}</div>
             <div className="mono text-[.62rem] text-cyan/80 uppercase tracking-[.14em] tabular-nums">{cardio.liss?.durationMin}min · {cardio.liss?.intensity}</div>
           </div>
-          {cardio.liss?.notes && <div className="mono text-[.66rem] text-ink2 mt-1 pl-2">{cardio.liss.notes}</div>}
-        </div>
+          {cardio.liss?.notes && <div className="mono text-[.66rem] text-ink2 mt-1">{cardio.liss.notes}</div>}
+        </AccentCard>
       )}
 
       {/* Main exercises */}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth.jsx";
+import { AccentCard, PageCommand } from "../components/ui";
 
 export default function Login() {
   const { t, i18n } = useTranslation();
@@ -22,16 +23,19 @@ export default function Login() {
 
   return (
     <div className="page pt-[80px]">
-      <div className="page-hero">
-        <div className="relative z-10 text-center">
+      <PageCommand
+        accent="#30d158"
+        kicker="fit rutkuc"
+        title="Six months. One direction."
+        sub="93 to 73 · fat loss · waist down · muscle kept"
+        className="text-center"
+      >
+        <div className="relative z-10 text-center mb-4">
           <div className="mx-auto w-[48px] h-[48px] rounded-lg bg-signal grid place-items-center text-[#000000] mono font-bold text-xl shadow-[0_0_30px_-6px_theme(colors.signal)]">F</div>
-          <div className="page-hero-kicker mt-4">fit rutkuc</div>
-          <div className="page-hero-title">Six months. One direction.</div>
-          <div className="page-hero-sub">93 to 73 · fat loss · waist down · muscle kept</div>
         </div>
-      </div>
+      </PageCommand>
 
-      <form onSubmit={submit} className="card p-4 flex flex-col gap-3">
+      <AccentCard as="form" onSubmit={submit} accent="#30d158" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
         <div className="section-label">{t(`auth.${mode}`)}</div>
 
         {mode === "register" && (
@@ -51,7 +55,7 @@ export default function Login() {
           onClick={() => { setMode(mode === "login" ? "register" : "login"); setErr(null); }}>
           {mode === "login" ? t("auth.or_register") : t("auth.or_login")}
         </button>
-      </form>
+      </AccentCard>
     </div>
   );
 }

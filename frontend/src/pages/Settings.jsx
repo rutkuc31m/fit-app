@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { getPushStatus, subscribeToPush, unsubscribeFromPush, sendTestPush, pushSupported } from "../lib/notify";
+import { AccentCard, PageCommand } from "../components/ui";
 
 const numberOrBlank = (value) => value === "" ? "" : Number(value);
 const numberOrNull = (value) => value === "" || value == null || Number.isNaN(Number(value)) ? null : Number(value);
@@ -91,18 +92,15 @@ export default function Settings() {
 
   return (
     <div className="page page-settings">
-      <div className="page-hero">
-        <div className="relative z-10">
-          <div className="page-hero-kicker">system setup</div>
-          <div className="page-hero-title">Keep the cut quiet, precise and useful.</div>
-          <div className="page-hero-sub">
-            Smart reminders · clean data · no noise by default
-          </div>
-        </div>
-      </div>
+      <PageCommand
+        accent="#64d2ff"
+        kicker="system setup"
+        title="Keep the cut quiet, precise and useful."
+        sub="Smart reminders · clean data · no noise by default"
+      />
 
       <div className="section-label">{t("settings.profile")}</div>
-      <div className="card p-4 flex flex-col gap-3">
+      <AccentCard accent="#64d2ff" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
         <label className="flex flex-col gap-1">
           <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("auth.name")}</span>
           <input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -124,12 +122,12 @@ export default function Settings() {
         </div>
         <button className="btn-primary" onClick={save}>{t("settings.save")}</button>
         {msg && <div className="mono text-xs text-signal text-center">{msg}</div>}
-      </div>
+      </AccentCard>
 
       {pushSupported() && (
         <>
           <div className="section-label">Notifications</div>
-          <div className="card p-3 flex flex-col gap-3">
+          <AccentCard accent="#30d158" contentClassName="pl-2 flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">coach mode</div>
@@ -154,12 +152,12 @@ export default function Settings() {
                 {pushBusy ? "..." : "enable push"}
               </button>
             )}
-          </div>
+          </AccentCard>
 
           {pushStatus === "subscribed" && (
             <>
               <div className="section-label">Reminder Groups</div>
-              <div className="card p-3 flex flex-col gap-[2px]">
+              <AccentCard accent="#bf5af2" contentClassName="pl-2 flex flex-col gap-[2px]">
                 {PREF_ROWS.map(({ key, label, sub }) => (
                   <label key={key} className="flex items-center justify-between gap-3 py-2 border-b border-line/40 last:border-0 cursor-pointer">
                     <div className="min-w-0">
@@ -180,7 +178,7 @@ export default function Settings() {
                     </button>
                   </label>
                 ))}
-              </div>
+              </AccentCard>
             </>
           )}
         </>

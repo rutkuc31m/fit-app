@@ -5,7 +5,7 @@ import { api } from "../lib/api";
 import { todayStr } from "../lib/plan";
 import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
 import BarcodeScanner from "../components/BarcodeScanner";
-import { Empty, Icon } from "../components/ui";
+import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
 
 const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, barcode: null };
 const numberOrBlank = (value) => value === "" ? "" : Number(value);
@@ -171,34 +171,21 @@ export default function Log() {
 
   return (
     <div className="page page-log">
-      <div className="page-hero">
-        <div className="relative z-10">
-          <div className="page-hero-kicker">nutrition control</div>
-          <div className="page-hero-title">Log fast. Stay honest.</div>
-          <div className="page-hero-sub">Scan · edit grams · protect protein</div>
-          <div className="grid grid-cols-4 gap-2 mt-4">
-            <div className="metric-tile">
-              <div className="metric-label">kcal</div>
-              <div className="metric-value text-amber">{Math.round(totals.kcal)}</div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">protein</div>
-              <div className="metric-value text-lime">{Math.round(totals.protein)}g</div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">carbs</div>
-              <div className="metric-value text-amber">{Math.round(totals.carbs)}g</div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">fat</div>
-              <div className="metric-value text-ink2">{Math.round(totals.fat)}g</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageCommand
+        accent="#ff9f0a"
+        kicker="nutrition control"
+        title="Log fast. Stay honest."
+        sub="Scan · edit grams · protect protein"
+        metrics={[
+          { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
+          { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
+          { label: "carbs", value: `${Math.round(totals.carbs)}g`, className: "text-amber" },
+          { label: "fat", value: `${Math.round(totals.fat)}g`, className: "text-ink2" }
+        ]}
+      />
 
       {/* Date navigator */}
-      <div className="card p-2 flex items-center gap-2">
+      <AccentCard accent="#64d2ff" className="p-2" contentClassName="pl-2 flex items-center gap-2">
         <button className="btn-icon" aria-label="prev day" onClick={() => shiftDate(-1)}>
           <Icon.chev size={16} className="rotate-180" />
         </button>
@@ -214,7 +201,7 @@ export default function Log() {
             {t("log.today")}
           </button>
         )}
-      </div>
+      </AccentCard>
 
       {/* Action buttons */}
       <div className="action-row">
@@ -232,7 +219,7 @@ export default function Log() {
       )}
 
       {allItems.length > 0 && (
-        <div className="list-card">
+        <AccentCard accent="#ff9f0a" className="overflow-hidden" contentClassName="pl-2">
           <div className="divide-y divide-line">
             {allItems.map((it) => (
               <div key={it.id} className="px-4 py-3 flex items-start justify-between gap-3">
@@ -253,7 +240,7 @@ export default function Log() {
               </div>
             ))}
           </div>
-        </div>
+        </AccentCard>
       )}
 
       {/* Barcode Scanner */}

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
-import { Ring, Brackets, Empty, Icon, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
+import { AccentCard, Ring, Empty, Icon, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
 
 const sumMacros = (meals) => meals.reduce((a, m) => {
   m.items.forEach((it) => {
@@ -77,7 +77,7 @@ export default function Dashboard() {
       </div>
 
       {/* Hero — Journey gauge (iOS Health style) */}
-      <div className="hero-card overflow-hidden p-5">
+      <AccentCard accent={phase.color} className="p-5">
         {/* Top meta row */}
         <div className="flex items-start justify-between mb-5">
           <div>
@@ -175,57 +175,55 @@ export default function Dashboard() {
             <div className="mono text-sm text-cyan tabular-nums">{daysLeft}</div>
           </div>
         </div>
-      </div>
+      </AccentCard>
 
       {/* Quick weigh-in */}
-      <div className="card p-4">
+      <AccentCard accent="#30d158" className="p-4">
         <div className="card-title mb-2">{t("dashboard.quick_weigh")}</div>
         <div className="flex gap-2">
           <input className="input flex-1 mono text-lg text-signal" type="number" step="0.1"
             value={quickWt} onChange={(e) => setQuickWt(e.target.value)} placeholder="00.0" />
           <button className={`btn-primary ${savedFlash ? "flash-ok" : ""}`} onClick={saveWeight}>✓</button>
         </div>
-      </div>
+      </AccentCard>
 
       {/* Calorie ring + macros */}
-      <Brackets>
-        <div className="card p-4">
-          <div className="flex justify-between items-baseline mb-3">
-            <div className="card-title">{t("dashboard.kcal")}</div>
-            <div className="mono text-[.64rem] text-mute uppercase tracking-[.18em]">
-              {Math.round(macros.kcal)} / {target.kcal}
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Ring value={macros.kcal} target={target.kcal || 1} size={118} stroke={9}
-              over={target.kcal > 0 && macros.kcal > target.kcal}
-              unit="kcal" label={`${Math.max(0, target.kcal - Math.round(macros.kcal))} left`} />
-            <div className="flex-1 grid grid-cols-3 gap-2">
-              {[
-                { k: "protein", v: macros.protein, t: target.protein, color: "#30d158" },
-                { k: "carbs",   v: macros.carbs,   t: target.carbs,   color: "#64d2ff" },
-                { k: "fat",     v: macros.fat,     t: target.fat,     color: "#ff9f0a" }
-              ].map((m) => {
-                const pct = m.t > 0 ? (m.v / m.t) : 0;
-                const over = pct > 1;
-                const c = over ? "#ff453a" : m.color;
-                return (
-                  <div key={m.k} className="flex flex-col items-center">
-                    <MiniRing value={m.v} target={m.t} color={c} size={54} stroke={5} />
-                    <div className="mono text-[.56rem] text-mute uppercase tracking-[.18em] mt-1">{t(`dashboard.${m.k}`)}</div>
-                    <div className="mono text-[.62rem] text-ink tabular-nums">{Math.round(m.v)}<span className="text-mute opacity-70">/{m.t}g</span></div>
-                  </div>
-                );
-              })}
-            </div>
+      <AccentCard accent="#ff9f0a" className="p-4">
+        <div className="flex justify-between items-baseline mb-3">
+          <div className="card-title">{t("dashboard.kcal")}</div>
+          <div className="mono text-[.64rem] text-mute uppercase tracking-[.18em]">
+            {Math.round(macros.kcal)} / {target.kcal}
           </div>
         </div>
-      </Brackets>
+        <div className="flex items-center gap-4">
+          <Ring value={macros.kcal} target={target.kcal || 1} size={118} stroke={9}
+            over={target.kcal > 0 && macros.kcal > target.kcal}
+            unit="kcal" label={`${Math.max(0, target.kcal - Math.round(macros.kcal))} left`} />
+          <div className="flex-1 grid grid-cols-3 gap-2">
+            {[
+              { k: "protein", v: macros.protein, t: target.protein, color: "#30d158" },
+              { k: "carbs",   v: macros.carbs,   t: target.carbs,   color: "#64d2ff" },
+              { k: "fat",     v: macros.fat,     t: target.fat,     color: "#ff9f0a" }
+            ].map((m) => {
+              const pct = m.t > 0 ? (m.v / m.t) : 0;
+              const over = pct > 1;
+              const c = over ? "#ff453a" : m.color;
+              return (
+                <div key={m.k} className="flex flex-col items-center">
+                  <MiniRing value={m.v} target={m.t} color={c} size={54} stroke={5} />
+                  <div className="mono text-[.56rem] text-mute uppercase tracking-[.18em] mt-1">{t(`dashboard.${m.k}`)}</div>
+                  <div className="mono text-[.62rem] text-ink tabular-nums">{Math.round(m.v)}<span className="text-mute opacity-70">/{m.t}g</span></div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </AccentCard>
 
       {/* Today plan */}
       <div className="section-label">{t("dashboard.today_plan")}</div>
       <div className="grid grid-cols-2 gap-[10px]">
-        <Link to="/training" className="card p-4 hover:border-line2 transition flex items-center gap-3">
+        <AccentCard as={Link} to="/training" accent="#30d158" className="p-4 hover:border-line2 flex items-center gap-3" contentClassName="pl-2 flex items-center gap-3 w-full">
           <div className="shrink-0">
             {dayPlan.type === "rest"
               ? <div className="w-[34px] h-[34px] rounded-full border border-dashed border-line2 grid place-items-center text-mute mono text-xs">z</div>
@@ -237,8 +235,8 @@ export default function Dashboard() {
               {dayPlan.type === "rest" ? t("training.rest") : t(`training.day_${dayPlan.type.toLowerCase()}`)}
             </div>
           </div>
-        </Link>
-        <Link to="/log" className="card p-4 hover:border-line2 transition">
+        </AccentCard>
+        <AccentCard as={Link} to="/log" accent="#ff9f0a" className="p-4 hover:border-line2">
           <div className="card-title mb-1">{t("nav.log")}</div>
           <div className="mono font-bold text-xl text-signal">{dayPlan.eating}</div>
           <div className="mono text-[.7rem] text-mute uppercase tracking-[.14em] mt-1">{target.kcal} kcal</div>
@@ -250,33 +248,33 @@ export default function Dashboard() {
           {dayPlan.eating === "FAST" && (
             <div className="mono text-[.62rem] text-mute mt-[2px]">{t("eating.fast_allowed")}</div>
           )}
-        </Link>
+        </AccentCard>
       </div>
 
       {/* Today timeline + Habits + Check-in quick links */}
-      <Link to="/today" className="card p-3 hover:border-line2 transition flex items-center gap-2">
+      <AccentCard as={Link} to="/today" accent="#64d2ff" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
         <Icon.clock size={16} className="text-signal" />
         <div className="flex-1">
           <div className="card-title">Schedule</div>
           <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">Hour-by-hour · D{daysBetween(PLAN.startDate, date) + 1}/182</div>
         </div>
         <Icon.chev size={14} className="text-mute" />
-      </Link>
+      </AccentCard>
       <div className="grid grid-cols-2 gap-[10px]">
-        <Link to="/habits" className="card p-3 hover:border-line2 transition flex items-center gap-2">
+        <AccentCard as={Link} to="/habits" accent="#30d158" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
           <Icon.check size={16} className="text-signal" />
           <div>
             <div className="card-title">{t("habits.title")}</div>
             <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("habits.morning")} · {t("habits.evening")}</div>
           </div>
-        </Link>
-        <Link to="/checkin" className="card p-3 hover:border-line2 transition flex items-center gap-2">
+        </AccentCard>
+        <AccentCard as={Link} to="/checkin" accent="#64d2ff" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
           <Icon.ruler size={16} className="text-signal" />
           <div>
             <div className="card-title">{t("checkin.title")}</div>
             <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">W{week}</div>
           </div>
-        </Link>
+        </AccentCard>
       </div>
 
       {/* Meals today */}
@@ -289,7 +287,7 @@ export default function Dashboard() {
           {meals.map((m) => {
             const kcal = Math.round(m.items.reduce((a, i) => a + (i.kcal || 0), 0));
             return (
-              <div key={m.id} className="card p-3 flex items-center gap-3">
+              <AccentCard key={m.id} accent="#ff9f0a" className="flex items-center gap-3" contentClassName="pl-2 flex items-center gap-3 w-full">
                 <div className="w-8 h-8 rounded-md border border-line bg-bg2 grid place-items-center text-ink2 shrink-0">
                   <Icon.utensils size={16} />
                 </div>
@@ -298,7 +296,7 @@ export default function Dashboard() {
                   <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{m.items.length} · {m.time}</div>
                 </div>
                 <div className="mono text-sm text-signal font-bold tabular-nums">{kcal}<span className="text-mute text-[.6rem] ml-1">kcal</span></div>
-              </div>
+              </AccentCard>
             );
           })}
         </div>

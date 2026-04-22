@@ -98,42 +98,10 @@
   }
   @keyframes pulse { 0%,100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1); } }
 
-  /* Hero — iOS Health style card */
-  .hero-card {
-    position: relative;
-    background:
-      linear-gradient(135deg, rgba(74,222,128,.1), transparent 38%),
-      linear-gradient(180deg, #18191b 0%, #101112 100%);
-    border: 1px solid theme(colors.line);
-    box-shadow: theme(boxShadow.glow);
-    border-radius: 10px;
-  }
-
   .page {
     @apply relative z-10 max-w-[760px] mx-auto px-[14px] pt-4 pb-[128px] flex flex-col gap-[14px];
   }
 
-  .mission-hero {
-    position: relative;
-    overflow: hidden;
-    border-radius: 10px;
-    border: 1px solid rgba(74,222,128,.26);
-    background:
-      linear-gradient(90deg, rgba(74,222,128,.1), transparent 36%),
-      linear-gradient(180deg, #1a1b1d 0%, #0f1011 100%);
-    box-shadow: 0 28px 70px -44px rgba(74,222,128,.5), inset 0 1px 0 rgba(255,255,255,.04);
-  }
-  .mission-hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
-    background-size: 28px 28px;
-    mask-image: linear-gradient(90deg, #000, transparent 78%);
-  }
   .metric-tile {
     @apply rounded-lg border border-line/70 bg-bg2/70 px-3 py-2 min-w-0;
   }
@@ -141,10 +109,10 @@
     @apply card p-4 overflow-hidden;
     box-shadow: 0 26px 72px -44px rgba(74,222,128,.65), inset 0 1px 0 rgba(255,255,255,.055);
   }
-  .today-card {
+  .accent-card {
     @apply card p-3 overflow-hidden transition;
   }
-  .today-card-rail {
+  .accent-card-rail {
     @apply absolute left-0 top-0 bottom-0 w-[3px];
   }
   .command-metric {
@@ -152,9 +120,6 @@
   }
   .soft-band {
     @apply rounded-lg border border-line/70 bg-bg2/50;
-  }
-  .page-hero {
-    @apply mission-hero p-4;
   }
   .page-hero-kicker {
     @apply mono text-[.58rem] text-signal uppercase tracking-[.18em] font-medium;
@@ -177,9 +142,6 @@
   .action-row {
     @apply grid grid-cols-2 gap-2;
   }
-  .list-card {
-    @apply card overflow-hidden;
-  }
   .list-row {
     @apply px-4 py-3 border-b border-line/60 last:border-0;
   }
@@ -192,17 +154,6 @@
   .modal-actions {
     @apply sticky bottom-[-1rem] -mx-4 -mb-4 flex gap-2 mt-1 p-4 bg-surface/95 border-t border-line/70 backdrop-blur;
   }
-
-  /* Corner bracket frame — subtle structural decoration */
-  .brackets { position: relative; }
-  .brackets > .bk {
-    position: absolute; width: 8px; height: 8px;
-    border-color: theme(colors.line2); pointer-events: none;
-  }
-  .brackets > .bk.tl { top: -1px; left: -1px; border-top: 1px solid; border-left: 1px solid; }
-  .brackets > .bk.tr { top: -1px; right: -1px; border-top: 1px solid; border-right: 1px solid; }
-  .brackets > .bk.bl { bottom: -1px; left: -1px; border-bottom: 1px solid; border-left: 1px solid; }
-  .brackets > .bk.br { bottom: -1px; right: -1px; border-bottom: 1px solid; border-right: 1px solid; }
 
   /* Skeleton shimmer */
   .skeleton {
@@ -261,11 +212,6 @@
     animation: tick 2.4s ease-in-out infinite;
   }
   @keyframes tick { 0%,100% { opacity: .15; } 50% { opacity: .7; } }
-
-  /* Hatch (for target zones / disabled) */
-  .hatch {
-    background-image: repeating-linear-gradient(135deg, rgba(48,209,88,.08) 0 2px, transparent 2px 6px);
-  }
 
   /* Chip (fuel/eating badges: OMAD, FAST, LOW, rest, A/B/C) */
   .chip {

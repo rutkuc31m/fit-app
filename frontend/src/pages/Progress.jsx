@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { PLAN, todayStr } from "../lib/plan";
+import { AccentCard, PageCommand } from "../components/ui";
 
 const numberOrBlank = (value) => value === "" ? "" : Number(value);
 const cleanMeasurement = (draft = {}) => Object.fromEntries(
@@ -64,7 +65,7 @@ function AdherenceCard({ review }) {
     ["water", `${review.hydration_days ?? 0}/7`]
   ];
   return (
-    <div className="card p-4">
+    <AccentCard accent="#30d158" className="p-4">
       <div className="flex items-center gap-4">
         <div className="relative w-[64px] h-[64px] shrink-0">
           <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
@@ -86,7 +87,7 @@ function AdherenceCard({ review }) {
           </div>
         </div>
       </div>
-    </div>
+    </AccentCard>
   );
 }
 
@@ -140,7 +141,7 @@ function WeeklyReviewCard({ review }) {
   ];
 
   return (
-    <div className="card p-4">
+    <AccentCard accent={review.signal === "recover" ? "#64d2ff" : review.signal === "audit" ? "#ff9f0a" : "#30d158"} className="p-4">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <div className="section-label mt-0 mb-1">weekly review</div>
@@ -162,7 +163,7 @@ function WeeklyReviewCard({ review }) {
         ))}
       </div>
       <div className="mono text-[.66rem] text-ink2 leading-snug mt-3">{signalCopy.note}</div>
-    </div>
+    </AccentCard>
   );
 }
 
@@ -197,44 +198,33 @@ export default function Progress() {
 
   return (
     <div className="page page-progress">
-      <div className="page-hero">
-        <div className="relative z-10">
-          <div className="page-hero-kicker">body data</div>
-          <div className="page-hero-title">Trend over mood.</div>
-          <div className="page-hero-sub">Weight · waist · phase checkpoints</div>
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            <div className="metric-tile">
-              <div className="metric-label">current</div>
-              <div className="metric-value">{latestWeight != null ? latestWeight.toFixed(1) : "--"}<span className="text-mute text-[.62rem] ml-1">kg</span></div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">lost</div>
-              <div className="metric-value text-lime">{lost.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-label">left</div>
-              <div className="metric-value text-amber">{left.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageCommand
+        accent="#64d2ff"
+        kicker="body data"
+        title="Trend over mood."
+        sub="Weight · waist · phase checkpoints"
+        metrics={[
+          { label: "current", value: <>{latestWeight != null ? latestWeight.toFixed(1) : "--"}<span className="text-mute text-[.62rem] ml-1">kg</span></> },
+          { label: "lost", value: <>{lost.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></>, className: "text-lime" },
+          { label: "left", value: <>{left.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></>, className: "text-amber" }
+        ]}
+      />
 
       <WeeklyReviewCard review={review} />
       <AdherenceCard review={review} />
 
       <div className="section-label">{t("progress.weight_chart")}</div>
-      <div className="card p-4"><WeightChart logs={logs} /></div>
+      <AccentCard accent="#64d2ff" className="p-4"><WeightChart logs={logs} /></AccentCard>
 
       <div className="section-label">{t("progress.phases")}</div>
       <div className="flex flex-col gap-2">
         {PLAN.phases.map((p) => (
-          <div key={p.id} className="card p-3 flex items-center gap-3">
-            <div className="w-1 self-stretch rounded-full" style={{ background: p.color }} />
+          <AccentCard key={p.id} accent={p.color} className="flex items-center gap-3">
             <div className="flex-1">
               <div className="mono text-xs text-ink">P{p.id} · W{p.weeks[0]}–{p.weeks[1]}</div>
               <div className="mono text-[.66rem] text-mute">{p.from} → {p.to}kg</div>
             </div>
-          </div>
+          </AccentCard>
         ))}
       </div>
 
@@ -244,14 +234,14 @@ export default function Progress() {
       </div>
 
       {last && (
-        <div className="card p-4 grid grid-cols-4 gap-2">
+        <AccentCard accent="#64d2ff" className="p-4" contentClassName="pl-2 grid grid-cols-4 gap-2">
           {MEASUREMENT_FIELDS.map((k) => (
             <div key={k} className="text-center">
               <div className="mono text-sm font-bold text-cyan tabular-nums">{last[`${k}_cm`] ?? "—"}</div>
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-1">{t(`progress.${k}`)}</div>
             </div>
           ))}
-        </div>
+        </AccentCard>
       )}
 
       {draft && (
