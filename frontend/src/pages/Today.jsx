@@ -6,6 +6,7 @@ import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { quoteForDate } from "../lib/quotes";
+import { dailyReadiness, recoveryCoachNote } from "../lib/coaching";
 import { Icon, Empty } from "../components/ui";
 
 const CAT_STYLE = {
@@ -154,7 +155,7 @@ const recoverySnapshotKey = (value = {}) => JSON.stringify({
 const hasRecoveryValue = (value = {}) =>
   ["energy", "hunger", "headache"].some((field) => value[field] !== "" && value[field] != null);
 
-function RecoveryCheck({ value, onChange, onSave, saving, saved }) {
+function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   const fields = [
     { id: "energy", label: "energy", low: "flat", high: "sharp", color: "#30d158" },
     { id: "hunger", label: "hunger", low: "quiet", high: "loud", color: "#ff9f0a" },
@@ -205,6 +206,46 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved }) {
             </div>
           </div>
         ))}
+      </div>
+      {coachNote && (
+        <div className="mt-3 soft-band px-3 py-2 mono text-[.64rem] text-ink2 leading-snug">
+          {coachNote}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ReadinessCard({ readiness, day }) {
+  if (!readiness) return null;
+  const fastDay = !day?.eating?.window;
+  return (
+    <div className="card p-3 overflow-hidden" style={{ borderColor: `${readiness.color}66`, background: `${readiness.color}0a` }}>
+      <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: readiness.color, boxShadow: `0 0 12px ${readiness.color}80` }} />
+      <div className="pl-2 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="mono text-[.58rem] uppercase tracking-[.18em]" style={{ color: readiness.color }}>
+            today's call
+          </div>
+          <div className="font-display text-[1.35rem] leading-none text-ink mt-1"
+            style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+            {readiness.label}
+          </div>
+          <div className="mono text-[.7rem] text-ink2 leading-snug mt-2">{readiness.action}</div>
+          <div className="mono text-[.62rem] text-mute leading-snug mt-1">{readiness.detail}</div>
+        </div>
+        <div className="grid gap-1 shrink-0 min-w-[82px]">
+          <div className="metric-tile px-2 py-1 text-right">
+            <div className="metric-label">food</div>
+            <div className="metric-value text-[.78rem]" style={{ color: fastDay ? "#64d2ff" : "#ff9f0a" }}>
+              {fastDay ? "FAST" : day.eating.mode}
+            </div>
+          </div>
+          <div className="metric-tile px-2 py-1 text-right">
+            <div className="metric-label">gym</div>
+            <div className="metric-value text-[.78rem]">{day.training?.type || "REST"}</div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -257,6 +298,8 @@ export default function Today() {
     return null;
   }, [date]);
   const preStart = date < PLAN.startDate;
+  const readiness = day ? dailyReadiness({ day, recovery, mealsTotals, session }) : null;
+  const recoveryNote = recoverySaved ? recoveryCoachNote(recovery, !day?.eating?.window) : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -463,6 +506,8 @@ export default function Today() {
         </div>
       </div>
 
+      <ReadinessCard readiness={readiness} day={day} />
+
       {/* Fasting window clock */}
       <FastingClock eating={day.eating} />
       <FastDayAssistant day={day} />
@@ -470,6 +515,7 @@ export default function Today() {
         value={recovery}
         saving={recoverySaving}
         saved={recoverySaved}
+        coachNote={recoveryNote}
         onChange={(field, score) => setRecovery((prev) => ({ ...prev, [field]: score }))}
         onSave={saveRecovery}
       />

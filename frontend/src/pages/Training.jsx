@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 import { todayStr, getDayPlan, getWeekNum, getExercisesForDay } from "../lib/plan";
 import { getCardioProtocol } from "../lib/protocols";
 import { EXERCISES, MUSCLE_LABELS } from "../lib/exercises";
+import { trainingAdjustment } from "../lib/coaching";
 import { Empty, Icon } from "../components/ui";
 import ExerciseGifPreview from "../components/ExerciseGifPreview";
 
@@ -78,16 +79,26 @@ export default function Training() {
   const cardio = useMemo(() => getCardioProtocol(week), [week]);
   const [session, setSession] = useState(null);
   const [lastByEx, setLastByEx] = useState({});
+  const [recovery, setRecovery] = useState({});
   const [rest, setRest] = useState(null); // { seconds } when active
   const [previewGif, setPreviewGif] = useState(null);
+  const adjustment = trainingAdjustment(recovery);
 
   const mainExercises = day.exercises.filter((e) => !e.phase1Only && !e.coreFinisher);
   const coreExercises = day.exercises.filter((e) => e.phase1Only || e.coreFinisher);
   const hasPhase1Core = coreExercises.some((e) => e.phase1Only);
 
   const load = async () => {
-    const s = await api.get(`/training/session?date=${date}&day_type=${dayType}`);
+    const [s, log] = await Promise.all([
+      api.get(`/training/session?date=${date}&day_type=${dayType}`),
+      api.get(`/logs/${date}`).catch(() => null)
+    ]);
     setSession(s);
+    setRecovery({
+      energy: log?.energy ?? "",
+      hunger: log?.hunger ?? "",
+      headache: log?.headache ?? ""
+    });
     const hist = await Promise.all(day.exercises.map((e) => api.get(`/training/exercise/${e.id}/history`).catch(() => [])));
     const map = {};
     day.exercises.forEach((e, i) => {
@@ -278,6 +289,22 @@ export default function Training() {
 
       <div className="section-label">
         {t("training.title")} · <span className="text-signal">{dayType}</span> · {t(`training.${day.nameKey}`)}
+      </div>
+
+      <div className="card p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className={`mono text-[.58rem] uppercase tracking-[.18em] ${adjustment.tone}`}>auto-adjust</div>
+            <div className="card-title mt-1">{adjustment.label}</div>
+            <div className="mono text-[.66rem] text-ink2 leading-snug mt-2">{adjustment.note}</div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="mono text-[.52rem] text-mute uppercase tracking-[.14em]">recovery</div>
+            <div className="mono text-[.72rem] text-ink2 tabular-nums mt-1">
+              E{recovery.energy || "-"} · H{recovery.headache || "-"}
+            </div>
+          </div>
+        </div>
       </div>
 
       {plan.type === "rest" && (

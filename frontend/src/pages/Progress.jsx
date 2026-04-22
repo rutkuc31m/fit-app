@@ -15,24 +15,78 @@ const addDays = (dateStr, days) => {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 };
 const fmt = (value, digits = 1) => value == null ? "--" : Number(value).toFixed(digits);
+const measurementDraftFromLast = (last) => last ? ({
+  waist_cm: last.waist_cm ?? "",
+  chest_cm: last.chest_cm ?? "",
+  arm_cm: last.arm_cm ?? "",
+  hip_cm: last.hip_cm ?? ""
+}) : {};
 
 function WeightChart({ logs }) {
   const data = logs.filter((l) => l.weight_kg != null).map((l) => ({ date: l.date, w: l.weight_kg }));
   if (!data.length) return <div className="mono text-xs text-mute text-center py-6">—</div>;
+  const trend = data.map((p, i) => {
+    const slice = data.slice(Math.max(0, i - 6), i + 1);
+    return { ...p, avg: slice.reduce((sum, row) => sum + row.w, 0) / slice.length };
+  });
   const min = Math.min(...data.map((d) => d.w), PLAN.targetWeight - 1);
   const max = Math.max(...data.map((d) => d.w), PLAN.startWeight + 1);
   const W = 600, H = 180, pad = 24;
   const x = (i) => pad + (i / Math.max(1, data.length - 1)) * (W - pad * 2);
   const y = (w) => H - pad - ((w - min) / (max - min || 1)) * (H - pad * 2);
   const d = data.map((p, i) => `${i === 0 ? "M" : "L"}${x(i)},${y(p.w)}`).join(" ");
+  const trendD = trend.map((p, i) => `${i === 0 ? "M" : "L"}${x(i)},${y(p.avg)}`).join(" ");
   const targetY = y(PLAN.targetWeight);
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-[180px]">
       <line x1={pad} y1={targetY} x2={W - pad} y2={targetY} stroke="#248a3d" strokeDasharray="3 4" strokeWidth="1" opacity=".6" />
       <text x={W - pad} y={targetY - 4} textAnchor="end" fontSize="9" fill="#248a3d" fontFamily="'JetBrains Mono', monospace" opacity=".7">TARGET {PLAN.targetWeight}kg</text>
-      <path d={d} stroke="#30d158" strokeWidth="2" fill="none" filter="drop-shadow(0 0 6px rgba(48,209,88,.5))" />
+      <path d={d} stroke="#3a3a3c" strokeWidth="1.5" fill="none" opacity=".85" />
+      <path d={trendD} stroke="#30d158" strokeWidth="2.5" fill="none" filter="drop-shadow(0 0 6px rgba(48,209,88,.5))" />
       {data.map((p, i) => <circle key={i} cx={x(i)} cy={y(p.w)} r="2.5" fill="#30d158" />)}
+      <text x={pad} y={16} fontSize="9" fill="#a1a1a6" fontFamily="'JetBrains Mono', monospace">daily</text>
+      <text x={pad + 44} y={16} fontSize="9" fill="#30d158" fontFamily="'JetBrains Mono', monospace">7d trend</text>
     </svg>
+  );
+}
+
+function AdherenceCard({ review }) {
+  if (!review) return null;
+  const pct = review.adherence_pct ?? 0;
+  const r = 24;
+  const c = 2 * Math.PI * r;
+  const off = c - (Math.min(100, Math.max(0, pct)) / 100) * c;
+  const items = [
+    ["meals", `${review.meal_consistency_pct ?? "--"}%`],
+    ["protein", `${review.protein_days ?? 0}/5`],
+    ["fast", `${review.fast_clean_days ?? 0}/2`],
+    ["recovery", `${review.recovery_days ?? 0}/7`],
+    ["water", `${review.hydration_days ?? 0}/7`]
+  ];
+  return (
+    <div className="card p-4">
+      <div className="flex items-center gap-4">
+        <div className="relative w-[64px] h-[64px] shrink-0">
+          <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
+            <circle cx="32" cy="32" r={r} stroke="rgba(255,255,255,.08)" strokeWidth="5" fill="none" />
+            <circle cx="32" cy="32" r={r} stroke="#30d158" strokeWidth="5" fill="none"
+              strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round" />
+          </svg>
+          <div className="absolute inset-0 grid place-items-center mono text-sm text-lime font-bold tabular-nums">{pct}%</div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="section-label mt-0 mb-2">adherence</div>
+          <div className="grid grid-cols-2 min-[460px]:grid-cols-5 gap-1">
+            {items.map(([label, value]) => (
+              <div key={label} className="metric-tile px-2 py-1 text-center">
+                <div className="metric-label">{label}</div>
+                <div className="metric-value text-[.78rem]">{value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -68,12 +122,16 @@ function WeeklyReviewCard({ review }) {
   const weightDelta = review.weight_delta == null ? "--" : `${review.weight_delta > 0 ? "+" : ""}${fmt(review.weight_delta)}kg`;
   const waistDelta = review.waist_change == null ? "--" : `${review.waist_change > 0 ? "+" : ""}${fmt(review.waist_change)}cm`;
   const metrics = [
+    ["adherence", `${review.adherence_pct ?? "--"}%`],
+    ["meal score", `${review.meal_consistency_pct ?? "--"}%`],
     ["avg weight", `${fmt(review.avg_weight)}kg`],
     ["vs last week", weightDelta],
     ["waist", `${fmt(review.latest_waist_cm)}cm`],
     ["waist delta", waistDelta],
     ["training", `${review.training_done}/${review.training_planned || 0}`],
     ["meal days", `${review.meal_days}/7`],
+    ["protein days", `${review.protein_days ?? 0}/5`],
+    ["fast clean", `${review.fast_clean_days ?? 0}/2`],
     ["kcal avg", fmt(review.avg_kcal, 0)],
     ["protein avg", `${fmt(review.avg_protein_g, 0)}g`],
     ["energy", `${fmt(review.avg_energy)}/5`],
@@ -162,6 +220,7 @@ export default function Progress() {
       </div>
 
       <WeeklyReviewCard review={review} />
+      <AdherenceCard review={review} />
 
       <div className="section-label">{t("progress.weight_chart")}</div>
       <div className="card p-4"><WeightChart logs={logs} /></div>
@@ -181,7 +240,7 @@ export default function Progress() {
 
       <div className="flex justify-between items-center">
         <div className="section-label flex-1">{t("progress.measurements")}</div>
-        <button className="btn-primary" onClick={() => setDraft({})}>{t("progress.add_measurement")}</button>
+        <button className="btn-primary" onClick={() => setDraft(measurementDraftFromLast(last))}>{t("progress.add_measurement")}</button>
       </div>
 
       {last && (

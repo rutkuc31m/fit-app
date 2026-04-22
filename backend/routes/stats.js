@@ -16,6 +16,37 @@ const prevDate = (s) => {
   return d.toISOString().slice(0, 10);
 };
 
+const addDays = (s, days) => {
+  const d = new Date(`${s}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
+const dateRange = (from, to) => {
+  const days = [];
+  for (let d = from; d <= to; d = addDays(d, 1)) days.push(d);
+  return days;
+};
+
+const dayPlan = (date) => {
+  const dow = new Date(`${date}T12:00:00`).getDay();
+  return {
+    1: { type: "A", eating: "OMAD" },
+    2: { type: "rest", eating: "FAST" },
+    3: { type: "B", eating: "OMAD" },
+    4: { type: "rest", eating: "LOW" },
+    5: { type: "C", eating: "OMAD" },
+    6: { type: "rest", eating: "FAST" },
+    0: { type: "rest", eating: "LOW" }
+  }[dow];
+};
+
+const eatingTarget = (mode) => ({
+  OMAD: { kcal: 1800, protein_g: 150 },
+  LOW: { kcal: 1300, protein_g: 130 },
+  FAST: { kcal: 0, protein_g: 0 }
+}[mode] || { kcal: 0, protein_g: 0 });
+
 // GET /api/stats/streaks — current streaks for weight-log / fast / training
 r.get("/streaks", (req, res) => {
   const uid = req.user.id;
@@ -86,6 +117,12 @@ r.get("/weekly-review", (req, res) => {
   const trainingRows = db.prepare(
     "SELECT date, completed FROM training_sessions WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date ASC"
   ).all(uid, from, to);
+  const trainingByDate = new Map(trainingRows.map((r) => [r.date, r]));
+  const mealByDate = new Map(meals.map((r) => [r.date, r]));
+  const days = dateRange(from, to);
+  const plannedTrainingDates = days.filter((date) => dayPlan(date).type !== "rest");
+  const nonFastDates = days.filter((date) => dayPlan(date).eating !== "FAST");
+  const fastDates = days.filter((date) => dayPlan(date).eating === "FAST");
 
   const latestMeasurement = db.prepare(
     "SELECT * FROM measurements WHERE user_id = ? AND date <= ? ORDER BY date DESC, id DESC LIMIT 1"
@@ -101,9 +138,35 @@ r.get("/weekly-review", (req, res) => {
   const avgEnergy = avg(logs, "energy");
   const avgHunger = avg(logs, "hunger");
   const avgHeadache = avg(logs, "headache");
-  const trainingDone = trainingRows.filter((r) => r.completed).length;
+  const trainingDone = plannedTrainingDates.filter((date) => trainingByDate.get(date)?.completed).length;
   const weightDays = logs.filter((r) => r.weight_kg != null).length;
+  const recoveryDays = logs.filter((r) => r.energy != null || r.hunger != null || r.headache != null).length;
+  const hydrationDays = logs.filter((r) => (r.water_ml || 0) + (r.coffee_ml || 0) > 0).length;
   const mealDays = meals.length;
+  const proteinDays = nonFastDates.filter((date) => {
+    const meal = mealByDate.get(date);
+    const target = eatingTarget(dayPlan(date).eating);
+    return meal && meal.protein_g >= target.protein_g * 0.9;
+  }).length;
+  const calorieGuardrailDays = nonFastDates.filter((date) => {
+    const meal = mealByDate.get(date);
+    const target = eatingTarget(dayPlan(date).eating);
+    return meal && meal.kcal > 0 && meal.kcal <= target.kcal * 1.15;
+  }).length;
+  const fastCleanDays = fastDates.filter((date) => (mealByDate.get(date)?.kcal || 0) <= 50).length;
+  const fastBreachDays = fastDates.length - fastCleanDays;
+  const mealConsistencyDenom = nonFastDates.length * 2 + fastDates.length;
+  const mealConsistencyPct = mealConsistencyDenom
+    ? Math.round(((proteinDays + calorieGuardrailDays + fastCleanDays) / mealConsistencyDenom) * 100)
+    : null;
+  const trainingAdherence = plannedTrainingDates.length ? trainingDone / plannedTrainingDates.length : 1;
+  const adherencePct = Math.round((
+    (weightDays / Math.max(1, days.length)) +
+    ((mealConsistencyPct ?? 0) / 100) +
+    trainingAdherence +
+    (recoveryDays / Math.max(1, days.length)) +
+    (hydrationDays / Math.max(1, days.length))
+  ) / 5 * 100);
   const waistChange =
     latestMeasurement?.waist_cm != null && previousMeasurement?.waist_cm != null
       ? latestMeasurement.waist_cm - previousMeasurement.waist_cm
@@ -125,10 +188,18 @@ r.get("/weekly-review", (req, res) => {
     avg_kcal: avgKcal,
     avg_protein_g: avgProtein,
     training_done: trainingDone,
-    training_planned: trainingRows.length,
+    training_planned: plannedTrainingDates.length,
     avg_energy: avgEnergy,
     avg_hunger: avgHunger,
     avg_headache: avgHeadache,
+    recovery_days: recoveryDays,
+    hydration_days: hydrationDays,
+    protein_days: proteinDays,
+    calorie_guardrail_days: calorieGuardrailDays,
+    fast_clean_days: fastCleanDays,
+    fast_breach_days: fastBreachDays,
+    meal_consistency_pct: mealConsistencyPct,
+    adherence_pct: adherencePct,
     latest_waist_cm: latestMeasurement?.waist_cm ?? null,
     waist_change: waistChange,
     signal
