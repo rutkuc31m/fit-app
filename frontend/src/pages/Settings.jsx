@@ -167,12 +167,12 @@ export default function Settings() {
                     <button
                       type="button"
                       aria-label={`${label} notifications`}
-                      className="relative w-10 h-6 rounded-full transition-colors duration-200 shrink-0"
+                      className="relative w-10 h-6 rounded-full transition-colors duration-200 shrink-0 overflow-hidden border border-line/60"
                       style={{ background: prefs[key] ? "#4ade80" : "#3a3a3c" }}
                       onClick={() => !prefsBusy && togglePref(key)}
                     >
                       <span
-                        className="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
+                        className="absolute left-0 top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
                         style={{ transform: prefs[key] ? "translateX(20px)" : "translateX(4px)" }}
                       />
                     </button>

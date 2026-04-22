@@ -1,16 +1,19 @@
 #!/bin/bash
-# Download exercise preview GIFs to /var/www/fitapp/gifs/
+# Download exercise preview GIFs.
 # Source: ExerciseDB (static.exercisedb.dev) — free, no auth required
 #
 # Run ON the VM:
 #   sudo bash /opt/fitapi/scripts/download_gifs.sh
+#
+# Optional:
+#   sudo DEST=/var/www/fitapp-gifs bash /opt/fitapi/scripts/download_gifs.sh
 #
 # Or run from local machine via SSH:
 #   ssh -i ~/.ssh/fit_key ubuntu@92.5.70.160 "sudo bash /opt/fitapi/scripts/download_gifs.sh"
 
 set -e
 
-DEST="/var/www/fitapp/gifs"
+DEST="${DEST:-/var/www/fitapp/gifs}"
 CDN="https://static.exercisedb.dev/media"
 
 echo "=== Fit-App GIF Download ==="
