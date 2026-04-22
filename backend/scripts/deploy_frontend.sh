@@ -20,10 +20,10 @@ sudo rsync -a --delete \
   --filter='P /gifs/***' \
   dist/ "$WEB_DIR/"
 
-sudo rm -rf "$WEB_DIR/gifs"
-sudo ln -s "$GIF_DIR" "$WEB_DIR/gifs"
-
 sudo DEST="$GIF_DIR" bash "$APP_DIR/backend/scripts/download_gifs.sh"
 sudo test -s "$GIF_DIR/bp.gif"
+sudo rm -rf "$WEB_DIR/gifs"
+sudo mkdir -p "$WEB_DIR/gifs"
+sudo cp -a "$GIF_DIR/." "$WEB_DIR/gifs/"
 sudo chown -R caddy:caddy "$WEB_DIR" "$GIF_DIR"
 curl -fsSI --max-time 8 "https://fit.rutkuc.com/gifs/bp.gif" | grep -Ei 'HTTP/|content-type: image/gif'
