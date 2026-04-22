@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken";
 
-const SECRET = process.env.JWT_SECRET || "fit-dev-secret-change-me";
+const isProductionLike = process.env.NODE_ENV === "production" || Boolean(process.env.FIT_DB);
+const SECRET = process.env.JWT_SECRET || (isProductionLike ? null : "fit-dev-secret-change-me");
 const EXP = "30d";
+
+if (!SECRET) {
+  throw new Error("JWT_SECRET env var is required for fit-api");
+}
 
 export const signToken = (user) =>
   jwt.sign({ id: user.id, email: user.email }, SECRET, { expiresIn: EXP });

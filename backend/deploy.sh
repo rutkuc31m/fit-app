@@ -28,6 +28,14 @@ fi
 
 # 4. systemd
 echo "[4/5] systemd unit..."
+mkdir -p /etc/fitapi
+chmod 750 /etc/fitapi
+touch /etc/fitapi/fitapi.env
+chmod 640 /etc/fitapi/fitapi.env
+if ! grep -q '^JWT_SECRET=' /etc/fitapi/fitapi.env; then
+  echo "JWT_SECRET=$(openssl rand -hex 32)" >> /etc/fitapi/fitapi.env
+fi
+
 cat > /etc/systemd/system/fitapi.service << 'UNIT'
 [Unit]
 Description=fit.rutkuc.com API
