@@ -570,9 +570,34 @@ export default function Today() {
         const totalMl = waterMl + coffeeMl;
         const filled = Math.floor(totalMl / glassSize);
         const pct = Math.min(100, Math.round((totalMl / target) * 100));
+        const drinkControl = (label, value, colorClass, onMinus, onPlus) => (
+          <div className="soft-band px-2 py-2 flex items-center gap-2">
+            <div className="min-w-[54px]">
+              <div className={`mono text-[.56rem] uppercase tracking-[.14em] ${colorClass}`}>{label}</div>
+              <div className="mono text-[.62rem] text-ink2 tabular-nums">{(value / 1000).toFixed(2)}L</div>
+            </div>
+            <button
+              className="h-10 w-10 rounded-md bg-bg2 hover:bg-surface3 border border-line text-lg leading-none text-mute transition grid place-items-center shrink-0"
+              onClick={onMinus}
+              disabled={value <= 0}
+              title={`-250ml ${label}`}
+              type="button"
+            >
+              −
+            </button>
+            <button
+              className={`h-10 w-10 rounded-md bg-bg2 hover:bg-surface3 border border-line text-lg leading-none transition grid place-items-center shrink-0 ${colorClass}`}
+              onClick={onPlus}
+              title={`+250ml ${label}`}
+              type="button"
+            >
+              +
+            </button>
+          </div>
+        );
         return (
           <div className="card p-3">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-start justify-between mb-2 gap-3">
               <div>
                 <div className="mono text-[.58rem] text-cyan uppercase tracking-[.2em]">hydration</div>
                 <div className="font-display text-[1.5rem] text-cyan leading-none tabular-nums mt-[2px]"
@@ -584,26 +609,10 @@ export default function Today() {
                   water {(waterMl / 1000).toFixed(2)}L · coffee {(coffeeMl / 1000).toFixed(2)}L
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <div className="flex gap-1">
-                  <button className="btn-icon text-cyan" onClick={() => saveWater(waterMl - 250)} title="-250ml water">−</button>
-                  <button className="btn-icon text-cyan" onClick={() => saveWater(waterMl + 250)} title="+250ml water">+</button>
-                </div>
-                <div className="flex gap-1">
-                  <button className="mono text-[.58rem] text-amber uppercase tracking-[.1em] bg-surface2 hover:bg-surface3 px-2 py-[6px] rounded-md transition"
-                    onClick={() => saveCoffee(coffeeMl + 250)}
-                    title="+250ml coffee">
-                    +coffee
-                  </button>
-                  {coffeeMl > 0 && (
-                    <button className="mono text-[.58rem] text-mute uppercase tracking-[.1em] bg-surface2 hover:bg-surface3 px-2 py-[6px] rounded-md transition"
-                      onClick={() => saveCoffee(coffeeMl - 250)}
-                      title="-250ml coffee">
-                      -coffee
-                    </button>
-                  )}
-                </div>
-              </div>
+            </div>
+            <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 mb-2">
+              {drinkControl("water", waterMl, "text-cyan", () => saveWater(waterMl - 250), () => saveWater(waterMl + 250))}
+              {drinkControl("coffee", coffeeMl, "text-amber", () => saveCoffee(coffeeMl - 250), () => saveCoffee(coffeeMl + 250))}
             </div>
             <div className="flex gap-[3px] mt-1">
               {Array.from({ length: totalGlasses }).map((_, i) => (
