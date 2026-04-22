@@ -8,7 +8,7 @@ r.use(requireAuth);
 // Upsert day log
 r.put("/:date", (req, res) => {
   const { date } = req.params;
-  const { weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, source, sent_at, energy, hunger, headache } = req.body || {};
+  const { weight_kg, fasting_type, steps, water_ml, coffee_ml, sleep_hours, mood, notes, source, sent_at, energy, hunger, headache } = req.body || {};
   const syncSource = source || req.get("x-fit-source") || null;
   const syncSentAt = sent_at || req.get("x-fit-sent-at") || null;
   const now = new Date().toISOString();
@@ -31,6 +31,7 @@ r.put("/:date", (req, res) => {
       fasting_type = COALESCE(?, fasting_type),
       steps = COALESCE(?, steps),
       water_ml = COALESCE(?, water_ml),
+      coffee_ml = COALESCE(?, coffee_ml),
       sleep_hours = COALESCE(?, sleep_hours),
       mood = COALESCE(?, mood),
       notes = COALESCE(?, notes),
@@ -40,11 +41,11 @@ r.put("/:date", (req, res) => {
       hunger = COALESCE(?, hunger),
       headache = COALESCE(?, headache),
       updated_at = ?
-      WHERE id = ?`).run(weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, syncSource, syncSentAt, energy, hunger, headache, now, existing.id);
+      WHERE id = ?`).run(weight_kg, fasting_type, steps, water_ml, coffee_ml, sleep_hours, mood, notes, syncSource, syncSentAt, energy, hunger, headache, now, existing.id);
   } else {
-    db.prepare(`INSERT INTO daily_logs (user_id, date, weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, source, sent_at, energy, hunger, headache, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(req.user.id, date, weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, syncSource, syncSentAt, energy, hunger, headache, now);
+    db.prepare(`INSERT INTO daily_logs (user_id, date, weight_kg, fasting_type, steps, water_ml, coffee_ml, sleep_hours, mood, notes, source, sent_at, energy, hunger, headache, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(req.user.id, date, weight_kg, fasting_type, steps, water_ml, coffee_ml, sleep_hours, mood, notes, syncSource, syncSentAt, energy, hunger, headache, now);
   }
   res.json(db.prepare("SELECT * FROM daily_logs WHERE user_id = ? AND date = ?").get(req.user.id, date));
 });

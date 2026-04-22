@@ -207,6 +207,7 @@ export default function Today() {
   const [date, setDate] = useState(todayStr());
   const now = nowHHMM();
   const [waterMl, setWaterMl] = useState(0);
+  const [coffeeMl, setCoffeeMl] = useState(0);
   const [savedFlash, setSavedFlash] = useState(false);
   const [currentWeight, setCurrentWeight] = useState(null);
   const [weightInput, setWeightInput] = useState("");
@@ -251,6 +252,7 @@ export default function Today() {
     api.get(`/logs/${date}`).then((l) => {
       if (cancelled) return;
       setWaterMl(l?.water_ml || 0);
+      setCoffeeMl(l?.coffee_ml || 0);
       if (l?.weight_kg != null) {
         setCurrentWeight(l.weight_kg);
         setWeightInput(String(l.weight_kg));
@@ -295,6 +297,12 @@ export default function Today() {
     const next = Math.max(0, ml);
     setWaterMl(next);
     await api.put(`/logs/${date}`, { water_ml: next });
+  };
+
+  const saveCoffee = async (ml) => {
+    const next = Math.max(0, ml);
+    setCoffeeMl(next);
+    await api.put(`/logs/${date}`, { coffee_ml: next });
   };
 
   const saveRecovery = async () => {
@@ -559,8 +567,9 @@ export default function Today() {
         const target = (day.waterLiters || 3) * 1000;
         const glassSize = 250;
         const totalGlasses = Math.ceil(target / glassSize);
-        const filled = Math.floor(waterMl / glassSize);
-        const pct = Math.min(100, Math.round((waterMl / target) * 100));
+        const totalMl = waterMl + coffeeMl;
+        const filled = Math.floor(totalMl / glassSize);
+        const pct = Math.min(100, Math.round((totalMl / target) * 100));
         return (
           <div className="card p-3">
             <div className="flex items-center justify-between mb-2">
@@ -568,13 +577,32 @@ export default function Today() {
                 <div className="mono text-[.58rem] text-cyan uppercase tracking-[.2em]">hydration</div>
                 <div className="font-display text-[1.5rem] text-cyan leading-none tabular-nums mt-[2px]"
                   style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-                  {(waterMl / 1000).toFixed(2)}<span className="text-[.8rem] text-ink2 font-light ml-[4px]">L</span>
+                  {(totalMl / 1000).toFixed(2)}<span className="text-[.8rem] text-ink2 font-light ml-[4px]">L</span>
                   <span className="text-mute text-[.7rem] font-light ml-[6px]">/ {(target / 1000).toFixed(1)}L</span>
                 </div>
+                <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mt-1">
+                  water {(waterMl / 1000).toFixed(2)}L · coffee {(coffeeMl / 1000).toFixed(2)}L
+                </div>
               </div>
-              <div className="flex gap-1">
-                <button className="btn-icon text-cyan" onClick={() => saveWater(waterMl - 250)} title="−250ml">−</button>
-                <button className="btn-icon text-cyan" onClick={() => saveWater(waterMl + 250)} title="+250ml">+</button>
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex gap-1">
+                  <button className="btn-icon text-cyan" onClick={() => saveWater(waterMl - 250)} title="-250ml water">−</button>
+                  <button className="btn-icon text-cyan" onClick={() => saveWater(waterMl + 250)} title="+250ml water">+</button>
+                </div>
+                <div className="flex gap-1">
+                  <button className="mono text-[.58rem] text-amber uppercase tracking-[.1em] bg-surface2 hover:bg-surface3 px-2 py-[6px] rounded-md transition"
+                    onClick={() => saveCoffee(coffeeMl + 200)}
+                    title="+200ml coffee">
+                    +coffee
+                  </button>
+                  {coffeeMl > 0 && (
+                    <button className="mono text-[.58rem] text-mute uppercase tracking-[.1em] bg-surface2 hover:bg-surface3 px-2 py-[6px] rounded-md transition"
+                      onClick={() => saveCoffee(coffeeMl - 200)}
+                      title="-200ml coffee">
+                      -coffee
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex gap-[3px] mt-1">
