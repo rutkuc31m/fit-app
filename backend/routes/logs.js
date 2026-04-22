@@ -8,7 +8,7 @@ r.use(requireAuth);
 // Upsert day log
 r.put("/:date", (req, res) => {
   const { date } = req.params;
-  const { weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, source, sent_at } = req.body || {};
+  const { weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, source, sent_at, energy, hunger, headache } = req.body || {};
   const syncSource = source || req.get("x-fit-source") || null;
   const syncSentAt = sent_at || req.get("x-fit-sent-at") || null;
   const now = new Date().toISOString();
@@ -36,12 +36,15 @@ r.put("/:date", (req, res) => {
       notes = COALESCE(?, notes),
       source = COALESCE(?, source),
       sent_at = COALESCE(?, sent_at),
+      energy = COALESCE(?, energy),
+      hunger = COALESCE(?, hunger),
+      headache = COALESCE(?, headache),
       updated_at = ?
-      WHERE id = ?`).run(weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, syncSource, syncSentAt, now, existing.id);
+      WHERE id = ?`).run(weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, syncSource, syncSentAt, energy, hunger, headache, now, existing.id);
   } else {
-    db.prepare(`INSERT INTO daily_logs (user_id, date, weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, source, sent_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(req.user.id, date, weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, syncSource, syncSentAt, now);
+    db.prepare(`INSERT INTO daily_logs (user_id, date, weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, source, sent_at, energy, hunger, headache, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(req.user.id, date, weight_kg, fasting_type, steps, water_ml, sleep_hours, mood, notes, syncSource, syncSentAt, energy, hunger, headache, now);
   }
   res.json(db.prepare("SELECT * FROM daily_logs WHERE user_id = ? AND date = ?").get(req.user.id, date));
 });

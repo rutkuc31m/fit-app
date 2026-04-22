@@ -134,6 +134,17 @@ export default function Training() {
     const gifPath = lib?.gifPath || null;
     const isOpen = !!openInfo[ex.id];
     const muscles = (lib?.targetMuscles || []).map((m) => MUSCLE_LABELS[m]?.[lang] || MUSCLE_LABELS[m]?.en || m);
+    const latestRows = last?.length ? last.filter((r) => r.date === last[0].date) : [];
+    const plannedSets = Number(ex.sets) || latestRows.length || 0;
+    const repGoal = Number(ex.reps) || 0;
+    const lastWeight = latestRows.length ? Math.max(...latestRows.map((r) => Number(r.weight_kg) || 0)) : 0;
+    const lastReps = latestRows.length ? Math.max(...latestRows.map((r) => Number(r.reps) || 0)) : 0;
+    const hitRepGoal = latestRows.length >= plannedSets && latestRows.every((r) => Number(r.reps) >= repGoal);
+    const nextCue = latestRows.length
+      ? hitRepGoal && lastWeight > 0
+        ? `${(lastWeight + 2.5).toFixed(1)}kg x ${Math.max(6, repGoal - 2 || lastReps)}`
+        : `${lastWeight > 0 ? `${lastWeight}kg ` : ""}x ${Math.min(repGoal || lastReps + 1, lastReps + 1)}`
+      : null;
     return (
       <div key={ex.id} className="list-card">
         <div className="px-4 py-3 border-b border-line flex justify-between items-baseline gap-2">
@@ -163,6 +174,11 @@ export default function Training() {
               <div className="mono text-[.62rem] text-ink2 text-right">
                 <div className="text-mute uppercase tracking-[.14em]">{t("training.last_time")}</div>
                 <div>{last.map((r) => `${r.weight_kg || "-"}×${r.reps}`).join(" · ")}</div>
+              </div>
+            )}
+            {nextCue && (
+              <div className="mono text-[.56rem] text-lime uppercase tracking-[.12em] text-right">
+                next {nextCue}
               </div>
             )}
             {lib && (

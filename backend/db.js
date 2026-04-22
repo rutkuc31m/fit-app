@@ -228,6 +228,9 @@ const addDailyLogCol = (col, def) => {
 addDailyLogCol("source", "TEXT");
 addDailyLogCol("sent_at", "TEXT");
 addDailyLogCol("updated_at", "TEXT");
+addDailyLogCol("energy", "INTEGER");
+addDailyLogCol("hunger", "INTEGER");
+addDailyLogCol("headache", "INTEGER");
 
 const prefCols = db.prepare("PRAGMA table_info(notification_prefs)").all().map((c) => c.name);
 const addPrefCol = (col, def = 1) => {

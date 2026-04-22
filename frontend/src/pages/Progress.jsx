@@ -7,6 +7,13 @@ const numberOrBlank = (value) => value === "" ? "" : Number(value);
 const cleanMeasurement = (draft = {}) => Object.fromEntries(
   Object.entries(draft).filter(([, value]) => value !== "" && value != null && !Number.isNaN(Number(value)))
 );
+const addDays = (dateStr, days) => {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(y, m - 1, d, 12);
+  dt.setDate(dt.getDate() + days);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+};
+const fmt = (value, digits = 1) => value == null ? "--" : Number(value).toFixed(digits);
 
 function WeightChart({ logs }) {
   const data = logs.filter((l) => l.weight_kg != null).map((l) => ({ date: l.date, w: l.weight_kg }));
@@ -28,18 +35,94 @@ function WeightChart({ logs }) {
   );
 }
 
+function WeeklyReviewCard({ review }) {
+  if (!review) return null;
+  const signalCopy = {
+    strong: {
+      label: "strong week",
+      tone: "text-lime",
+      note: "Training, tracking and recovery are aligned. Keep the exact rhythm."
+    },
+    recover: {
+      label: "recovery first",
+      tone: "text-cyan",
+      note: "Energy or headache signal is high. Walk easy, salt carefully, sleep hard."
+    },
+    audit: {
+      label: "audit week",
+      tone: "text-amber",
+      note: "Weight trend is pushing up. Check hidden calories, late salt and meal portions."
+    },
+    keep_going: {
+      label: "collect signal",
+      tone: "text-ink",
+      note: "Keep logging weight, meals and recovery so the next adjustment is obvious."
+    }
+  }[review.signal] || {
+    label: "collect signal",
+    tone: "text-ink",
+    note: "Keep logging weight, meals and recovery so the next adjustment is obvious."
+  };
+
+  const weightDelta = review.weight_delta == null ? "--" : `${review.weight_delta > 0 ? "+" : ""}${fmt(review.weight_delta)}kg`;
+  const waistDelta = review.waist_change == null ? "--" : `${review.waist_change > 0 ? "+" : ""}${fmt(review.waist_change)}cm`;
+  const metrics = [
+    ["avg weight", `${fmt(review.avg_weight)}kg`],
+    ["vs last week", weightDelta],
+    ["waist", `${fmt(review.latest_waist_cm)}cm`],
+    ["waist delta", waistDelta],
+    ["training", `${review.training_done}/${review.training_planned || 0}`],
+    ["meal days", `${review.meal_days}/7`],
+    ["kcal avg", fmt(review.avg_kcal, 0)],
+    ["protein avg", `${fmt(review.avg_protein_g, 0)}g`],
+    ["energy", `${fmt(review.avg_energy)}/5`],
+    ["hunger", `${fmt(review.avg_hunger)}/5`],
+    ["headache", `${fmt(review.avg_headache)}/5`]
+  ];
+
+  return (
+    <div className="card p-4">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div>
+          <div className="section-label mt-0 mb-1">weekly review</div>
+          <div className={`font-display text-[1.35rem] leading-none ${signalCopy.tone}`}
+            style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
+            {signalCopy.label}
+          </div>
+        </div>
+        <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] text-right tabular-nums">
+          {review.from}<br />{review.to}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 min-[460px]:grid-cols-4 gap-2">
+        {metrics.map(([label, value]) => (
+          <div key={label} className="metric-tile">
+            <div className="metric-label">{label}</div>
+            <div className="metric-value text-[.95rem]">{value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mono text-[.66rem] text-ink2 leading-snug mt-3">{signalCopy.note}</div>
+    </div>
+  );
+}
+
 export default function Progress() {
   const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [meas, setMeas] = useState([]);
   const [draft, setDraft] = useState(null);
+  const [review, setReview] = useState(null);
 
   const load = async () => {
-    const [l, m] = await Promise.all([
-      api.get(`/logs?from=${PLAN.startDate}&to=${todayStr()}`),
-      api.get("/measurements")
+    const to = todayStr();
+    const from = addDays(to, -6);
+    const [l, m, r] = await Promise.all([
+      api.get(`/logs?from=${PLAN.startDate}&to=${to}`),
+      api.get("/measurements"),
+      api.get(`/stats/weekly-review?from=${from}&to=${to}`).catch(() => null)
     ]);
-    setLogs(l); setMeas(m);
+    setLogs(l); setMeas(m); setReview(r);
   };
   useEffect(() => { load(); }, []);
 
@@ -76,6 +159,8 @@ export default function Progress() {
           </div>
         </div>
       </div>
+
+      <WeeklyReviewCard review={review} />
 
       <div className="section-label">{t("progress.weight_chart")}</div>
       <div className="card p-4"><WeightChart logs={logs} /></div>

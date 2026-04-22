@@ -114,6 +114,93 @@ function FastingClock({ eating }) {
   );
 }
 
+function FastDayAssistant({ day }) {
+  if (day.eating?.window) return null;
+  const items = [
+    ["hydrate", "700ml water + 1/2 lemon + tiny pinch natron"],
+    ["salt", "Tiny pinch salt only if headache or flat energy appears"],
+    ["move", "Easy walk only; no bonus training, no ego cardio"],
+    ["sleep", "Protect sleep tonight; recovery is the fat-loss multiplier"]
+  ];
+  return (
+    <div className="card p-3 border-cyan/30 bg-cyan/[.035]">
+      <div className="flex items-start gap-2">
+        <Icon.zap size={16} className="text-cyan mt-[2px] shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="card-title text-cyan">Fast day assistant</div>
+          <div className="mt-2 grid gap-2">
+            {items.map(([key, text]) => (
+              <div key={key} className="flex items-start gap-2">
+                <span className="mt-[5px] w-[6px] h-[6px] rounded-full bg-cyan shadow-[0_0_8px_rgba(100,210,255,.5)] shrink-0" />
+                <div className="mono text-[.66rem] text-ink2 leading-snug">{text}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 mono text-[.58rem] text-mute uppercase tracking-[.14em]">
+            Dizziness or hard headache means slow down first.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecoveryCheck({ value, onChange, onSave, saving }) {
+  const fields = [
+    { id: "energy", label: "energy", low: "flat", high: "sharp", color: "#30d158" },
+    { id: "hunger", label: "hunger", low: "quiet", high: "loud", color: "#ff9f0a" },
+    { id: "headache", label: "headache", low: "none", high: "hard", color: "#64d2ff" }
+  ];
+  return (
+    <div className="card p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <div className="card-title">Recovery signal</div>
+          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-[2px]">
+            fasting · sleep · training readiness
+          </div>
+        </div>
+        <button className="btn-ghost shrink-0" onClick={onSave} disabled={saving}>
+          {saving ? "..." : "save"}
+        </button>
+      </div>
+      <div className="grid gap-3">
+        {fields.map((f) => (
+          <div key={f.id}>
+            <div className="flex justify-between mono text-[.56rem] uppercase tracking-[.14em] mb-1">
+              <span className="text-mute">{f.label}</span>
+              <span className="text-ink2">{value[f.id] || "--"}/5</span>
+            </div>
+            <div className="grid grid-cols-5 gap-1">
+              {[1, 2, 3, 4, 5].map((n) => {
+                const active = Number(value[f.id]) === n;
+                return (
+                  <button
+                    key={n}
+                    className="h-8 rounded-md border mono text-xs transition"
+                    style={{
+                      borderColor: active ? f.color : "rgba(72,72,74,.75)",
+                      background: active ? f.color : "rgba(28,28,30,.65)",
+                      color: active ? "#000000" : "#d1d1d6"
+                    }}
+                    onClick={() => onChange(f.id, n)}
+                    type="button"
+                  >
+                    {n}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex justify-between mono text-[.5rem] text-mute uppercase tracking-[.14em] mt-1">
+              <span>{f.low}</span><span>{f.high}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Today() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -125,6 +212,8 @@ export default function Today() {
   const [weightInput, setWeightInput] = useState("");
   const [mealsTotals, setMealsTotals] = useState({ kcal: 0, protein: 0, carbs: 0, fat: 0, count: 0 });
   const [session, setSession] = useState(null);
+  const [recovery, setRecovery] = useState({ energy: "", hunger: "", headache: "" });
+  const [recoverySaving, setRecoverySaving] = useState(false);
   const quote = useMemo(() => quoteForDate(date), [date]);
   const week = getWeekNum(date);
   const phase = getPhase(week);
@@ -168,6 +257,11 @@ export default function Today() {
       } else {
         setWeightInput("");
       }
+      setRecovery({
+        energy: l?.energy ?? "",
+        hunger: l?.hunger ?? "",
+        headache: l?.headache ?? ""
+      });
     }).catch(() => {});
     api.get(`/meals?date=${date}`).then((meals) => {
       if (cancelled) return;
@@ -201,6 +295,20 @@ export default function Today() {
     const next = Math.max(0, ml);
     setWaterMl(next);
     await api.put(`/logs/${date}`, { water_ml: next });
+  };
+
+  const saveRecovery = async () => {
+    setRecoverySaving(true);
+    try {
+      const clean = Object.fromEntries(
+        Object.entries(recovery).map(([key, value]) => [key, value === "" ? null : Number(value)])
+      );
+      await api.put(`/logs/${date}`, clean);
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 600);
+    } finally {
+      setRecoverySaving(false);
+    }
   };
 
   const shiftDate = (delta) => {
@@ -334,6 +442,13 @@ export default function Today() {
 
       {/* Fasting window clock */}
       <FastingClock eating={day.eating} />
+      <FastDayAssistant day={day} />
+      <RecoveryCheck
+        value={recovery}
+        saving={recoverySaving}
+        onChange={(field, score) => setRecovery((prev) => ({ ...prev, [field]: score }))}
+        onSave={saveRecovery}
+      />
 
       {/* Journey — to go */}
       <div className="card p-3">
