@@ -7,6 +7,7 @@ const numberOrBlank = (value) => value === "" ? "" : Number(value);
 const cleanMeasurement = (draft = {}) => Object.fromEntries(
   Object.entries(draft).filter(([, value]) => value !== "" && value != null && !Number.isNaN(Number(value)))
 );
+const MEASUREMENT_FIELDS = ["waist", "chest", "arm", "hip"];
 const addDays = (dateStr, days) => {
   const [y, m, d] = dateStr.split("-").map(Number);
   const dt = new Date(y, m - 1, d, 12);
@@ -184,10 +185,10 @@ export default function Progress() {
       </div>
 
       {last && (
-        <div className="card p-4 grid grid-cols-5 gap-2">
-          {[["waist", last.waist_cm], ["chest", last.chest_cm], ["arm", last.arm_cm], ["hip", last.hip_cm], ["thigh", last.thigh_cm]].map(([k, v]) => (
+        <div className="card p-4 grid grid-cols-4 gap-2">
+          {MEASUREMENT_FIELDS.map((k) => (
             <div key={k} className="text-center">
-              <div className="mono text-sm font-bold text-cyan tabular-nums">{v ?? "—"}</div>
+              <div className="mono text-sm font-bold text-cyan tabular-nums">{last[`${k}_cm`] ?? "—"}</div>
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-1">{t(`progress.${k}`)}</div>
             </div>
           ))}
@@ -198,7 +199,7 @@ export default function Progress() {
         <div className="modal-shell" onClick={() => setDraft(null)}>
           <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
             <div className="section-label">{t("progress.add_measurement")}</div>
-            {["waist", "chest", "arm", "hip", "thigh"].map((k) => (
+            {MEASUREMENT_FIELDS.map((k) => (
               <label key={k} className="flex items-center gap-3">
                 <span className="mono text-xs text-mute uppercase tracking-[.14em] w-20">{t(`progress.${k}`)}</span>
                 <input type="number" step="0.1" className="input mono flex-1"

@@ -10,10 +10,10 @@ r.get("/", (req, res) => {
 });
 
 r.post("/", (req, res) => {
-  const { date, waist_cm, chest_cm, arm_cm, hip_cm, thigh_cm } = req.body || {};
+  const { date, waist_cm, chest_cm, arm_cm, hip_cm } = req.body || {};
   const info = db.prepare(
-    "INSERT INTO measurements (user_id, date, waist_cm, chest_cm, arm_cm, hip_cm, thigh_cm) VALUES (?, ?, ?, ?, ?, ?, ?)"
-  ).run(req.user.id, date, waist_cm, chest_cm, arm_cm, hip_cm, thigh_cm);
+    "INSERT INTO measurements (user_id, date, waist_cm, chest_cm, arm_cm, hip_cm) VALUES (?, ?, ?, ?, ?, ?)"
+  ).run(req.user.id, date, waist_cm, chest_cm, arm_cm, hip_cm);
   res.json(db.prepare("SELECT * FROM measurements WHERE id = ?").get(info.lastInsertRowid));
 });
 
