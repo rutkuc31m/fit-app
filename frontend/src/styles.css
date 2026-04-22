@@ -314,6 +314,57 @@
     align-items: center;
     gap: 8px;
   }
+
+  .pull-refresh {
+    position: fixed;
+    left: 50%;
+    top: max(10px, env(safe-area-inset-top));
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 11px;
+    border-radius: 999px;
+    border: 1px solid theme(colors.line);
+    background: rgba(24,25,27,.92);
+    color: theme(colors.ink2);
+    box-shadow: 0 16px 42px -28px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.05);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .16s ease, transform .16s ease, border-color .16s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .pull-refresh.is-visible {
+    opacity: 1;
+  }
+  .pull-refresh.is-armed {
+    border-color: rgba(48,209,88,.55);
+    color: theme(colors.signal);
+  }
+  .pull-refresh-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    border: 2px solid currentColor;
+    display: grid;
+    place-items: center;
+  }
+  .pull-refresh-dot span {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+  .pull-refresh.is-armed .pull-refresh-dot {
+    animation: refreshSpin .65s linear infinite;
+  }
+  .pull-refresh-text {
+    @apply mono text-[.58rem] uppercase tracking-[.16em];
+  }
+  @keyframes refreshSpin {
+    to { transform: rotate(360deg); }
+  }
 }
 
 /* iOS Safari/PWA final guard: keep every editable field at 16px or above

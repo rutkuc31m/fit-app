@@ -11,6 +11,7 @@ import Checkin from "./pages/Checkin";
 import Today from "./pages/Today";
 import PushPrompt from "./components/PushPrompt";
 import AppUpdatePrompt from "./components/AppUpdatePrompt";
+import PullToRefresh from "./components/PullToRefresh";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -36,6 +37,7 @@ export default function App() {
       </Routes>
       {user && <NavBar />}
       {user && <PushPrompt />}
+      {user && <PullToRefresh />}
       <AppUpdatePrompt />
     </>
   );
