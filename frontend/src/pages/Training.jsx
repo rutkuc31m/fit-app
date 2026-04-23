@@ -8,6 +8,7 @@ import { trainingAdjustment } from "../lib/coaching";
 import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
 
 const numberOrNull = (value) => value === "" ? null : Number(value);
+const clampNumber = (value, min = 0) => Math.max(min, Number(value) || 0);
 
 function RestTimer({ seconds, onClose }) {
   const [left, setLeft] = useState(seconds);
@@ -133,6 +134,12 @@ export default function Training() {
       reps: Object.hasOwn(patch, "reps") ? patch.reps : (s.reps ?? null)
     });
     load();
+  };
+
+  const nudgeSet = (s, field, delta) => {
+    const step = field === "weight_kg" ? 2.5 : 1;
+    const next = +(clampNumber(s[field]) + (delta * step)).toFixed(1);
+    updateSet(s, { [field]: next <= 0 ? null : next });
   };
 
   const complete = async () => {
@@ -261,13 +268,21 @@ export default function Training() {
 
         <div className="flex flex-col divide-y divide-line">
           {sets.map((s) => (
-            <div key={s.id} className="px-4 py-2 flex items-center gap-2">
+            <div key={s.id} className="px-4 py-2 grid grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
               <span className="chip chip-muscle w-7 justify-center">{s.set_number}</span>
-              <input type="number" className="input mono flex-1 text-center" defaultValue={s.weight_kg || ""} placeholder="kg"
-                onBlur={(e) => e.target.value !== String(s.weight_kg || "") && updateSet(s, { weight_kg: numberOrNull(e.target.value) })} />
+              <div className="flex items-center gap-1 min-w-0">
+                <button type="button" className="h-9 w-8 rounded-md border border-line bg-bg2 text-mute hover:text-ink hover:border-line2" onClick={() => nudgeSet(s, "weight_kg", -1)}>−</button>
+                <input key={`${s.id}-weight-${s.weight_kg ?? ""}`} type="number" className="input mono flex-1 min-w-0 text-center px-1" defaultValue={s.weight_kg || ""} placeholder="kg"
+                  onBlur={(e) => e.target.value !== String(s.weight_kg || "") && updateSet(s, { weight_kg: numberOrNull(e.target.value) })} />
+                <button type="button" className="h-9 w-8 rounded-md border border-line bg-bg2 text-lime hover:border-lime/50" onClick={() => nudgeSet(s, "weight_kg", 1)}>+</button>
+              </div>
               <span className="mono text-mute">×</span>
-              <input type="number" className="input mono flex-1 text-center" defaultValue={s.reps || ""} placeholder="reps"
-                onBlur={(e) => e.target.value !== String(s.reps || "") && updateSet(s, { reps: numberOrNull(e.target.value) })} />
+              <div className="flex items-center gap-1 min-w-0">
+                <button type="button" className="h-9 w-8 rounded-md border border-line bg-bg2 text-mute hover:text-ink hover:border-line2" onClick={() => nudgeSet(s, "reps", -1)}>−</button>
+                <input key={`${s.id}-reps-${s.reps ?? ""}`} type="number" className="input mono flex-1 min-w-0 text-center px-1" defaultValue={s.reps || ""} placeholder="reps"
+                  onBlur={(e) => e.target.value !== String(s.reps || "") && updateSet(s, { reps: numberOrNull(e.target.value) })} />
+                <button type="button" className="h-9 w-8 rounded-md border border-line bg-bg2 text-lime hover:border-lime/50" onClick={() => nudgeSet(s, "reps", 1)}>+</button>
+              </div>
             </div>
           ))}
           <div className="flex divide-x divide-line">

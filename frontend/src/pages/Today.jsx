@@ -224,6 +224,40 @@ function CommandCard({ readiness, day, leftKg, journeyPct }) {
   );
 }
 
+function ScheduleFocus({ day, currentIdx, isToday }) {
+  const start = isToday ? Math.max(0, currentIdx) : 0;
+  const current = isToday && currentIdx >= 0 ? day.schedule[currentIdx] : null;
+  const nextItems = day.schedule.slice(current ? currentIdx + 1 : start, current ? currentIdx + 3 : start + 2);
+  const rows = [current && { ...current, state: "now" }, ...nextItems.map((item) => ({ ...item, state: "next" }))].filter(Boolean);
+  if (!rows.length) return null;
+  return (
+    <AccentCard accent={current ? "#ff9f0a" : "#64d2ff"} className="p-3" contentClassName="pl-2">
+      <div className="flex items-center justify-between mb-2">
+        <div className="card-title">{current ? "now / next" : "first blocks"}</div>
+        <a href="#schedule" className="mono text-[.58rem] text-mute uppercase tracking-[.14em] hover:text-ink">full</a>
+      </div>
+      <div className="grid gap-1">
+        {rows.map((item, idx) => {
+          const style = CAT_STYLE[item.category] || CAT_STYLE.routine;
+          const active = item.state === "now";
+          return (
+            <div key={`${item.time}-${idx}`} className={`soft-band px-2 py-2 flex items-start gap-2 ${active ? "border-amber/60 bg-amber/[.06]" : ""}`}>
+              <div className={`mono text-[.62rem] tabular-nums w-10 shrink-0 ${active ? "text-amber" : "text-ink2"}`}>{item.time}</div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[.78rem] text-ink leading-tight truncate">{item.action}</div>
+                <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em] mt-[2px] truncate">{item.details}</div>
+              </div>
+              <div className="mono text-[.52rem] uppercase tracking-[.14em] shrink-0" style={{ color: style.dot }}>
+                {active ? "now" : style.label}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </AccentCard>
+  );
+}
+
 export default function Today() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -424,6 +458,8 @@ export default function Today() {
 
       <CommandCard readiness={readiness} day={day} leftKg={leftKg} journeyPct={journeyPct} />
 
+      <ScheduleFocus day={day} currentIdx={currentIdx} isToday={date === todayStr()} />
+
       <RecoveryCheck
         value={recovery}
         saving={recoverySaving}
@@ -618,7 +654,7 @@ export default function Today() {
       )}
 
       {/* Timeline */}
-      <div className="section-label">Schedule</div>
+      <div id="schedule" className="section-label">Schedule</div>
       <div className="flex flex-col gap-1">
         {day.schedule.map((item, i) => {
           const style = CAT_STYLE[item.category] || CAT_STYLE.routine;

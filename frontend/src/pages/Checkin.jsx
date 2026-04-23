@@ -150,20 +150,43 @@ export default function Checkin() {
       {visible.map((f) => {
         if (PHOTO_FIELDS[f.id]) {
           const angleKey = f.id.replace("photo_", "");
+          const busy = uploading === f.id;
           return (
-            <AccentCard key={f.id} accent="#64d2ff">
-              <div className="flex justify-between items-center">
-                <div className="card-title">{t(`checkin.${angleKey}`)}</div>
-                {uploading === f.id ? <span className="mono text-[.6rem] text-amber">...</span> : data[f.id] && <span className="mono text-[.6rem] text-cyan">✓</span>}
-              </div>
-              {data[f.id] && (
-                <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 aspect-[3/4] max-h-[260px] grid place-items-center">
-                  <img src={PHOTO_BASE + data[f.id]} alt={angleKey} className="max-h-full max-w-full object-contain" />
+            <AccentCard key={f.id} accent="#64d2ff" className={busy ? "border-amber/60" : ""}>
+              <div className="flex justify-between items-center gap-2">
+                <div>
+                  <div className="card-title">{t(`checkin.${angleKey}`)}</div>
+                  <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mt-[2px]">photo check-in</div>
                 </div>
-              )}
-              <label className="btn-ghost mt-2 inline-flex items-center justify-center gap-2 cursor-pointer w-full">
-                <Icon.scan size={14} />
-                <span>{uploading === f.id ? "Uploading" : data[f.id] ? "Replace" : "Upload"}</span>
+                <span className={`chip ${busy ? "chip-energy" : data[f.id] ? "chip-hydro" : "chip-mute"}`}>
+                  {busy ? "uploading" : data[f.id] ? "saved" : "empty"}
+                </span>
+              </div>
+              <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 aspect-[3/4] max-h-[280px] grid place-items-center relative">
+                {data[f.id] ? (
+                  <>
+                    <img src={PHOTO_BASE + data[f.id]} alt={angleKey} className="max-h-full max-w-full object-contain" />
+                    <div className="absolute left-2 right-2 bottom-2 flex items-center justify-between gap-2">
+                      <span className="mono text-[.54rem] text-cyan uppercase tracking-[.14em] bg-bg/80 border border-cyan/30 rounded px-2 py-1 backdrop-blur">{angleKey}</span>
+                      <span className="mono text-[.54rem] text-ink2 uppercase tracking-[.14em] bg-bg/80 border border-line rounded px-2 py-1 backdrop-blur">compressed</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-center px-4">
+                    <Icon.camera size={24} className="text-cyan" />
+                    <div className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">no photo yet</div>
+                    <div className="mono text-[.58rem] text-mute leading-relaxed">same light · same distance · relaxed posture</div>
+                  </div>
+                )}
+                {busy && (
+                  <div className="absolute inset-0 bg-bg/80 backdrop-blur-sm grid place-items-center">
+                    <div className="mono text-[.66rem] text-amber uppercase tracking-[.16em]">compressing · uploading</div>
+                  </div>
+                )}
+              </div>
+              <label className={`btn-ghost mt-2 inline-flex items-center justify-center gap-2 cursor-pointer w-full ${busy ? "opacity-60 pointer-events-none" : ""}`}>
+                <Icon.camera size={14} />
+                <span>{busy ? "Uploading" : data[f.id] ? "Replace photo" : "Add photo"}</span>
                 <input type="file" accept="image/*" capture="environment" className="hidden"
                   disabled={!!uploading}
                   onChange={(e) => {

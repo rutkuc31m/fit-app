@@ -16,11 +16,14 @@ const isQuickEntry = (item) =>
   Number(item?.carbs_g || 0) === 0 &&
   Number(item?.fat_g || 0) === 0;
 
+const quickSignature = (item) => `${String(item?.name || "").trim().toLowerCase()}|${Math.round(Number(item?.kcal) || 0)}`;
+
 export default function Log() {
   const { t } = useTranslation();
   const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
   const [date, setDate] = useState(todayStr());
   const [meals, setMeals] = useState([]);
+  const [recentFoods, setRecentFoods] = useState([]);
   const [scanOpen, setScanOpen] = useState(false);
   const [draft, setDraft] = useState(null);
   const [search, setSearch] = useState("");
@@ -47,7 +50,9 @@ export default function Log() {
   })();
 
   const load = async () => setMeals(await api.get(`/meals?date=${date}`));
+  const loadRecent = async () => setRecentFoods(await api.get("/foods/recent").catch(() => []));
   useEffect(() => { load(); }, [date]);
+  useEffect(() => { loadRecent(); }, []);
 
   // Ensure a meal exists for the day, return its id
   const ensureMeal = async () => {
@@ -62,6 +67,16 @@ export default function Log() {
 
   // All items flat across all meals
   const allItems = meals.flatMap((m) => m.items);
+  const recentQuick = [];
+  const seenQuick = new Set();
+  for (const item of recentFoods) {
+    if (!isQuickEntry(item)) continue;
+    const sig = quickSignature(item);
+    if (!item.name || seenQuick.has(sig)) continue;
+    seenQuick.add(sig);
+    recentQuick.push(item);
+    if (recentQuick.length >= 4) break;
+  }
 
   const totals = allItems.reduce((a, i) => {
     a.kcal    += i.kcal     || 0;
@@ -138,6 +153,14 @@ export default function Log() {
   };
 
   const openAdd = () => { setDraft({ ...emptyItem }); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); };
+  const openQuick = (item = null) => {
+    setDraft({ ...emptyItem, ...(item ? { name: item.name, kcal: Math.round(Number(item.kcal) || 0), amount_g: 0 } : { amount_g: 0 }) });
+    setEditingItemId(null);
+    setMode("quick");
+    setPieceFood(null);
+    setPieces(1);
+    setSearch("");
+  };
   const openScan = () => { setEditingItemId(null); setScanOpen(true); };
   const openEdit = (item) => {
     const quick = isQuickEntry(item);
@@ -171,7 +194,7 @@ export default function Log() {
       const mealId = await ensureMeal();
       await api.post(`/meals/${mealId}/items`, clean);
     }
-    setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); load();
+    setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); load(); loadRecent();
   };
 
   const closeDraft = () => { setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); };
@@ -219,6 +242,30 @@ export default function Log() {
           <Icon.plus size={15} /> Ekle
         </button>
       </div>
+
+      {recentQuick.length > 0 && (
+        <AccentCard accent="#ff9f0a" className="p-3" contentClassName="pl-2">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="card-title">{t("log.recent_quick")}</div>
+            <button className="mono text-[.58rem] text-amber uppercase tracking-[.14em] hover:text-ink" onClick={() => openQuick()}>
+              {t("log.mode_quick")}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {recentQuick.map((item) => (
+              <button
+                key={quickSignature(item)}
+                type="button"
+                className="soft-band px-2 py-2 text-left hover:border-amber/60 transition min-w-0"
+                onClick={() => openQuick(item)}
+              >
+                <div className="text-[.76rem] text-ink truncate">{item.name}</div>
+                <div className="mono text-[.62rem] text-amber tabular-nums mt-[2px]">{Math.round(item.kcal)} kcal</div>
+              </button>
+            ))}
+          </div>
+        </AccentCard>
+      )}
 
       {/* Flat food list */}
       {allItems.length === 0 && (
