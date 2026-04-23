@@ -4,11 +4,6 @@ import { api } from "../lib/api";
 import { PLAN, todayStr } from "../lib/plan";
 import { AccentCard, PageCommand } from "../components/ui";
 
-const numberOrBlank = (value) => value === "" ? "" : Number(value);
-const cleanMeasurement = (draft = {}) => Object.fromEntries(
-  Object.entries(draft).filter(([, value]) => value !== "" && value != null && !Number.isNaN(Number(value)))
-);
-const MEASUREMENT_FIELDS = ["waist", "chest", "arm", "hip"];
 const addDays = (dateStr, days) => {
   const [y, m, d] = dateStr.split("-").map(Number);
   const dt = new Date(y, m - 1, d, 12);
@@ -16,12 +11,6 @@ const addDays = (dateStr, days) => {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 };
 const fmt = (value, digits = 1) => value == null ? "--" : Number(value).toFixed(digits);
-const measurementDraftFromLast = (last) => last ? ({
-  waist_cm: last.waist_cm ?? "",
-  chest_cm: last.chest_cm ?? "",
-  arm_cm: last.arm_cm ?? "",
-  hip_cm: last.hip_cm ?? ""
-}) : {};
 
 function WeightChart({ logs }) {
   const data = logs.filter((l) => l.weight_kg != null).map((l) => ({ date: l.date, w: l.weight_kg }));
@@ -121,14 +110,11 @@ function WeeklyReviewCard({ review }) {
   };
 
   const weightDelta = review.weight_delta == null ? "--" : `${review.weight_delta > 0 ? "+" : ""}${fmt(review.weight_delta)}kg`;
-  const waistDelta = review.waist_change == null ? "--" : `${review.waist_change > 0 ? "+" : ""}${fmt(review.waist_change)}cm`;
   const metrics = [
     ["adherence", `${review.adherence_pct ?? "--"}%`],
     ["meal score", `${review.meal_consistency_pct ?? "--"}%`],
     ["avg weight", `${fmt(review.avg_weight)}kg`],
     ["vs last week", weightDelta],
-    ["waist", `${fmt(review.latest_waist_cm)}cm`],
-    ["waist delta", waistDelta],
     ["training", `${review.training_done}/${review.training_planned || 0}`],
     ["meal days", `${review.meal_days}/7`],
     ["protein days", `${review.protein_days ?? 0}/5`],
@@ -170,28 +156,19 @@ function WeeklyReviewCard({ review }) {
 export default function Progress() {
   const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
-  const [meas, setMeas] = useState([]);
-  const [draft, setDraft] = useState(null);
   const [review, setReview] = useState(null);
 
   const load = async () => {
     const to = todayStr();
     const from = addDays(to, -6);
-    const [l, m, r] = await Promise.all([
+    const [l, r] = await Promise.all([
       api.get(`/logs?from=${PLAN.startDate}&to=${to}`),
-      api.get("/measurements"),
       api.get(`/stats/weekly-review?from=${from}&to=${to}`).catch(() => null)
     ]);
-    setLogs(l); setMeas(m); setReview(r);
+    setLogs(l); setReview(r);
   };
   useEffect(() => { load(); }, []);
 
-  const saveMeas = async () => {
-    await api.post("/measurements", { date: todayStr(), ...cleanMeasurement(draft) });
-    setDraft(null); load();
-  };
-
-  const last = meas[meas.length - 1];
   const latestWeight = [...logs].reverse().find((l) => l.weight_kg != null)?.weight_kg ?? null;
   const lost = latestWeight != null ? Math.max(0, PLAN.startWeight - latestWeight) : 0;
   const left = Math.max(0, (PLAN.startWeight - PLAN.targetWeight) - lost);
@@ -202,7 +179,7 @@ export default function Progress() {
         accent="#64d2ff"
         kicker="body data"
         title="Trend over mood."
-        sub="Weight · waist · phase checkpoints"
+        sub="Weight · photos · phase checkpoints"
         metrics={[
           { label: "current", value: <>{latestWeight != null ? latestWeight.toFixed(1) : "--"}<span className="text-mute text-[.62rem] ml-1">kg</span></> },
           { label: "lost", value: <>{lost.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></>, className: "text-lime" },
@@ -228,42 +205,6 @@ export default function Progress() {
         ))}
       </div>
 
-      <div className="flex justify-between items-center">
-        <div className="section-label flex-1">{t("progress.measurements")}</div>
-        <button className="btn-primary" onClick={() => setDraft(measurementDraftFromLast(last))}>{t("progress.add_measurement")}</button>
-      </div>
-
-      {last && (
-        <AccentCard accent="#64d2ff" className="p-4" contentClassName="pl-2 grid grid-cols-4 gap-2">
-          {MEASUREMENT_FIELDS.map((k) => (
-            <div key={k} className="text-center">
-              <div className="mono text-sm font-bold text-cyan tabular-nums">{last[`${k}_cm`] ?? "—"}</div>
-              <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-1">{t(`progress.${k}`)}</div>
-            </div>
-          ))}
-        </AccentCard>
-      )}
-
-      {draft && (
-        <div className="modal-shell" onClick={() => setDraft(null)}>
-          <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
-            <div className="section-label">{t("progress.add_measurement")}</div>
-            {MEASUREMENT_FIELDS.map((k) => (
-              <label key={k} className="flex items-center gap-3">
-                <span className="mono text-xs text-mute uppercase tracking-[.14em] w-20">{t(`progress.${k}`)}</span>
-                <input type="number" step="0.1" className="input mono flex-1"
-                  value={draft[`${k}_cm`] ?? ""}
-                  onChange={(e) => setDraft({ ...draft, [`${k}_cm`]: numberOrBlank(e.target.value) })} />
-                <span className="mono text-xs text-mute">{t("progress.cm")}</span>
-              </label>
-            ))}
-            <div className="modal-actions">
-              <button className="btn flex-1" onClick={() => setDraft(null)}>{t("log.cancel")}</button>
-              <button className="btn-primary flex-1" onClick={saveMeas}>{t("log.save")}</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

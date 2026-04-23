@@ -13,8 +13,7 @@ mkdirSync(PHOTO_DIR, { recursive: true });
 const V2_FIELDS = [
   "date", "avg_weight", "weight_change", "training_done", "avg_steps",
   "avg_kcal", "avg_protein_g", "challenges", "adjustments",
-  "waist_cm", "chest_cm", "arm_cm", "energy", "sleep_quality",
-  "back_pain", "motivation", "adherence_pct", "notes",
+  "energy", "sleep_quality", "back_pain", "motivation", "adherence_pct", "notes",
   "photo_front", "photo_side", "photo_back"
 ];
 

@@ -90,8 +90,7 @@ export const PROTOCOLS = {
       ],
       weekly: [
         { id: "weigh_in", label: "Monday morning fasted weigh-in", icon: "scale", day: 1 },
-        { id: "photo", label: "Progress photo (same light, same pose)", icon: "camera", day: 1 },
-        { id: "measurements", label: "Waist, chest, arm", icon: "ruler", day: 1, biweekly: true }
+        { id: "photo", label: "Progress photo (same light, same pose)", icon: "camera", day: 1 }
       ]
     },
     2: {
@@ -111,7 +110,6 @@ export const PROTOCOLS = {
       weekly: [
         { id: "weigh_in", label: "Monday morning fasted weigh-in", icon: "scale", day: 1 },
         { id: "photo", label: "Progress photo", icon: "camera", day: 1 },
-        { id: "measurements", label: "Body measurements", icon: "ruler", day: 1, biweekly: true },
         { id: "refeed", label: "Refeed day (every 14d — maintenance kcal)", icon: "plate", biweekly: true }
       ]
     },
@@ -131,7 +129,6 @@ export const PROTOCOLS = {
       weekly: [
         { id: "weigh_in", label: "Monday morning fasted weigh-in", icon: "scale", day: 1 },
         { id: "photo", label: "Progress photo", icon: "camera", day: 1 },
-        { id: "measurements", label: "Body measurements", icon: "ruler", day: 1 },
         { id: "refeed", label: "Refeed day (weekly — maintenance kcal)", icon: "plate" }
       ]
     },
@@ -183,13 +180,9 @@ export const PROTOCOLS = {
   // ─── WEEKLY CHECKPOINTS (Monday morning) ───
   weeklyCheckpoint: {
     order: [
-      { id: "weight", label: "Fasted weight (kg)", type: "number" },
       { id: "photo_front", label: "Front photo", type: "photo" },
       { id: "photo_side", label: "Side photo", type: "photo" },
       { id: "photo_back", label: "Back photo", type: "photo" },
-      { id: "waist", label: "Waist at navel (cm)", type: "number", biweekly: true },
-      { id: "chest", label: "Chest (cm)", type: "number", biweekly: true },
-      { id: "arm", label: "Arm flexed (cm)", type: "number", biweekly: true },
       { id: "energy", label: "Energy level (1-5)", type: "scale" },
       { id: "sleep_quality", label: "Sleep quality (1-5)", type: "scale" },
       { id: "motivation", label: "Motivation (1-5)", type: "scale" },

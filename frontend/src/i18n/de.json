@@ -111,14 +111,6 @@
   "progress": {
     "title": "Fortschritt",
     "weight_chart": "Gewicht",
-    "measurements": "Maße",
-    "waist": "Taille",
-    "chest": "Brust",
-    "arm": "Arm",
-    "hip": "Hüfte",
-    "cm": "cm",
-    "add_measurement": "+ Maß",
-    "weekly_checkin": "Wöchentlicher Check-in",
     "phases": "Phasen"
   },
   "settings": {

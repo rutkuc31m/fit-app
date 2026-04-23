@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
@@ -8,10 +8,6 @@ import { AccentCard, Icon, PageCommand } from "../components/ui";
 const PHOTO_BASE = (import.meta.env.DEV ? "" : (import.meta.env.VITE_API_BASE?.replace(/\/api$/, "") || "https://api.fit.rutkuc.com"));
 
 const FIELD_TO_COL = {
-  weight: "avg_weight",
-  waist:  "waist_cm",
-  chest:  "chest_cm",
-  arm:    "arm_cm",
   energy: "energy",
   sleep_quality: "sleep_quality",
   back_pain: "back_pain",
@@ -24,10 +20,6 @@ const PHOTO_FIELDS = { photo_front: "photo_front", photo_side: "photo_side", pho
 
 // Semantic color per field (muscle=lime, energy=amber, hydro=cyan)
 const FIELD_COLOR = {
-  weight: "cyan",
-  waist:  "cyan",
-  chest:  "cyan",
-  arm:    "cyan",
   energy: "amber",
   sleep_quality: "cyan",
   back_pain: "amber",
@@ -43,8 +35,7 @@ export default function Checkin() {
   const date = todayStr();
   const week = getWeekNum(date);
   const order = PROTOCOLS.weeklyCheckpoint.order;
-  const isBiweekly = week % 2 === 0;
-  const visible = useMemo(() => order.filter((f) => !f.biweekly || isBiweekly), [order, isBiweekly]);
+  const visible = useMemo(() => order.filter((f) => !f.biweekly), [order]);
   const [data, setData] = useState({});
   const [saved, setSaved] = useState(false);
 
@@ -90,12 +81,12 @@ export default function Checkin() {
       <PageCommand
         accent="#64d2ff"
         kicker="weekly check-in"
-        title="Measure the signal."
-        sub="Photos · waist · adherence · recovery"
+        title="Photos tell the truth."
+        sub="Front · side · back · recovery"
         metrics={[
           { label: "week", value: `W${String(week).padStart(2, "0")}`, className: "text-cyan" },
           { label: "fields", value: visible.length },
-          { label: "measure", value: isBiweekly ? "full" : "core", className: "text-amber" }
+          { label: "photos", value: "3", className: "text-amber" }
         ]}
       />
 

@@ -111,14 +111,6 @@
   "progress": {
     "title": "Progress",
     "weight_chart": "Weight",
-    "measurements": "Measurements",
-    "waist": "Waist",
-    "chest": "Chest",
-    "arm": "Arm",
-    "hip": "Hip",
-    "cm": "cm",
-    "add_measurement": "+ Measurement",
-    "weekly_checkin": "Weekly check-in",
     "phases": "Phases"
   },
   "settings": {

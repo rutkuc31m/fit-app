@@ -276,6 +276,27 @@
     align-items: center;
     gap: 8px;
   }
+  .gif-modal-focus {
+    max-width: min(520px, calc(100vw - 24px));
+    border-color: rgba(48,209,88,.45);
+    box-shadow: 0 28px 80px -40px rgba(48,209,88,.65), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .gif-stage {
+    width: 100%;
+    max-height: 70vh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid theme(colors.line);
+    border-radius: 8px;
+    background: theme(colors.bg2);
+  }
+  .gif-stage img {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+  }
 
   .pull-refresh {
     position: fixed;

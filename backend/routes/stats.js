@@ -124,13 +124,6 @@ r.get("/weekly-review", (req, res) => {
   const nonFastDates = days.filter((date) => dayPlan(date).eating !== "FAST");
   const fastDates = days.filter((date) => dayPlan(date).eating === "FAST");
 
-  const latestMeasurement = db.prepare(
-    "SELECT * FROM measurements WHERE user_id = ? AND date <= ? ORDER BY date DESC, id DESC LIMIT 1"
-  ).get(uid, to) || null;
-  const previousMeasurement = db.prepare(
-    "SELECT * FROM measurements WHERE user_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1"
-  ).get(uid, from) || null;
-
   const avgWeight = avg(logs, "weight_kg");
   const prevAvgWeight = avg(prevLogs, "weight_kg");
   const avgKcal = avg(meals, "kcal");
@@ -167,11 +160,6 @@ r.get("/weekly-review", (req, res) => {
     (recoveryDays / Math.max(1, days.length)) +
     (hydrationDays / Math.max(1, days.length))
   ) / 5 * 100);
-  const waistChange =
-    latestMeasurement?.waist_cm != null && previousMeasurement?.waist_cm != null
-      ? latestMeasurement.waist_cm - previousMeasurement.waist_cm
-      : null;
-
   let signal = "keep_going";
   if ((avgHeadache != null && avgHeadache >= 3) || (avgEnergy != null && avgEnergy <= 2)) signal = "recover";
   else if (avgWeight != null && prevAvgWeight != null && avgWeight > prevAvgWeight + 0.3 && mealDays >= 4) signal = "audit";
@@ -200,8 +188,6 @@ r.get("/weekly-review", (req, res) => {
     fast_breach_days: fastBreachDays,
     meal_consistency_pct: mealConsistencyPct,
     adherence_pct: adherencePct,
-    latest_waist_cm: latestMeasurement?.waist_cm ?? null,
-    waist_change: waistChange,
     signal
   });
 });

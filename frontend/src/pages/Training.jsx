@@ -6,7 +6,6 @@ import { getCardioProtocol } from "../lib/protocols";
 import { EXERCISES, MUSCLE_LABELS } from "../lib/exercises";
 import { trainingAdjustment } from "../lib/coaching";
 import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
-import ExerciseGifPreview from "../components/ExerciseGifPreview";
 
 const numberOrNull = (value) => value === "" ? null : Number(value);
 
@@ -85,7 +84,7 @@ export default function Training() {
   const [lastByEx, setLastByEx] = useState({});
   const [recovery, setRecovery] = useState({});
   const [rest, setRest] = useState(null); // { seconds } when active
-  const [previewGif, setPreviewGif] = useState(null);
+  const [preview, setPreview] = useState(null);
   const adjustment = trainingAdjustment(recovery);
 
   const mainExercises = day.exercises.filter((e) => !e.phase1Only && !e.coreFinisher);
@@ -160,13 +159,23 @@ export default function Training() {
         ? `${(lastWeight + 2.5).toFixed(1)}kg x ${Math.max(6, repGoal - 2 || lastReps)}`
         : `${lastWeight > 0 ? `${lastWeight}kg ` : ""}x ${Math.min(repGoal || lastReps + 1, lastReps + 1)}`
       : null;
+    const openPreview = (event) => {
+      event?.stopPropagation();
+      if (!gifPath) return;
+      setPreview({
+        path: gifPath,
+        title: ex.name,
+        target: muscles.slice(0, 3).join(" · "),
+        prescription: `${ex.sets}x${ex.reps}${ex.unit ? ex.unit : ""}`
+      });
+    };
     return (
       <AccentCard key={ex.id} accent="#30d158" className="overflow-hidden" contentClassName="pl-2">
         <div className="px-4 py-3 border-b border-line flex justify-between items-baseline gap-2">
           <button
             type="button"
             className={`min-w-0 flex-1 text-left ${gifPath ? "cursor-pointer" : "cursor-default"}`}
-            onClick={() => gifPath && setPreviewGif(gifPath)}
+            onClick={openPreview}
             title={gifPath ? t("training.show_exercise") : undefined}
           >
             <div className="text-sm text-ink font-semibold truncate">{ex.name}</div>
@@ -198,8 +207,19 @@ export default function Training() {
             )}
             {lib && (
               <div className="flex items-center gap-1">
-                <ExerciseGifPreview gifPath={gifPath} />
+                {gifPath && (
+                  <button
+                    type="button"
+                    className="btn-icon"
+                    onClick={openPreview}
+                    aria-label={t("training.show_exercise")}
+                    title={t("training.show_exercise")}
+                  >
+                    <Icon.scan size={15} />
+                  </button>
+                )}
                 <button
+                  type="button"
                   className="mono text-[.58rem] uppercase tracking-[.14em] text-ink2 bg-surface2 hover:bg-surface3 px-[8px] py-[3px] rounded"
                   onClick={() => setOpenInfo((s) => ({ ...s, [ex.id]: !s[ex.id] }))}>
                   {isOpen ? "−" : "i"}
@@ -338,16 +358,25 @@ export default function Training() {
       )}
 
       {rest && <RestTimer key={rest.key} seconds={rest.seconds} onClose={() => setRest(null)} />}
-      {previewGif && (
-        <div className="gif-modal-backdrop" onClick={() => setPreviewGif(null)} role="dialog" aria-modal="true">
-          <div className="gif-modal-content" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={previewGif}
-              alt={t("training.exercise_preview")}
-              loading="lazy"
-              style={{ maxWidth: "100%", maxHeight: "70vh", display: "block", borderRadius: "8px" }}
-            />
-            <button className="btn mt-2 w-full" onClick={() => setPreviewGif(null)}>{t("common.close")}</button>
+      {preview && (
+        <div className="gif-modal-backdrop" onClick={() => setPreview(null)} role="dialog" aria-modal="true">
+          <div className="gif-modal-content gif-modal-focus" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="mono text-[.58rem] text-signal uppercase tracking-[.18em]">{t("training.exercise_preview")}</div>
+                <div className="text-base text-ink font-semibold leading-tight mt-1">{preview.title}</div>
+                {preview.target && <div className="mono text-[.6rem] text-mute uppercase tracking-[.14em] mt-1">{preview.target}</div>}
+              </div>
+              <div className="mono text-[.62rem] text-amber uppercase tracking-[.14em] shrink-0">{preview.prescription}</div>
+            </div>
+            <div className="gif-stage">
+              <img
+                src={preview.path}
+                alt={preview.title}
+                loading="eager"
+              />
+            </div>
+            <button className="btn mt-1 w-full" onClick={() => setPreview(null)}>{t("common.close")}</button>
           </div>
         </div>
       )}
