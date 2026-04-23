@@ -26,4 +26,5 @@ sudo rm -rf "$WEB_DIR/gifs"
 sudo mkdir -p "$WEB_DIR/gifs"
 sudo cp -a "$GIF_DIR/." "$WEB_DIR/gifs/"
 sudo chown -R caddy:caddy "$WEB_DIR" "$GIF_DIR"
+sudo test -s "$WEB_DIR/gifs/bp.gif"
 curl -fsSI --max-time 8 "https://fit.rutkuc.com/gifs/bp.gif" | grep -Ei 'HTTP/|content-type: image/gif'
