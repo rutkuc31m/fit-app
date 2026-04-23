@@ -87,5 +87,9 @@ chown -R caddy:caddy "$DEST" 2>/dev/null || chown -R www-data:www-data "$DEST" 2
 chmod 644 "$DEST"/*.gif 2>/dev/null || true
 
 echo ""
-echo "Serve test (first GIF):"
-curl -sI "https://fit.rutkuc.com/gifs/bp.gif" | grep -E "HTTP|content-type|content-length" || true
+if [ "$DEST" = "/var/www/fitapp/gifs" ]; then
+  echo "Serve test (first GIF):"
+  curl -sI "https://fit.rutkuc.com/gifs/bp.gif" | grep -E "HTTP|content-type|content-length" || true
+else
+  echo "Serve test skipped: $DEST is the persistent asset cache, not the public web path."
+fi
