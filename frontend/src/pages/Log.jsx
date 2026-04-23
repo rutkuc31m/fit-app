@@ -231,9 +231,16 @@ export default function Log() {
             {allItems.map((it) => (
               <div key={it.id} className="px-4 py-3 flex items-start justify-between gap-3">
                 <button type="button" className="min-w-0 flex-1 text-left" onClick={() => openEdit(it)}>
-                  {/* Name: 2-line clamp instead of truncate */}
-                  <div className="text-sm text-ink leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {it.name}
+                  <div className="flex items-start gap-2">
+                    {/* Name: 2-line clamp instead of truncate */}
+                    <div className="text-sm text-ink leading-snug flex-1 min-w-0" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                      {it.name}
+                    </div>
+                    {isQuickEntry(it) && (
+                      <span className="chip chip-energy shrink-0 mt-[1px]">
+                        {t("log.mode_quick")}
+                      </span>
+                    )}
                   </div>
                   <div className="mono text-[.62rem] text-mute tabular-nums mt-[2px]">
                     {isQuickEntry(it)
