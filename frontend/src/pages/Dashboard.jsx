@@ -251,7 +251,7 @@ export default function Dashboard() {
         </AccentCard>
       </div>
 
-      {/* Today timeline + Habits + Check-in quick links */}
+      {/* Today timeline + Check-in quick links */}
       <AccentCard as={Link} to="/today" accent="#64d2ff" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
         <Icon.clock size={16} className="text-signal" />
         <div className="flex-1">
@@ -260,22 +260,14 @@ export default function Dashboard() {
         </div>
         <Icon.chev size={14} className="text-mute" />
       </AccentCard>
-      <div className="grid grid-cols-2 gap-[10px]">
-        <AccentCard as={Link} to="/habits" accent="#30d158" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
-          <Icon.check size={16} className="text-signal" />
-          <div>
-            <div className="card-title">{t("habits.title")}</div>
-            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("habits.morning")} · {t("habits.evening")}</div>
-          </div>
-        </AccentCard>
-        <AccentCard as={Link} to="/checkin" accent="#64d2ff" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
-          <Icon.ruler size={16} className="text-signal" />
-          <div>
-            <div className="card-title">{t("checkin.title")}</div>
-            <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">W{week}</div>
-          </div>
-        </AccentCard>
-      </div>
+      <AccentCard as={Link} to="/checkin" accent="#64d2ff" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
+        <Icon.camera size={16} className="text-signal" />
+        <div className="flex-1 min-w-0">
+          <div className="card-title">{t("checkin.title")}</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">photos · recovery · W{week}</div>
+        </div>
+        <Icon.chev size={14} className="text-mute" />
+      </AccentCard>
 
       {/* Meals today */}
       <div className="section-label">{t("dashboard.meals_today")}</div>

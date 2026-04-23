@@ -243,7 +243,6 @@
   body:has(.page-log)       { --page-glow-a: rgba(251,191,36,.035); --page-glow-b: rgba(48,209,88,.018); }
   body:has(.page-training)  { --page-glow-a: rgba(251,113,133,.035); --page-glow-b: rgba(48,209,88,.018); }
   body:has(.page-progress)  { --page-glow-a: rgba(96,165,250,.03); --page-glow-b: rgba(48,209,88,.025); }
-  body:has(.page-habits)    { --page-glow-a: rgba(48,209,88,.035); --page-glow-b: rgba(251,191,36,.018); }
   body:has(.page-checkin)   { --page-glow-a: rgba(125,211,252,.035); --page-glow-b: rgba(196,181,253,.018); }
   body:has(.page-settings)  { --page-glow-a: rgba(125,211,252,.018); --page-glow-b: transparent; }
 

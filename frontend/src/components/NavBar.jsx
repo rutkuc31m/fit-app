@@ -4,7 +4,7 @@ import { Icon } from "./ui";
 
 const items = [
   { to: "/",         k: "nav.today",    i: Icon.home },
-  { to: "/recipes",  k: "nav.recipes",  i: Icon.utensils },
+  { to: "/log",      k: "nav.recipes",  i: Icon.utensils },
   { to: "/training", k: "nav.training", i: Icon.dumbbell },
   { to: "/progress", k: "nav.progress", i: Icon.chart },
   { to: "/settings", k: "nav.settings", i: Icon.cog }

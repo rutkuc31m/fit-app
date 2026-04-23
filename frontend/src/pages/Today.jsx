@@ -494,7 +494,7 @@ export default function Today() {
           );
         };
         return (
-          <AccentCard as={Link} to="/recipes" accent="#ff9f0a" className="block hover:brightness-110">
+          <AccentCard as={Link} to="/log" accent="#ff9f0a" className="block hover:brightness-110">
             <div className="flex items-center justify-between mb-2">
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">nutrition</div>
               <div className="mono text-[.58rem] text-ink2 uppercase tracking-[.14em]">

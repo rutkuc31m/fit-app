@@ -17,6 +17,8 @@ const FIELD_TO_COL = {
 };
 
 const PHOTO_FIELDS = { photo_front: "photo_front", photo_side: "photo_side", photo_back: "photo_back" };
+const MAX_PHOTO_EDGE = 1600;
+const PHOTO_QUALITY = 0.82;
 
 // Semantic color per field (muscle=lime, energy=amber, hydro=cyan)
 const FIELD_COLOR = {
@@ -30,6 +32,51 @@ const colorOf = (id) => FIELD_COLOR[id] || "lime";
 const ACCENT_HEX = { lime: "#30d158", cyan: "#64d2ff", amber: "#ff9f0a" };
 const accentOf = (id) => ACCENT_HEX[colorOf(id)] || "#30d158";
 
+const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = reject;
+  reader.readAsDataURL(blob);
+});
+
+const imageToCompressedDataUrl = (file) => new Promise((resolve, reject) => {
+  if (!file?.type?.startsWith("image/")) {
+    reject(new Error("invalid_image"));
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = async () => {
+    try {
+      const scale = Math.min(1, MAX_PHOTO_EDGE / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+      const width = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
+      const height = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(async (blob) => {
+        URL.revokeObjectURL(url);
+        if (!blob) {
+          reject(new Error("image_compress_failed"));
+          return;
+        }
+        blobToDataUrl(blob).then(resolve).catch(reject);
+      }, "image/jpeg", PHOTO_QUALITY);
+    } catch (e) {
+      URL.revokeObjectURL(url);
+      reject(e);
+    }
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    reject(new Error("image_load_failed"));
+  };
+  img.src = url;
+});
+
 export default function Checkin() {
   const { t } = useTranslation();
   const date = todayStr();
@@ -38,6 +85,7 @@ export default function Checkin() {
   const visible = useMemo(() => order.filter((f) => !f.biweekly), [order]);
   const [data, setData] = useState({});
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(null);
 
   const load = async () => {
     const row = await api.get(`/checkins/${week}`).catch(() => null);
@@ -68,12 +116,14 @@ export default function Checkin() {
 
   const onPhoto = async (angle, file) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const out = await api.post(`/checkins/${week}/photo`, { angle: angle.replace("photo_", ""), data_url: reader.result, date });
+    setUploading(angle);
+    try {
+      const dataUrl = await imageToCompressedDataUrl(file);
+      const out = await api.post(`/checkins/${week}/photo`, { angle: angle.replace("photo_", ""), data_url: dataUrl, date });
       setData((d) => ({ ...d, [angle]: out.path }));
-    };
-    reader.readAsDataURL(file);
+    } finally {
+      setUploading(null);
+    }
   };
 
   return (
@@ -104,7 +154,7 @@ export default function Checkin() {
             <AccentCard key={f.id} accent="#64d2ff">
               <div className="flex justify-between items-center">
                 <div className="card-title">{t(`checkin.${angleKey}`)}</div>
-                {data[f.id] && <span className="mono text-[.6rem] text-cyan">✓</span>}
+                {uploading === f.id ? <span className="mono text-[.6rem] text-amber">...</span> : data[f.id] && <span className="mono text-[.6rem] text-cyan">✓</span>}
               </div>
               {data[f.id] && (
                 <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 aspect-[3/4] max-h-[260px] grid place-items-center">
@@ -113,9 +163,13 @@ export default function Checkin() {
               )}
               <label className="btn-ghost mt-2 inline-flex items-center justify-center gap-2 cursor-pointer w-full">
                 <Icon.scan size={14} />
-                <span>{data[f.id] ? "Replace" : "Upload"}</span>
+                <span>{uploading === f.id ? "Uploading" : data[f.id] ? "Replace" : "Upload"}</span>
                 <input type="file" accept="image/*" capture="environment" className="hidden"
-                  onChange={(e) => onPhoto(f.id, e.target.files?.[0])} />
+                  disabled={!!uploading}
+                  onChange={(e) => {
+                    onPhoto(f.id, e.target.files?.[0]);
+                    e.currentTarget.value = "";
+                  }} />
               </label>
             </AccentCard>
           );

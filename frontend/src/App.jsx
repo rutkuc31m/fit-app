@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Training from "./pages/Training";
 import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
-import Recipes from "./pages/Recipes";
+import Log from "./pages/Log";
 import Checkin from "./pages/Checkin";
 import Today from "./pages/Today";
 import PushPrompt from "./components/PushPrompt";
@@ -28,7 +28,8 @@ export default function App() {
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
         <Route path="/"         element={<Protected><Today /></Protected>} />
-        <Route path="/recipes"  element={<Protected><Recipes /></Protected>} />
+        <Route path="/log"      element={<Protected><Log /></Protected>} />
+        <Route path="/recipes"  element={<Navigate to="/log" replace />} />
         <Route path="/training" element={<Protected><Training /></Protected>} />
         <Route path="/progress" element={<Protected><Progress /></Protected>} />
         <Route path="/checkin"  element={<Protected><Checkin /></Protected>} />

@@ -23,6 +23,7 @@ export const Icon = {
   zap:     (p) => <Svg {...p} d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />,
   clock:   (p) => <Svg {...p} d={<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>} />,
   trend:   (p) => <Svg {...p} d="M3 17l6-6 4 4 8-8M15 7h6v6" />,
+  camera:  (p) => <Svg {...p} d={<><path d="M4 8a2 2 0 0 1 2-2h2l1.5-2h5L16 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><circle cx="12" cy="12.5" r="3.5" /></>} />,
   ruler:   (p) => <Svg {...p} d={<><path d="M3 14l7-11 11 7-7 11z" /><path d="M7 11l2 1M10 8l2 1M13 5l2 1M9 15l2 1M12 12l2 1" /></>} />,
   logout:  (p) => <Svg {...p} d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />,
   chev:    (p) => <Svg {...p} d="M9 6l6 6-6 6" />,
