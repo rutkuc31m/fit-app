@@ -10,6 +10,11 @@ import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
 const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, barcode: null };
 const numberOrBlank = (value) => value === "" ? "" : Number(value);
 const cleanNumber = (value) => value === "" || value == null || Number.isNaN(Number(value)) ? 0 : Number(value);
+const isQuickEntry = (item) =>
+  Number(item?.amount_g || 0) <= 0 &&
+  Number(item?.protein_g || 0) === 0 &&
+  Number(item?.carbs_g || 0) === 0 &&
+  Number(item?.fat_g || 0) === 0;
 
 export default function Log() {
   const { t } = useTranslation();
@@ -21,7 +26,7 @@ export default function Log() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [mode, setMode] = useState("gram"); // gram | piece
+  const [mode, setMode] = useState("gram"); // gram | piece | quick
   const [pieceFood, setPieceFood] = useState(null);
   const [pieces, setPieces] = useState(1);
   const [editingItemId, setEditingItemId] = useState(null);
@@ -80,7 +85,7 @@ export default function Log() {
   };
 
   useEffect(() => {
-    if (!draft || search.trim().length < 2) { setResults([]); return; }
+    if (!draft || mode !== "gram" || search.trim().length < 2) { setResults([]); return; }
     setSearching(true);
     const h = setTimeout(async () => {
       try { setResults(await api.get(`/foods/search?q=${encodeURIComponent(search.trim())}`)); }
@@ -88,7 +93,7 @@ export default function Log() {
       finally { setSearching(false); }
     }, 350);
     return () => clearTimeout(h);
-  }, [search, draft]);
+  }, [search, draft, mode]);
 
   const pickResult = async (r) => {
     let item = r;
@@ -132,10 +137,11 @@ export default function Log() {
     setDraft((d) => ({ ...(d || emptyItem), ...scaled, name: pieceFood.name[lang], barcode: null }));
   };
 
-  const openAdd = () => { setDraft({ ...emptyItem }); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); };
+  const openAdd = () => { setDraft({ ...emptyItem }); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); };
   const openScan = () => { setEditingItemId(null); setScanOpen(true); };
   const openEdit = (item) => {
-    const amount = Number(item.amount_g) || 100;
+    const quick = isQuickEntry(item);
+    const amount = quick ? 100 : (Number(item.amount_g) || 100);
     setDraft({
       ...emptyItem,
       ...item,
@@ -147,27 +153,28 @@ export default function Log() {
       },
     });
     setEditingItemId(item.id);
-    setMode("gram");
+    setMode(quick ? "quick" : "gram");
     setPieceFood(null);
     setPieces(1);
+    setSearch("");
   };
 
   const saveDraft = async () => {
     const { _per100, _analyzing, _noData, _pieces, _pieceFoodId, _gPerPiece, ...clean } = draft;
-    clean.amount_g = cleanNumber(clean.amount_g);
+    clean.amount_g = mode === "quick" ? 0 : cleanNumber(clean.amount_g);
     clean.kcal = cleanNumber(clean.kcal);
-    clean.protein_g = cleanNumber(clean.protein_g);
-    clean.carbs_g = cleanNumber(clean.carbs_g);
-    clean.fat_g = cleanNumber(clean.fat_g);
+    clean.protein_g = mode === "quick" ? 0 : cleanNumber(clean.protein_g);
+    clean.carbs_g = mode === "quick" ? 0 : cleanNumber(clean.carbs_g);
+    clean.fat_g = mode === "quick" ? 0 : cleanNumber(clean.fat_g);
     if (editingItemId) await api.put(`/meals/items/${editingItemId}`, clean);
     else {
       const mealId = await ensureMeal();
       await api.post(`/meals/${mealId}/items`, clean);
     }
-    setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); load();
+    setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); load();
   };
 
-  const closeDraft = () => { setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); };
+  const closeDraft = () => { setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); };
 
   return (
     <div className="page page-log">
@@ -229,7 +236,9 @@ export default function Log() {
                     {it.name}
                   </div>
                   <div className="mono text-[.62rem] text-mute tabular-nums mt-[2px]">
-                    {it.amount_g}g · <span className="text-lime">P</span>{Math.round(it.protein_g)} <span className="text-amber">C</span>{Math.round(it.carbs_g)} <span className="text-ink2">F</span>{Math.round(it.fat_g)}
+                    {isQuickEntry(it)
+                      ? t("log.quick_kcal_hint")
+                      : <><span>{it.amount_g}g</span> · <span className="text-lime">P</span>{Math.round(it.protein_g)} <span className="text-amber">C</span>{Math.round(it.carbs_g)} <span className="text-ink2">F</span>{Math.round(it.fat_g)}</>}
                   </div>
                 </button>
                 <div className="flex items-center gap-3 shrink-0 pt-[2px]">
@@ -280,7 +289,7 @@ export default function Log() {
 
             {/* Mode toggle */}
             <div className="soft-band p-1 flex gap-1">
-              {["gram", "piece"].map((k) => (
+              {["gram", "piece", "quick"].map((k) => (
                 <button key={k} onClick={() => setMode(k)}
                   className={`flex-1 mono text-[.66rem] caps py-[8px] rounded-lg transition ${mode === k ? "bg-signal text-[#000000] font-bold" : "text-ink2 hover:bg-bg2"}`}>
                   {t(`log.mode_${k}`)}
@@ -358,33 +367,44 @@ export default function Log() {
               </div>
             )}
 
+            {mode === "quick" && (
+              <div className="soft-band px-3 py-3">
+                <div className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.quick_kcal")}</div>
+                <div className="mono text-[.62rem] text-mute leading-relaxed mt-1">{t("log.quick_kcal_hint")}</div>
+              </div>
+            )}
+
             {/* Macro inputs */}
             <div className="grid grid-cols-2 gap-2">
-              <label className="flex flex-col gap-1">
-                <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.amount_g")}</span>
-                <input className="input mono" type="number" value={draft.amount_g}
-                  onChange={(e) => updateAmount(numberOrBlank(e.target.value))} />
-              </label>
               <label className="flex flex-col gap-1">
                 <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.kcal")}</span>
                 <input className="input mono" type="number" value={draft.kcal}
                   onChange={(e) => setDraft({ ...draft, kcal: numberOrBlank(e.target.value) })} />
               </label>
-              <label className="flex flex-col gap-1">
-                <span className="mono text-[.62rem] text-lime uppercase tracking-[.14em]">{t("log.protein")}</span>
-                <input className="input mono" type="number" value={draft.protein_g}
-                  onChange={(e) => setDraft({ ...draft, protein_g: numberOrBlank(e.target.value) })} />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.carbs")}</span>
-                <input className="input mono" type="number" value={draft.carbs_g}
-                  onChange={(e) => setDraft({ ...draft, carbs_g: numberOrBlank(e.target.value) })} />
-              </label>
-              <label className="flex flex-col gap-1 col-span-2">
-                <span className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">{t("log.fat")}</span>
-                <input className="input mono" type="number" value={draft.fat_g}
-                  onChange={(e) => setDraft({ ...draft, fat_g: numberOrBlank(e.target.value) })} />
-              </label>
+              {mode !== "quick" && (
+                <>
+                  <label className="flex flex-col gap-1">
+                    <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.amount_g")}</span>
+                    <input className="input mono" type="number" value={draft.amount_g}
+                      onChange={(e) => updateAmount(numberOrBlank(e.target.value))} />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="mono text-[.62rem] text-lime uppercase tracking-[.14em]">{t("log.protein")}</span>
+                    <input className="input mono" type="number" value={draft.protein_g}
+                      onChange={(e) => setDraft({ ...draft, protein_g: numberOrBlank(e.target.value) })} />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.carbs")}</span>
+                    <input className="input mono" type="number" value={draft.carbs_g}
+                      onChange={(e) => setDraft({ ...draft, carbs_g: numberOrBlank(e.target.value) })} />
+                  </label>
+                  <label className="flex flex-col gap-1 col-span-2">
+                    <span className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">{t("log.fat")}</span>
+                    <input className="input mono" type="number" value={draft.fat_g}
+                      onChange={(e) => setDraft({ ...draft, fat_g: numberOrBlank(e.target.value) })} />
+                  </label>
+                </>
+              )}
             </div>
 
             <div className="modal-actions">
