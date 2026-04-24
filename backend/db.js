@@ -233,6 +233,14 @@ addDailyLogCol("hunger", "INTEGER");
 addDailyLogCol("headache", "INTEGER");
 addDailyLogCol("coffee_ml", "INTEGER DEFAULT 0");
 
+const mealItemCols = db.prepare("PRAGMA table_info(meal_items)").all().map((c) => c.name);
+const addMealItemCol = (col, def) => {
+  if (!mealItemCols.includes(col)) {
+    try { db.exec(`ALTER TABLE meal_items ADD COLUMN ${col} ${def};`); } catch {}
+  }
+};
+addMealItemCol("eaten_pct", "REAL DEFAULT 100");
+
 const prefCols = db.prepare("PRAGMA table_info(notification_prefs)").all().map((c) => c.name);
 const addPrefCol = (col, def = 1) => {
   if (!prefCols.includes(col)) {

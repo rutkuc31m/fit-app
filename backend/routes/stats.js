@@ -105,8 +105,8 @@ r.get("/weekly-review", (req, res) => {
 
   const meals = db.prepare(`
     SELECT m.date,
-      COALESCE(SUM(mi.kcal), 0) AS kcal,
-      COALESCE(SUM(mi.protein_g), 0) AS protein_g
+      COALESCE(SUM(mi.kcal * COALESCE(mi.eaten_pct, 100) / 100.0), 0) AS kcal,
+      COALESCE(SUM(mi.protein_g * COALESCE(mi.eaten_pct, 100) / 100.0), 0) AS protein_g
     FROM meals m
     LEFT JOIN meal_items mi ON mi.meal_id = m.id
     WHERE m.user_id = ? AND m.date >= ? AND m.date <= ?

@@ -4,12 +4,13 @@ import i18n from "../i18n";
 import { api } from "../lib/api";
 import { todayStr } from "../lib/plan";
 import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
+import { eatenPct, effectiveMacros, sumMealMacros } from "../lib/nutrition";
 import BarcodeScanner from "../components/BarcodeScanner";
 import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
 
-const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, barcode: null };
+const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, eaten_pct: 100, barcode: null };
 const numberOrBlank = (value) => value === "" ? "" : Number(value);
-const cleanNumber = (value) => value === "" || value == null || Number.isNaN(Number(value)) ? 0 : Number(value);
+const cleanNumber = (value, fallback = 0) => value === "" || value == null || Number.isNaN(Number(value)) ? fallback : Number(value);
 const isQuickEntry = (item) =>
   Number(item?.amount_g || 0) <= 0 &&
   Number(item?.protein_g || 0) === 0 &&
@@ -64,6 +65,10 @@ export default function Log() {
   };
 
   const deleteItem = async (id) => { await api.del(`/meals/items/${id}`); load(); };
+  const setItemEatenPct = async (item, pct) => {
+    await api.put(`/meals/items/${item.id}`, { ...item, eaten_pct: pct });
+    load();
+  };
 
   // All items flat across all meals
   const allItems = meals.flatMap((m) => m.items);
@@ -78,13 +83,7 @@ export default function Log() {
     if (recentQuick.length >= 4) break;
   }
 
-  const totals = allItems.reduce((a, i) => {
-    a.kcal    += i.kcal     || 0;
-    a.protein += i.protein_g || 0;
-    a.carbs   += i.carbs_g  || 0;
-    a.fat     += i.fat_g    || 0;
-    return a;
-  }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
+  const totals = sumMealMacros(meals);
 
   const updateAmount = (g) => {
     if (g === "") return setDraft({ ...draft, amount_g: "" });
@@ -189,6 +188,7 @@ export default function Log() {
     clean.protein_g = mode === "quick" ? 0 : cleanNumber(clean.protein_g);
     clean.carbs_g = mode === "quick" ? 0 : cleanNumber(clean.carbs_g);
     clean.fat_g = mode === "quick" ? 0 : cleanNumber(clean.fat_g);
+    clean.eaten_pct = Math.max(0, Math.min(100, cleanNumber(clean.eaten_pct, 100)));
     if (editingItemId) await api.put(`/meals/items/${editingItemId}`, clean);
     else {
       const mealId = await ensureMeal();
@@ -275,8 +275,12 @@ export default function Log() {
       {allItems.length > 0 && (
         <AccentCard accent="#ff9f0a" className="overflow-hidden" contentClassName="pl-2">
           <div className="divide-y divide-line">
-            {allItems.map((it) => (
-              <div key={it.id} className="px-4 py-3 flex items-start justify-between gap-3">
+            {allItems.map((it) => {
+              const pct = eatenPct(it);
+              const eff = effectiveMacros(it);
+              return (
+              <div key={it.id} className="px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
                 <button type="button" className="min-w-0 flex-1 text-left" onClick={() => openEdit(it)}>
                   <div className="flex items-start gap-2">
                     {/* Name: 2-line clamp instead of truncate */}
@@ -292,16 +296,32 @@ export default function Log() {
                   <div className="mono text-[.62rem] text-mute tabular-nums mt-[2px]">
                     {isQuickEntry(it)
                       ? t("log.quick_kcal_hint")
-                      : <><span>{it.amount_g}g</span> · <span className="text-lime">P</span>{Math.round(it.protein_g)} <span className="text-amber">C</span>{Math.round(it.carbs_g)} <span className="text-ink2">F</span>{Math.round(it.fat_g)}</>}
+                      : <><span>{it.amount_g}g</span> · <span className="text-lime">P</span>{Math.round(eff.protein_g)} <span className="text-amber">C</span>{Math.round(eff.carbs_g)} <span className="text-ink2">F</span>{Math.round(eff.fat_g)}</>}
                   </div>
                 </button>
                 <div className="flex items-center gap-3 shrink-0 pt-[2px]">
-                  <div className="mono text-sm text-amber font-bold tabular-nums">{Math.round(it.kcal)}</div>
+                  <div className="mono text-sm text-amber font-bold tabular-nums">{Math.round(eff.kcal)}</div>
                   <button className="text-mute hover:text-signal mono text-[.62rem] uppercase tracking-[.14em] leading-none" onClick={() => openEdit(it)}>{t("log.edit")}</button>
                   <button className="text-mute hover:text-danger text-lg leading-none" onClick={() => deleteItem(it.id)}>×</button>
                 </div>
+                </div>
+                <div className="mt-3 flex items-center gap-1">
+                  {[25, 50, 75, 100].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`flex-1 mono text-[.58rem] uppercase tracking-[.12em] rounded-md border px-2 py-[7px] transition ${
+                        pct === value ? "border-amber/70 bg-amber/15 text-amber" : "border-line bg-bg2 text-mute hover:text-ink"
+                      }`}
+                      onClick={() => setItemEatenPct(it, value)}
+                    >
+                      {value}%
+                    </button>
+                  ))}
+                </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </AccentCard>
       )}

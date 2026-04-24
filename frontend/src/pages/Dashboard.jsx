@@ -4,15 +4,8 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
 import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
+import { effectiveMacro, sumMealMacros } from "../lib/nutrition";
 import { AccentCard, Ring, Empty, Icon, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
-
-const sumMacros = (meals) => meals.reduce((a, m) => {
-  m.items.forEach((it) => {
-    a.kcal += it.kcal || 0; a.protein += it.protein_g || 0;
-    a.carbs += it.carbs_g || 0; a.fat += it.fat_g || 0;
-  });
-  return a;
-}, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -30,7 +23,7 @@ export default function Dashboard() {
   const phaseStartDay = (phase.weeks[0] - 1) * 7 + 1;
   const isPhaseFirstDay = dayIdx === phaseStartDay;
   const target = getEatingTarget(dayPlan.eating);
-  const macros = sumMacros(meals);
+  const macros = sumMealMacros(meals);
 
   const load = async () => {
     const [l, m] = await Promise.all([
@@ -277,7 +270,7 @@ export default function Dashboard() {
       ) : (
         <div className="flex flex-col gap-2">
           {meals.map((m) => {
-            const kcal = Math.round(m.items.reduce((a, i) => a + (i.kcal || 0), 0));
+            const kcal = Math.round(m.items.reduce((a, i) => a + effectiveMacro(i, "kcal"), 0));
             return (
               <AccentCard key={m.id} accent="#ff9f0a" className="flex items-center gap-3" contentClassName="pl-2 flex items-center gap-3 w-full">
                 <div className="w-8 h-8 rounded-md border border-line bg-bg2 grid place-items-center text-ink2 shrink-0">

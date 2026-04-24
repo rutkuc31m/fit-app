@@ -75,7 +75,7 @@ function computeWeeklyRecap(userId) {
   const weightDelta = weights.length >= 2 ? weights[weights.length - 1] - weights[0] : null;
 
   const kcalRows = db.prepare(`
-    SELECT m.date, COALESCE(SUM(mi.kcal), 0) AS kcal
+    SELECT m.date, COALESCE(SUM(mi.kcal * COALESCE(mi.eaten_pct, 100) / 100.0), 0) AS kcal
     FROM meals m LEFT JOIN meal_items mi ON mi.meal_id = m.id
     WHERE m.user_id = ? AND m.date >= ? AND m.date <= ?
     GROUP BY m.date

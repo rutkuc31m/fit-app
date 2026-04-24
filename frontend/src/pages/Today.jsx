@@ -6,6 +6,7 @@ import { useAuth } from "../lib/auth.jsx";
 import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { dailyReadiness, recoveryCoachNote } from "../lib/coaching";
+import { effectiveMacro } from "../lib/nutrition";
 import { AccentCard, Icon, Empty } from "../components/ui";
 
 const CAT_STYLE = {
@@ -339,10 +340,10 @@ export default function Today() {
       if (cancelled) return;
       const totals = (meals || []).reduce((acc, m) => {
         (m.items || []).forEach((it) => {
-          acc.kcal += it.kcal || 0;
-          acc.protein += it.protein_g || 0;
-          acc.carbs += it.carbs_g || 0;
-          acc.fat += it.fat_g || 0;
+          acc.kcal += effectiveMacro(it, "kcal");
+          acc.protein += effectiveMacro(it, "protein_g");
+          acc.carbs += effectiveMacro(it, "carbs_g");
+          acc.fat += effectiveMacro(it, "fat_g");
         });
         return acc;
       }, { kcal: 0, protein: 0, carbs: 0, fat: 0, count: (meals || []).length });
