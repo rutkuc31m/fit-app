@@ -1,5 +1,5 @@
 #!/bin/bash
-# Download exercise preview GIFs.
+# Download exercise preview assets.
 # Source: ExerciseDB (static.exercisedb.dev) — free, no auth required
 #
 # Run ON the VM:
@@ -51,6 +51,11 @@ declare -A GIFS=(
   ["lr.gif"]="dRTfGZT"                  # Lateral Raise
 )
 
+# Static fallback frames for machine variations not available in the ExerciseDB GIF CDN.
+declare -A IMAGES=(
+  ["chest_press_machine.jpg"]="https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Chest_Press/0.jpg"
+)
+
 ok=0
 fail=0
 
@@ -77,14 +82,37 @@ for filename in "${!GIFS[@]}"; do
   fi
 done
 
+for filename in "${!IMAGES[@]}"; do
+  url="${IMAGES[$filename]}"
+  dest_file="${DEST}/${filename}"
+
+  if [ -f "$dest_file" ] && [ -s "$dest_file" ]; then
+    echo "  [skip] $filename (already exists)"
+    ((ok+=1))
+    continue
+  fi
+
+  echo -n "  [dl]   $filename ... "
+  if curl -fsSL --max-time 30 "$url" -o "$dest_file"; then
+    size=$(du -sh "$dest_file" | cut -f1)
+    echo "ok ($size)"
+    ((ok+=1))
+  else
+    echo "FAIL (url: $url)"
+    rm -f "$dest_file"
+    ((fail+=1))
+  fi
+done
+
 echo ""
 echo "=== Done: $ok ok, $fail failed ==="
 echo "GIF directory: $DEST"
-ls -lh "$DEST"/*.gif 2>/dev/null | awk '{print "  "$5, $9}'
+find "$DEST" -maxdepth 1 \( -name '*.gif' -o -name '*.jpg' \) -type f -print0 2>/dev/null | xargs -0 ls -lh 2>/dev/null | awk '{print "  "$5, $9}'
 
 # Fix ownership so Caddy can serve them
 chown -R caddy:caddy "$DEST" 2>/dev/null || chown -R www-data:www-data "$DEST" 2>/dev/null || true
 chmod 644 "$DEST"/*.gif 2>/dev/null || true
+chmod 644 "$DEST"/*.jpg 2>/dev/null || true
 
 echo ""
 if [ "$DEST" = "/var/www/fitapp/gifs" ]; then

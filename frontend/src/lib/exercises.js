@@ -15,6 +15,7 @@ export const EXERCISES = {
     gifPath: "/gifs/bp.gif",
     targetMuscles: ["chest", "shoulders_front", "triceps"],
     equipment: "barbell_or_dumbbells",
+    phase1Alt: "chest_press_machine",
     videoSearch: {
       en: "bench press proper form beginner",
       de: "Bankdrücken richtig ausführen Anfänger"
@@ -36,12 +37,41 @@ export const EXERCISES = {
     machineAlt: "Chest Press Machine (ilk hafta için de güvenli seçim)"
   },
 
+  chest_press_machine: {
+    id: "chest_press_machine",
+    name: { en: "Chest Press Machine", de: "Brustpresse Maschine", tr: "Chest Press Machine (Makinede Göğüs Press)" },
+    gifPath: "/gifs/chest_press_machine.jpg",
+    targetMuscles: ["chest", "shoulders_front", "triceps"],
+    equipment: "machine",
+    videoSearch: {
+      en: "chest press machine proper form beginner",
+      de: "Brustpresse Maschine richtig ausführen"
+    },
+    recommendedVideo: "https://www.youtube.com/results?search_query=brustpresse+maschine+richtig",
+    formCues: [
+      "Koltuk yüksekliğini ayarla: tutacaklar göğüs ortası hizasında olsun",
+      "Sırtını tam yasla, ayaklar yerde sabit",
+      "Omuzları aşağı ve geriye al, göğüs açık",
+      "Kontrollü it, dirsekleri sert kilitleme",
+      "Geri dönüşte göğüs gerilsin ama omuz öne düşmesin"
+    ],
+    commonMistakes: [
+      "Koltuk çok alçak/yüksek → omuz sıkışır",
+      "Omuzları öne yuvarlamak",
+      "Ağırlığı fırlatıp dönüşü kontrol etmemek"
+    ],
+    beginnerAlt: "Smith Machine Bench Press, omuzda sıkışma yoksa",
+    importance: "Phase 1 için barbell bench yerine daha stabil ve ölçülebilir seçenek",
+    isPhase1Safe: true
+  },
+
   dr: {
     id: "dr",
     name: { en: "Dumbbell Row", de: "Einarmiges Kurzhantelrudern", tr: "Tek El Dambıl Row" },
     gifPath: "/gifs/dr.gif",
     targetMuscles: ["back", "biceps", "rear_delts"],
     equipment: "dumbbell_bench",
+    phase1Alt: "cw",
     videoSearch: {
       en: "one arm dumbbell row proper form",
       de: "einarmiges Kurzhantelrudern Form"

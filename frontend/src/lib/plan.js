@@ -73,8 +73,10 @@ export const PLAN = {
     A: {
       nameKey: "day_a",
       exercises: [
-        { id: "bp", name: "Bench Press",     sets: 3, reps: 10 },
-        { id: "dr", name: "Dumbbell Row",    sets: 3, reps: 10 },
+        { id: "bp", name: "Bench Press",     sets: 3, reps: 10,
+          phase1Alt: { name: "Chest Press Machine", reason: "guided_stability" } },
+        { id: "dr", name: "Dumbbell Row",    sets: 3, reps: 10,
+          phase1Alt: { name: "Seated Cable Row", reason: "guided_stability" } },
         { id: "op", name: "Overhead Press",  sets: 3, reps: 8,
           phase1Alt: { name: "Seated Shoulder Press (machine)", reason: "back_safe" } },
         { id: "lp", name: "Lat Pulldown",    sets: 3, reps: 10 },

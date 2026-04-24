@@ -160,6 +160,8 @@ export const PROTOCOLS = {
         "No deadlifts in Phase 1 — use Hip Thrust",
         "No Romanian Deadlift in Phase 1 — use Seated Leg Curl",
         "No free-weight squats in Phase 1 — use Leg Press",
+        "No free barbell bench in Phase 1 — use Chest Press Machine",
+        "No unsupported dumbbell row in Phase 1 — use Seated Cable Row",
         "Seated Overhead Press (machine) instead of standing",
         "Daily 5min core routine: dead bug, bird dog, glute bridge",
         "Lumbar support cushion at desk",
