@@ -5,8 +5,6 @@ import { todayStr, getWeekNum } from "../lib/plan";
 import { PROTOCOLS } from "../lib/protocols";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
-const PHOTO_BASE = (import.meta.env.DEV ? "" : (import.meta.env.VITE_API_BASE?.replace(/\/api$/, "") || "https://api.fit.rutkuc.com"));
-
 const FIELD_TO_COL = {
   energy: "energy",
   sleep_quality: "sleep_quality",
@@ -96,6 +94,7 @@ export default function Checkin() {
       const col = FIELD_TO_COL[f.id];
       if (col && row[col] != null) next[f.id] = row[col];
     }
+    next._photoCounts = row.photo_counts || {};
     setData(next);
   };
   useEffect(() => { load(); }, [week]);
@@ -114,13 +113,23 @@ export default function Checkin() {
     setTimeout(() => setSaved(false), 1200);
   };
 
-  const onPhoto = async (angle, file) => {
-    if (!file) return;
+  const onPhoto = async (angle, files) => {
+    const list = Array.from(files || []).filter(Boolean);
+    if (!list.length) return;
     setUploading(angle);
     try {
-      const dataUrl = await imageToCompressedDataUrl(file);
-      const out = await api.post(`/checkins/${week}/photo`, { angle: angle.replace("photo_", ""), data_url: dataUrl, date });
-      setData((d) => ({ ...d, [angle]: out.path }));
+      let latest = null;
+      for (const file of list) {
+        const dataUrl = await imageToCompressedDataUrl(file);
+        latest = await api.post(`/checkins/${week}/photo`, { angle: angle.replace("photo_", ""), data_url: dataUrl, date });
+      }
+      if (latest) {
+        setData((d) => ({
+          ...d,
+          [angle]: latest.path,
+          _photoCounts: { ...(d._photoCounts || {}), [latest.angle]: latest.count_today }
+        }));
+      }
     } finally {
       setUploading(null);
     }
@@ -151,6 +160,7 @@ export default function Checkin() {
         if (PHOTO_FIELDS[f.id]) {
           const angleKey = f.id.replace("photo_", "");
           const busy = uploading === f.id;
+          const count = data._photoCounts?.[angleKey] || 0;
           return (
             <AccentCard key={f.id} accent="#64d2ff" className={busy ? "border-amber/60" : ""}>
               <div className="flex justify-between items-center gap-2">
@@ -162,22 +172,16 @@ export default function Checkin() {
                   {busy ? "uploading" : data[f.id] ? "saved" : "empty"}
                 </span>
               </div>
-              <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 aspect-[3/4] max-h-[280px] grid place-items-center relative">
-                {data[f.id] ? (
-                  <>
-                    <img src={PHOTO_BASE + data[f.id]} alt={angleKey} className="max-h-full max-w-full object-contain" />
-                    <div className="absolute left-2 right-2 bottom-2 flex items-center justify-between gap-2">
-                      <span className="mono text-[.54rem] text-cyan uppercase tracking-[.14em] bg-bg/80 border border-cyan/30 rounded px-2 py-1 backdrop-blur">{angleKey}</span>
-                      <span className="mono text-[.54rem] text-ink2 uppercase tracking-[.14em] bg-bg/80 border border-line rounded px-2 py-1 backdrop-blur">compressed</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-center px-4">
-                    <Icon.camera size={24} className="text-cyan" />
-                    <div className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">no photo yet</div>
-                    <div className="mono text-[.58rem] text-mute leading-relaxed">same light · same distance · relaxed posture</div>
+              <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 min-h-[122px] grid place-items-center relative">
+                <div className="flex flex-col items-center gap-2 text-center px-4 py-5">
+                  <Icon.camera size={24} className={data[f.id] ? "text-lime" : "text-cyan"} />
+                  <div className={`mono text-[.68rem] uppercase tracking-[.14em] ${data[f.id] ? "text-lime" : "text-ink2"}`}>
+                    {data[f.id] ? "photo saved" : "no photo yet"}
                   </div>
-                )}
+                  <div className="mono text-[.58rem] text-mute leading-relaxed">
+                    {count > 0 ? `${count} ${angleKey} upload${count === 1 ? "" : "s"} today` : "camera or gallery · same light"}
+                  </div>
+                </div>
                 {busy && (
                   <div className="absolute inset-0 bg-bg/80 backdrop-blur-sm grid place-items-center">
                     <div className="mono text-[.66rem] text-amber uppercase tracking-[.16em]">compressing · uploading</div>
@@ -186,16 +190,16 @@ export default function Checkin() {
               </div>
               {data[f.id] && (
                 <div className="mono text-[.56rem] text-mute uppercase tracking-[.12em] mt-2 text-center">
-                  current photo shown · old uploads stay in history
+                  saved privately · gallery view later
                 </div>
               )}
               <label className={`btn-ghost mt-2 inline-flex items-center justify-center gap-2 cursor-pointer w-full ${busy ? "opacity-60 pointer-events-none" : ""}`}>
                 <Icon.camera size={14} />
-                <span>{busy ? "Uploading" : data[f.id] ? "Update current photo" : "Add photo"}</span>
-                <input type="file" accept="image/*" capture="environment" className="hidden"
+                <span>{busy ? "Uploading" : data[f.id] ? "Add another photo" : "Add photo"}</span>
+                <input type="file" accept="image/*" multiple className="hidden"
                   disabled={!!uploading}
                   onChange={(e) => {
-                    onPhoto(f.id, e.target.files?.[0]);
+                    onPhoto(f.id, e.target.files);
                     e.currentTarget.value = "";
                   }} />
               </label>

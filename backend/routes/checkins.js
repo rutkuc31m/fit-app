@@ -24,7 +24,18 @@ r.get("/", (req, res) => {
 r.get("/:week", (req, res) => {
   const week = parseInt(req.params.week, 10);
   const row = db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
-  res.json(row || null);
+  if (!row) return res.json(null);
+  const today = new Date().toISOString().slice(0, 10);
+  const counts = db.prepare(`
+    SELECT angle, COUNT(*) AS count
+    FROM progress_photos
+    WHERE user_id = ? AND date = ?
+    GROUP BY angle
+  `).all(req.user.id, today);
+  res.json({
+    ...row,
+    photo_counts: Object.fromEntries(counts.map((r) => [r.angle, r.count]))
+  });
 });
 
 r.put("/:week", (req, res) => {
@@ -54,6 +65,7 @@ r.put("/:week", (req, res) => {
 r.post("/:week/photo", (req, res) => {
   const week = parseInt(req.params.week, 10);
   const { angle, data_url, date } = req.body || {};
+  const photoDate = date || new Date().toISOString().slice(0, 10);
   if (!angle || !["front", "side", "back", "legs"].includes(angle)) return res.status(400).json({ error: "bad_angle" });
   if (!data_url || !data_url.startsWith("data:image/")) return res.status(400).json({ error: "bad_data" });
 
@@ -74,13 +86,16 @@ r.post("/:week/photo", (req, res) => {
     db.prepare(`UPDATE weekly_checkins SET ${col} = ? WHERE id = ?`).run(relPath, existing.id);
   } else {
     db.prepare(`INSERT INTO weekly_checkins (user_id, week_number, date, ${col}) VALUES (?, ?, ?, ?)`)
-      .run(req.user.id, week, date || new Date().toISOString().slice(0, 10), relPath);
+      .run(req.user.id, week, photoDate, relPath);
   }
   // also add to progress_photos for history
   db.prepare("INSERT INTO progress_photos (user_id, date, path, angle) VALUES (?, ?, ?, ?)")
-    .run(req.user.id, new Date().toISOString().slice(0, 10), relPath, angle);
+    .run(req.user.id, photoDate, relPath, angle);
+  const countToday = db.prepare(
+    "SELECT COUNT(*) AS count FROM progress_photos WHERE user_id = ? AND date = ? AND angle = ?"
+  ).get(req.user.id, photoDate, angle)?.count || 0;
 
-  res.json({ angle, path: relPath });
+  res.json({ angle, path: relPath, count_today: countToday });
 });
 
 export default r;
