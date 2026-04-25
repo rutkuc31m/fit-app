@@ -174,7 +174,8 @@
     "save": "Save check-in",
     "front": "Front",
     "side": "Side",
-    "back": "Back"
+    "back": "Back",
+    "legs": "Legs"
   },
   "restrictions": {
     "lower_back": "Lower back protection active",

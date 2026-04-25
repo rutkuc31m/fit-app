@@ -16,7 +16,7 @@ const FIELD_TO_COL = {
   notes: "notes"
 };
 
-const PHOTO_FIELDS = { photo_front: "photo_front", photo_side: "photo_side", photo_back: "photo_back" };
+const PHOTO_FIELDS = { photo_front: "photo_front", photo_side: "photo_side", photo_back: "photo_back", photo_legs: "photo_legs" };
 const MAX_PHOTO_EDGE = 1600;
 const PHOTO_QUALITY = 0.82;
 
@@ -132,11 +132,11 @@ export default function Checkin() {
         accent="#64d2ff"
         kicker="weekly check-in"
         title="Photos tell the truth."
-        sub="Front · side · back · recovery"
+        sub="Front · side · back · legs"
         metrics={[
           { label: "week", value: `W${String(week).padStart(2, "0")}`, className: "text-cyan" },
           { label: "fields", value: visible.length },
-          { label: "photos", value: "3", className: "text-amber" }
+          { label: "photos", value: "4", className: "text-amber" }
         ]}
       />
 

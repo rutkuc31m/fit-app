@@ -174,7 +174,8 @@
     "save": "Check-in speichern",
     "front": "Vorne",
     "side": "Seite",
-    "back": "Rücken"
+    "back": "Rücken",
+    "legs": "Beine"
   },
   "restrictions": {
     "lower_back": "Unterer Rücken-Schutz aktiv",

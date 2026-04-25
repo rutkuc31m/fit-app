@@ -185,6 +185,7 @@ export const PROTOCOLS = {
       { id: "photo_front", label: "Front photo", type: "photo" },
       { id: "photo_side", label: "Side photo", type: "photo" },
       { id: "photo_back", label: "Back photo", type: "photo" },
+      { id: "photo_legs", label: "Leg photo", type: "photo" },
       { id: "energy", label: "Energy level (1-5)", type: "scale" },
       { id: "sleep_quality", label: "Sleep quality (1-5)", type: "scale" },
       { id: "motivation", label: "Motivation (1-5)", type: "scale" },

@@ -217,6 +217,7 @@ addCol("notes", "TEXT");
 addCol("photo_front", "TEXT");
 addCol("photo_side", "TEXT");
 addCol("photo_back", "TEXT");
+addCol("photo_legs", "TEXT");
 
 // daily_logs sync metadata for iOS Shortcut / automation debugging.
 const dailyLogCols = db.prepare("PRAGMA table_info(daily_logs)").all().map((c) => c.name);

@@ -14,7 +14,7 @@ const V2_FIELDS = [
   "date", "avg_weight", "weight_change", "training_done", "avg_steps",
   "avg_kcal", "avg_protein_g", "challenges", "adjustments",
   "energy", "sleep_quality", "back_pain", "motivation", "adherence_pct", "notes",
-  "photo_front", "photo_side", "photo_back"
+  "photo_front", "photo_side", "photo_back", "photo_legs"
 ];
 
 r.get("/", (req, res) => {
@@ -50,11 +50,11 @@ r.put("/:week", (req, res) => {
   res.json(db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week));
 });
 
-// POST /api/checkins/:week/photo  — body { angle: "front"|"side"|"back", data_url: "data:image/jpeg;base64,..." }
+// POST /api/checkins/:week/photo  — body { angle: "front"|"side"|"back"|"legs", data_url: "data:image/jpeg;base64,..." }
 r.post("/:week/photo", (req, res) => {
   const week = parseInt(req.params.week, 10);
   const { angle, data_url, date } = req.body || {};
-  if (!angle || !["front", "side", "back"].includes(angle)) return res.status(400).json({ error: "bad_angle" });
+  if (!angle || !["front", "side", "back", "legs"].includes(angle)) return res.status(400).json({ error: "bad_angle" });
   if (!data_url || !data_url.startsWith("data:image/")) return res.status(400).json({ error: "bad_data" });
 
   const m = data_url.match(/^data:image\/(\w+);base64,(.+)$/);
