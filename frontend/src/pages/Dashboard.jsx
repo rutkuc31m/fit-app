@@ -17,6 +17,8 @@ export default function Dashboard() {
   const [savedFlash, setSavedFlash] = useState(false);
 
   const dayPlan = getDayPlan(date);
+  const dateParts = date.split("-").map(Number);
+  const isFreeMealDay = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).getDay() === 0 && dayPlan.eating === "LOW";
   const week = getWeekNum(date);
   const phase = getPhase(week);
   const dayIdx = daysBetween(PLAN.startDate, date) + 1;
@@ -240,6 +242,9 @@ export default function Dashboard() {
           )}
           {dayPlan.eating === "FAST" && (
             <div className="mono text-[.62rem] text-mute mt-[2px]">{t("eating.fast_allowed")}</div>
+          )}
+          {isFreeMealDay && (
+            <div className="mono text-[.62rem] text-amber mt-[2px]">controlled free meal</div>
           )}
         </AccentCard>
       </div>

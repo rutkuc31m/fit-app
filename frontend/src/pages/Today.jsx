@@ -544,10 +544,18 @@ export default function Today() {
             {kcalTarget === 0 ? (
               <div className="mono text-[.7rem] text-cyan text-center py-2">fast day · 0 kcal</div>
             ) : (
-              <div className="flex justify-around">
-                {ring(kcalPct, "#ff9f0a", "kcal", Math.round(mealsTotals.kcal), kcalTarget, "")}
-                {ring(protPct, "#30d158", "protein", Math.round(mealsTotals.protein), protTarget, "g")}
-              </div>
+              <>
+                {day.eating.freeMeal && (
+                  <div className="soft-band px-3 py-2 mb-3 text-center">
+                    <div className="mono text-[.58rem] text-amber uppercase tracking-[.16em]">{day.eating.freeMeal.label}</div>
+                    <div className="mono text-[.56rem] text-mute leading-relaxed mt-[2px]">{day.eating.freeMeal.note}</div>
+                  </div>
+                )}
+                <div className="flex justify-around">
+                  {ring(kcalPct, "#ff9f0a", "kcal", Math.round(mealsTotals.kcal), kcalTarget, "")}
+                  {ring(protPct, "#30d158", "protein", Math.round(mealsTotals.protein), protTarget, "g")}
+                </div>
+              </>
             )}
           </AccentCard>
         );

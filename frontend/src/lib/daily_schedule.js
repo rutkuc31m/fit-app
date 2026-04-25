@@ -26,6 +26,7 @@ export function generateFullSchedule() {
     const isFastDay = dayPlan.eating === "FAST";
     const isLowDay = dayPlan.eating === "LOW";
     const isWeekend = dow === 0 || dow === 6;
+    const isFreeMealDay = dow === 0 && isLowDay;
 
     // Step target interpolation
     const phaseWeekStart = phase.weeks[0];
@@ -54,6 +55,10 @@ export function generateFullSchedule() {
       eating: {
         mode: dayPlan.eating,
         label: isFastDay ? "ORUÇ" : isLowDay ? "DÜŞÜK KALORİ" : "OMAD",
+        freeMeal: isFreeMealDay ? {
+          label: "controlled free meal",
+          note: "Protein first. One meal, not a cheat day."
+        } : null,
         window: isFastDay ? null : {
           start: isTrainingDay ? "19:30" : "18:00",
           end: isTrainingDay ? "20:45" : "19:00"
@@ -359,8 +364,10 @@ function generateDaySchedule(opts) {
 
     schedule.push({
       time: "18:00",
-      action: "OMAD — Ana öğün (düşük kalori)",
-      details: "Çocuklarla birlikte, tek öğün (~1300kcal). Düşük karbonhidrat, yüksek protein.",
+      action: isFreeMealDay ? "Controlled free meal" : "OMAD — Ana öğün (düşük kalori)",
+      details: isFreeMealDay
+        ? "Tek öğün. Protein önce, keyif serbest; cheat day değil. 1800-2200kcal tavan."
+        : "Çocuklarla birlikte, tek öğün (~1300kcal). Düşük karbonhidrat, yüksek protein.",
       category: "nutrition",
       duration: "30-45dk"
     });
