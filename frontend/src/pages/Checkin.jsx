@@ -184,9 +184,14 @@ export default function Checkin() {
                   </div>
                 )}
               </div>
+              {data[f.id] && (
+                <div className="mono text-[.56rem] text-mute uppercase tracking-[.12em] mt-2 text-center">
+                  current photo shown · old uploads stay in history
+                </div>
+              )}
               <label className={`btn-ghost mt-2 inline-flex items-center justify-center gap-2 cursor-pointer w-full ${busy ? "opacity-60 pointer-events-none" : ""}`}>
                 <Icon.camera size={14} />
-                <span>{busy ? "Uploading" : data[f.id] ? "Replace photo" : "Add photo"}</span>
+                <span>{busy ? "Uploading" : data[f.id] ? "Update current photo" : "Add photo"}</span>
                 <input type="file" accept="image/*" capture="environment" className="hidden"
                   disabled={!!uploading}
                   onChange={(e) => {
