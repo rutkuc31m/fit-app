@@ -237,18 +237,25 @@ function ScheduleFocus({ day, currentIdx, isToday }) {
         <div className="card-title">{current ? "now / next" : "first blocks"}</div>
         <a href="#schedule" className="mono text-[.58rem] text-mute uppercase tracking-[.14em] hover:text-ink">full</a>
       </div>
-      <div className="grid gap-1">
+      <div className="grid gap-1 overflow-hidden">
         {rows.map((item, idx) => {
           const style = CAT_STYLE[item.category] || CAT_STYLE.routine;
           const active = item.state === "now";
           return (
-            <div key={`${item.time}-${idx}`} className={`soft-band px-2 py-2 flex items-start gap-2 ${active ? "border-amber/60 bg-amber/[.06]" : ""}`}>
-              <div className={`mono text-[.62rem] tabular-nums w-10 shrink-0 ${active ? "text-amber" : "text-ink2"}`}>{item.time}</div>
+            <div
+              key={`${item.time}-${idx}`}
+              className={`soft-band px-2 py-2 grid grid-cols-[2.35rem_minmax(0,1fr)_2.15rem] items-start gap-2 overflow-hidden ${active ? "border-amber/60 bg-amber/[.06]" : ""}`}
+            >
+              <div className={`mono text-[.6rem] tabular-nums shrink-0 ${active ? "text-amber" : "text-ink2"}`}>{item.time}</div>
               <div className="flex-1 min-w-0">
-                <div className="text-[.78rem] text-ink leading-tight truncate">{item.action}</div>
-                <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em] mt-[2px] truncate">{item.details}</div>
+                <div className="text-[.76rem] text-ink leading-snug break-words" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  {item.action}
+                </div>
+                <div className="mono text-[.54rem] text-mute uppercase tracking-[.08em] leading-snug mt-[2px] break-words" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  {item.details}
+                </div>
               </div>
-              <div className="mono text-[.52rem] uppercase tracking-[.14em] shrink-0" style={{ color: style.dot }}>
+              <div className="mono text-[.48rem] uppercase tracking-[.06em] text-right leading-tight min-w-0 truncate" style={{ color: style.dot }}>
                 {active ? "now" : style.label}
               </div>
             </div>
