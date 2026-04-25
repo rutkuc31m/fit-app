@@ -161,11 +161,7 @@ function CommandCard({ readiness, day, leftKg, journeyPct }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 min-[420px]:grid-cols-4 gap-2 mt-4 pl-2">
-        <div className="command-metric">
-          <div className="metric-label">phase</div>
-          <div className="metric-value text-[.78rem] truncate">{day.phase.name}</div>
-        </div>
+      <div className="grid grid-cols-3 gap-2 mt-4 pl-2">
         <div className="command-metric">
           <div className="metric-label">food</div>
           <div className="metric-value text-[.78rem]" style={{ color: fastDay ? "#64d2ff" : "#ff9f0a" }}>{fastDay ? "FAST" : day.eating.mode}</div>
