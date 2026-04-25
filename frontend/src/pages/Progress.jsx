@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { PLAN, todayStr } from "../lib/plan";
-import { AccentCard, PageCommand } from "../components/ui";
+import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const addDays = (dateStr, days) => {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -186,6 +187,17 @@ export default function Progress() {
           { label: "left", value: <>{left.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></>, className: "text-amber" }
         ]}
       />
+
+      <AccentCard as={Link} to="/checkin" accent="#64d2ff" className="hover:border-line2" contentClassName="pl-2 flex items-center gap-3 w-full">
+        <div className="w-10 h-10 rounded-md border border-cyan/40 bg-cyan/[.08] grid place-items-center text-cyan shrink-0">
+          <Icon.camera size={19} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="card-title">Progress photos</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">front · side · back · weekly check-in</div>
+        </div>
+        <Icon.chev size={14} className="text-mute shrink-0" />
+      </AccentCard>
 
       <WeeklyReviewCard review={review} />
       <AdherenceCard review={review} />
