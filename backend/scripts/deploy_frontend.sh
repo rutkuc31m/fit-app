@@ -23,7 +23,8 @@ sudo rsync -a --delete \
 sudo DEST="$GIF_DIR" bash "$APP_DIR/backend/scripts/download_gifs.sh"
 sudo test -s "$GIF_DIR/bp.gif"
 sudo rm -rf "$WEB_DIR/gifs"
-sudo ln -s "$GIF_DIR" "$WEB_DIR/gifs"
 sudo chown -R caddy:caddy "$WEB_DIR" "$GIF_DIR"
+sudo ln -sfn "$GIF_DIR" "$WEB_DIR/gifs"
+sudo chown -h caddy:caddy "$WEB_DIR/gifs"
 sudo test -s "$WEB_DIR/gifs/bp.gif"
 curl -fsSI --max-time 8 "https://fit.rutkuc.com/gifs/bp.gif" | grep -Ei 'HTTP/|content-type: image/gif'
