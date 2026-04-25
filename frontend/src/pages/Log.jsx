@@ -235,10 +235,10 @@ export default function Log() {
 
       {/* Action buttons */}
       <div className="action-row">
-        <button className="btn flex-1 flex items-center justify-center gap-2" onClick={openScan}>
+        <button className="btn-primary flex-1 flex items-center justify-center gap-2" onClick={openScan}>
           <Icon.scan size={15} /> Tarama
         </button>
-        <button className="btn-primary flex-1 flex items-center justify-center gap-2" onClick={openAdd}>
+        <button className="btn flex-1 flex items-center justify-center gap-2" onClick={openAdd}>
           <Icon.plus size={15} /> Ekle
         </button>
       </div>
@@ -450,17 +450,17 @@ export default function Log() {
 
             {/* Macro inputs */}
             <div className="grid grid-cols-2 gap-2">
-              <label className="flex flex-col gap-1">
-                <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.kcal")}</span>
-                <input className="input mono" type="number" value={draft.kcal}
-                  onChange={(e) => setDraft({ ...draft, kcal: numberOrBlank(e.target.value) })} />
-              </label>
               {mode !== "quick" && (
                 <>
                   <label className="flex flex-col gap-1">
                     <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("log.amount_g")}</span>
                     <input className="input mono" type="number" value={draft.amount_g}
                       onChange={(e) => updateAmount(numberOrBlank(e.target.value))} />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.kcal")}</span>
+                    <input className="input mono" type="number" value={draft.kcal}
+                      onChange={(e) => setDraft({ ...draft, kcal: numberOrBlank(e.target.value) })} />
                   </label>
                   <label className="flex flex-col gap-1">
                     <span className="mono text-[.62rem] text-lime uppercase tracking-[.14em]">{t("log.protein")}</span>
@@ -478,6 +478,13 @@ export default function Log() {
                       onChange={(e) => setDraft({ ...draft, fat_g: numberOrBlank(e.target.value) })} />
                   </label>
                 </>
+              )}
+              {mode === "quick" && (
+                <label className="flex flex-col gap-1 col-span-2">
+                  <span className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.kcal")}</span>
+                  <input className="input mono" type="number" value={draft.kcal}
+                    onChange={(e) => setDraft({ ...draft, kcal: numberOrBlank(e.target.value) })} />
+                </label>
               )}
             </div>
 
