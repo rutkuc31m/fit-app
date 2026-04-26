@@ -96,6 +96,7 @@ export default function Log() {
 
   const updateDraftName = (name) => {
     setSuppressSearchFor("");
+    setResults([]);
     setDraft((d) => d ? { ...d, name } : d);
   };
 
@@ -143,7 +144,7 @@ export default function Log() {
     setDraft((d) => ({ ...(d || emptyItem), ...scaled, name: pieceFood.name[lang], barcode: null }));
   };
 
-  const openAdd = () => { setDraft({ ...emptyItem }); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); };
+  const openAdd = () => { setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setScanOpen(true); };
   const openScan = () => { setEditingItemId(null); setScanOpen(true); };
   const openEdit = (item) => {
     const quick = isQuickEntry(item);

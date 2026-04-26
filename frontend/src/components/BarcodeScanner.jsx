@@ -9,6 +9,7 @@ export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose })
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const videoRef = useRef(null);
+  const fileRef = useRef(null);
   const streamRef = useRef(null);
   const cbRef = useRef({ onCapture, onPhoto, onError, onClose });
   cbRef.current = { onCapture, onPhoto, onError, onClose };
@@ -32,11 +33,21 @@ export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose })
     };
   }, []);
 
+  const analyzeImage = (b64) => {
+    setBusy(true); setErr(null);
+    try { streamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
+    streamRef.current = null;
+    setDone(true);
+    try { cbRef.current.onCapture?.(); } catch {}
+    api.post("/foods/analyze-photo", { image: b64 }, { timeoutMs: 60000 })
+      .then((result) => { try { cbRef.current.onPhoto(result); } catch {} })
+      .catch((e) => { try { cbRef.current.onError?.(e.message || String(e)); } catch {} });
+  };
+
   const snap = () => {
     if (busy) return;
     const v = videoRef.current;
     if (!v || !v.videoWidth) return setErr("camera_not_ready");
-    setBusy(true); setErr(null);
     const maxW = 1280;
     const scale = Math.min(1, maxW / v.videoWidth);
     const w = Math.round(v.videoWidth * scale);
@@ -45,14 +56,40 @@ export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose })
     c.width = w; c.height = h;
     c.getContext("2d").drawImage(v, 0, 0, w, h);
     const dataUrl = c.toDataURL("image/jpeg", 0.82);
-    const b64 = dataUrl.split(",")[1];
-    try { streamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
-    streamRef.current = null;
-    setDone(true);
-    try { cbRef.current.onCapture?.(); } catch {}
-    api.post("/foods/analyze-photo", { image: b64 }, { timeoutMs: 60000 })
-      .then((result) => { try { cbRef.current.onPhoto(result); } catch {} })
-      .catch((e) => { try { cbRef.current.onError?.(e.message || String(e)); } catch {} });
+    analyzeImage(dataUrl.split(",")[1]);
+  };
+
+  const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("file_read_failed"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("image_load_failed"));
+      img.onload = () => {
+        const maxW = 1280;
+        const scale = Math.min(1, maxW / img.width);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", 0.82).split(",")[1]);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  const pickFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || busy) return;
+    try {
+      const b64 = await fileToBase64(file);
+      analyzeImage(b64);
+    } catch (error) {
+      setErr(error.message || String(error));
+    }
   };
 
   if (done) return null;
@@ -82,6 +119,10 @@ export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose })
       </div>
 
       <div className="p-4 flex flex-col items-center gap-2">
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickFile} />
+        <button className="btn w-full max-w-md" disabled={busy} onClick={() => fileRef.current?.click()}>
+          gallery photo
+        </button>
         {err && <div className="mono text-sm text-warn text-center bg-warn/10 border border-warn/40 rounded-lg px-3 py-2 w-full break-all">ERR: {err}</div>}
         {!err && (
           <div className="mono text-[.66rem] text-mute uppercase tracking-[.14em] text-center">
