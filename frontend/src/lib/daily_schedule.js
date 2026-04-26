@@ -54,7 +54,7 @@ export function generateFullSchedule() {
       // ── EATING ──
       eating: {
         mode: dayPlan.eating,
-        label: isFastDay ? "ORUÇ" : isLowDay ? "DÜŞÜK KALORİ" : "OMAD",
+        label: isFastDay ? "ORUÇ" : isFreeMealDay ? "CHEAT MEAL" : isLowDay ? "DÜŞÜK KALORİ" : "OMAD",
         freeMeal: isFreeMealDay ? {
           label: "controlled free meal",
           note: "Protein first. One meal, not a cheat day."
