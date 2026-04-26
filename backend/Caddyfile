@@ -31,7 +31,7 @@ fit.rutkuc.com {
     encode gzip
 
     @nocache {
-        path /index.html /sw.js /registerSW.js /manifest.webmanifest /workbox-*.js
+        path / /index.html /sw.js /registerSW.js /manifest.webmanifest /workbox-*.js
     }
     header @nocache Cache-Control "no-store, must-revalidate"
 

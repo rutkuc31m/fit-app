@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useTranslation } from "react-i18next";
 import { AccentCard } from "./ui";
@@ -8,7 +9,16 @@ export default function AppUpdatePrompt() {
     offlineReady: [offlineReady, setOfflineReady],
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker
-  } = useRegisterSW({ immediate: true });
+  } = useRegisterSW({
+    immediate: true,
+    onRegisteredSW(_url, registration) {
+      registration?.update?.();
+    }
+  });
+
+  useEffect(() => {
+    if (needRefresh) updateServiceWorker(true);
+  }, [needRefresh, updateServiceWorker]);
 
   if (!offlineReady && !needRefresh) return null;
 
