@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { Icon } from "./ui";
 
-export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose }) {
+export default function BarcodeScanner({ date, onCapture, onPhoto, onError, onClose }) {
   const { t } = useTranslation();
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -33,15 +33,20 @@ export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose })
     };
   }, []);
 
-  const analyzeImage = (b64) => {
+  const analyzeImage = async (dataUrl) => {
     setBusy(true); setErr(null);
     try { streamRef.current?.getTracks().forEach((t) => t.stop()); } catch {}
     streamRef.current = null;
     setDone(true);
     try { cbRef.current.onCapture?.(); } catch {}
-    api.post("/foods/analyze-photo", { image: b64 }, { timeoutMs: 60000 })
-      .then((result) => { try { cbRef.current.onPhoto(result); } catch {} })
-      .catch((e) => { try { cbRef.current.onError?.(e.message || String(e)); } catch {} });
+    try {
+      const saved = await api.post("/foods/meal-photo", { data_url: dataUrl, date });
+      const image = dataUrl.split(",")[1];
+      const result = await api.post("/foods/analyze-photo", { image }, { timeoutMs: 60000 });
+      try { cbRef.current.onPhoto({ ...result, photo_id: saved.id, photo_path: saved.path }); } catch {}
+    } catch (e) {
+      try { cbRef.current.onError?.(e.message || String(e)); } catch {}
+    }
   };
 
   const snap = () => {
@@ -56,7 +61,7 @@ export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose })
     c.width = w; c.height = h;
     c.getContext("2d").drawImage(v, 0, 0, w, h);
     const dataUrl = c.toDataURL("image/jpeg", 0.82);
-    analyzeImage(dataUrl.split(",")[1]);
+    analyzeImage(dataUrl);
   };
 
   const fileToBase64 = (file) => new Promise((resolve, reject) => {
@@ -73,7 +78,7 @@ export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose })
         const c = document.createElement("canvas");
         c.width = w; c.height = h;
         c.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(c.toDataURL("image/jpeg", 0.82).split(",")[1]);
+        resolve(c.toDataURL("image/jpeg", 0.82));
       };
       img.src = reader.result;
     };
@@ -85,8 +90,8 @@ export default function BarcodeScanner({ onCapture, onPhoto, onError, onClose })
     e.target.value = "";
     if (!file || busy) return;
     try {
-      const b64 = await fileToBase64(file);
-      analyzeImage(b64);
+      const dataUrl = await fileToBase64(file);
+      analyzeImage(dataUrl);
     } catch (error) {
       setErr(error.message || String(error));
     }

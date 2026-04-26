@@ -99,6 +99,15 @@ CREATE TABLE IF NOT EXISTS foods_cache (
   fetched_at   TEXT DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS meal_photos (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date       TEXT NOT NULL,
+  path       TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_meal_photos_user_date ON meal_photos(user_id, date);
+
 CREATE TABLE IF NOT EXISTS training_sessions (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -241,6 +250,7 @@ const addMealItemCol = (col, def) => {
   }
 };
 addMealItemCol("eaten_pct", "REAL DEFAULT 100");
+addMealItemCol("photo_path", "TEXT");
 
 const prefCols = db.prepare("PRAGMA table_info(notification_prefs)").all().map((c) => c.name);
 const addPrefCol = (col, def = 1) => {

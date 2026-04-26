@@ -289,6 +289,7 @@ export default function Log() {
 
       {/* Barcode Scanner */}
       {scanOpen && <BarcodeScanner
+        date={date}
         onCapture={() => {
           setScanOpen(false);
           setDraft({ ...emptyItem, name: "analyzing…", _analyzing: true });
@@ -302,6 +303,7 @@ export default function Log() {
             return {
               ...d,
               name: [f.brand, f.name].filter(Boolean).join(" — ") || "photo item",
+              photo_path: f.photo_path || null,
               _per100: { kcal: f.kcal_100g, p: f.protein_100g, c: f.carbs_100g, f: f.fat_100g },
               kcal:      +((f.kcal_100g    || 0) * k).toFixed(1),
               protein_g: +((f.protein_100g || 0) * k).toFixed(1),

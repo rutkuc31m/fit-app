@@ -40,11 +40,11 @@ r.delete("/:id", (req, res) => {
 r.post("/:mealId/items", (req, res) => {
   const meal = db.prepare("SELECT id FROM meals WHERE id = ? AND user_id = ?").get(req.params.mealId, req.user.id);
   if (!meal) return res.status(404).json({ error: "not_found" });
-  const { barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct } = req.body || {};
+  const { barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct, photo_path } = req.body || {};
   const info = db.prepare(
-    `INSERT INTO meal_items (meal_id, barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(meal.id, barcode || null, name, amount_g, kcal || 0, protein_g || 0, carbs_g || 0, fat_g || 0, cleanEatenPct(eaten_pct));
+    `INSERT INTO meal_items (meal_id, barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct, photo_path)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(meal.id, barcode || null, name, amount_g, kcal || 0, protein_g || 0, carbs_g || 0, fat_g || 0, cleanEatenPct(eaten_pct), photo_path || null);
   res.json(db.prepare("SELECT * FROM meal_items WHERE id = ?").get(info.lastInsertRowid));
 });
 
@@ -63,12 +63,12 @@ r.put("/items/:itemId", (req, res) => {
   `).get(req.params.itemId, req.user.id);
   if (!item) return res.status(404).json({ error: "not_found" });
 
-  const { barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct } = req.body || {};
+  const { barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct, photo_path } = req.body || {};
   db.prepare(`
     UPDATE meal_items
-    SET barcode = ?, name = ?, amount_g = ?, kcal = ?, protein_g = ?, carbs_g = ?, fat_g = ?, eaten_pct = ?
+    SET barcode = ?, name = ?, amount_g = ?, kcal = ?, protein_g = ?, carbs_g = ?, fat_g = ?, eaten_pct = ?, photo_path = ?
     WHERE id = ?
-  `).run(barcode || null, name, amount_g, kcal || 0, protein_g || 0, carbs_g || 0, fat_g || 0, cleanEatenPct(eaten_pct), item.id);
+  `).run(barcode || null, name, amount_g, kcal || 0, protein_g || 0, carbs_g || 0, fat_g || 0, cleanEatenPct(eaten_pct), photo_path || null, item.id);
 
   res.json(db.prepare("SELECT * FROM meal_items WHERE id = ?").get(item.id));
 });

@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import db from "../db.js";
 import { requireAuth } from "../auth.js";
 
@@ -7,6 +9,7 @@ r.use(requireAuth);
 
 const OFF_URL = (barcode) => `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json`;
 const CACHE_DAYS = 30;
+const PHOTO_DIR = process.env.FIT_PHOTO_DIR || "./data/photos";
 
 const clampMacro = (value, max) => {
   const n = Number(value);
@@ -32,6 +35,24 @@ const parseAiJson = (text) => {
   if (!match) return null;
   try { return JSON.parse(match[0]); } catch { return null; }
 };
+
+r.post("/meal-photo", (req, res) => {
+  const { data_url, date } = req.body || {};
+  const photoDate = date || new Date().toISOString().slice(0, 10);
+  if (!data_url || !data_url.startsWith("data:image/")) return res.status(400).json({ error: "bad_data" });
+  const m = data_url.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!m) return res.status(400).json({ error: "bad_format" });
+  const ext = m[1] === "jpeg" ? "jpg" : m[1];
+  const buf = Buffer.from(m[2], "base64");
+  const userDir = join(PHOTO_DIR, String(req.user.id), "food");
+  if (!existsSync(userDir)) mkdirSync(userDir, { recursive: true });
+  const fname = `meal_${photoDate}_${Date.now()}.${ext}`;
+  writeFileSync(join(userDir, fname), buf);
+  const relPath = `/photos/${req.user.id}/food/${fname}`;
+  const info = db.prepare("INSERT INTO meal_photos (user_id, date, path) VALUES (?, ?, ?)")
+    .run(req.user.id, photoDate, relPath);
+  res.json({ id: info.lastInsertRowid, date: photoDate, path: relPath });
+});
 
 r.get("/barcode/:code", async (req, res, next) => {
   const code = req.params.code.trim();
