@@ -24,7 +24,7 @@ export default function Log() {
   const [meals, setMeals] = useState([]);
   const [scanOpen, setScanOpen] = useState(false);
   const [draft, setDraft] = useState(null);
-  const [search, setSearch] = useState("");
+  const [suppressSearchFor, setSuppressSearchFor] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [mode, setMode] = useState("gram"); // gram | piece | quick
@@ -83,15 +83,21 @@ export default function Log() {
   };
 
   useEffect(() => {
-    if (!draft || mode !== "gram" || search.trim().length < 2) { setResults([]); return; }
+    const query = (draft?.name || "").trim();
+    if (!draft || mode !== "gram" || query.length < 2 || query === suppressSearchFor) { setResults([]); return; }
     setSearching(true);
     const h = setTimeout(async () => {
-      try { setResults(await api.get(`/foods/search?q=${encodeURIComponent(search.trim())}`)); }
+      try { setResults(await api.get(`/foods/search?q=${encodeURIComponent(query)}`)); }
       catch { setResults([]); }
       finally { setSearching(false); }
     }, 350);
     return () => clearTimeout(h);
-  }, [search, draft, mode]);
+  }, [draft?.name, mode, suppressSearchFor]);
+
+  const updateDraftName = (name) => {
+    setSuppressSearchFor("");
+    setDraft((d) => d ? { ...d, name } : d);
+  };
 
   const pickResult = async (r) => {
     let item = r;
@@ -103,9 +109,10 @@ export default function Log() {
       if (!d) return d;
       const amt = d.amount_g || 100;
       const k = amt / 100;
+      const name = [item.brand, item.name].filter(Boolean).join(" — ") || r.name;
       return {
         ...d,
-        name: [item.brand, item.name].filter(Boolean).join(" — ") || r.name,
+        name,
         barcode: item.barcode || null,
         _per100: { kcal: item.kcal_100g, p: item.protein_100g, c: item.carbs_100g, f: item.fat_100g },
         kcal:      +((item.kcal_100g    || 0) * k).toFixed(1),
@@ -114,7 +121,8 @@ export default function Log() {
         fat_g:     +((item.fat_100g     || 0) * k).toFixed(1),
       };
     });
-    setSearch(""); setResults([]);
+    setSuppressSearchFor([item.brand, item.name].filter(Boolean).join(" — ") || r.name);
+    setResults([]);
   };
 
   const pickPieceFood = (food) => {
@@ -135,7 +143,7 @@ export default function Log() {
     setDraft((d) => ({ ...(d || emptyItem), ...scaled, name: pieceFood.name[lang], barcode: null }));
   };
 
-  const openAdd = () => { setDraft({ ...emptyItem }); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); };
+  const openAdd = () => { setDraft({ ...emptyItem }); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); };
   const openScan = () => { setEditingItemId(null); setScanOpen(true); };
   const openEdit = (item) => {
     const quick = isQuickEntry(item);
@@ -154,7 +162,7 @@ export default function Log() {
     setMode(quick ? "quick" : "gram");
     setPieceFood(null);
     setPieces(1);
-    setSearch("");
+    setSuppressSearchFor(item.name || "");
   };
 
   const saveDraft = async () => {
@@ -170,10 +178,10 @@ export default function Log() {
       const mealId = await ensureMeal();
       await api.post(`/meals/${mealId}/items`, clean);
     }
-    setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); load();
+    setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); load();
   };
 
-  const closeDraft = () => { setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSearch(""); };
+  const closeDraft = () => { setDraft(null); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); };
 
   return (
     <div className="page page-log">
@@ -329,8 +337,31 @@ export default function Log() {
               </div>
             )}
 
-            <input className="input" placeholder="Name" value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <div className="relative">
+              <input
+                className="input"
+                placeholder={mode === "gram" ? "Name oder Produkt suchen…" : "Name"}
+                value={draft.name}
+                onChange={(e) => updateDraftName(e.target.value)}
+              />
+              {mode === "gram" && (searching || results.length > 0 || (draft.name.trim().length >= 2 && draft.name.trim() !== suppressSearchFor)) && (
+                <div className="absolute left-0 right-0 top-full mt-1 z-30 card max-h-52 overflow-y-auto shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)]">
+                  {searching && <div className="px-3 py-2 mono text-[.66rem] text-mute">searching…</div>}
+                  {!searching && results.length === 0 && draft.name.trim().length >= 2 && (
+                    <div className="px-3 py-2 mono text-[.66rem] text-mute">no matches</div>
+                  )}
+                  {results.map((r, i) => (
+                    <button key={i} type="button" onClick={() => pickResult(r)}
+                      className="w-full text-left px-3 py-2 border-b border-line last:border-0 hover:bg-bg2">
+                      <div className="text-sm text-ink truncate">{r.name}</div>
+                      <div className="mono text-[.62rem] text-mute truncate">
+                        {r.brand || "—"} {r.kcal_100g ? `· ${Math.round(r.kcal_100g)} kcal/100g` : "· no macros (AI fallback)"}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* STÜCK mode */}
             {mode === "piece" && (
@@ -366,31 +397,6 @@ export default function Log() {
                   </div>
                 )}
               </>
-            )}
-
-            {/* GRAMM mode — search */}
-            {mode === "gram" && (
-              <div className="relative">
-                <input className="input" placeholder="Ürün ara…" value={search}
-                  onChange={(e) => setSearch(e.target.value)} />
-                {(searching || results.length > 0) && (
-                  <div className="absolute left-0 right-0 top-full mt-1 z-30 card max-h-52 overflow-y-auto shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)]">
-                    {searching && <div className="px-3 py-2 mono text-[.66rem] text-mute">searching…</div>}
-                    {!searching && results.length === 0 && search.trim().length >= 2 && (
-                      <div className="px-3 py-2 mono text-[.66rem] text-mute">no matches</div>
-                    )}
-                    {results.map((r, i) => (
-                      <button key={i} type="button" onClick={() => pickResult(r)}
-                        className="w-full text-left px-3 py-2 border-b border-line last:border-0 hover:bg-bg2">
-                        <div className="text-sm text-ink truncate">{r.name}</div>
-                        <div className="mono text-[.62rem] text-mute truncate">
-                          {r.brand || "—"} {r.kcal_100g ? `· ${Math.round(r.kcal_100g)} kcal/100g` : "· no macros (AI fallback)"}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
             )}
 
             {mode === "quick" && (
