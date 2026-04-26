@@ -118,6 +118,7 @@ export function generateFullSchedule() {
         isTrainingDay,
         isFastDay,
         isLowDay,
+        isFreeMealDay,
         isWeekend,
         dayType: dayPlan.type,
         weekNum,
@@ -178,6 +179,7 @@ export function generateFullSchedule() {
 function generateDaySchedule(opts) {
   const {
     isTrainingDay, isFastDay, isLowDay, isWeekend,
+    isFreeMealDay,
     dayType, weekNum, phase, stepTarget, cardio,
     isCheckpointDay, football
   } = opts;
