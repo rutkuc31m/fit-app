@@ -24,7 +24,9 @@ export default function Dashboard() {
   const dayIdx = daysBetween(PLAN.startDate, date) + 1;
   const phaseStartDay = (phase.weeks[0] - 1) * 7 + 1;
   const isPhaseFirstDay = dayIdx === phaseStartDay;
-  const target = getEatingTarget(dayPlan.eating);
+  const target = isFreeMealDay
+    ? { ...getEatingTarget(dayPlan.eating), kcal: 2000, carbs: 160, fat: 80 }
+    : getEatingTarget(dayPlan.eating);
   const macros = sumMealMacros(meals);
 
   const load = async () => {
@@ -233,7 +235,7 @@ export default function Dashboard() {
         </AccentCard>
         <AccentCard as={Link} to="/log" accent="#ff9f0a" className="p-4 hover:border-line2">
           <div className="card-title mb-1">{t("nav.log")}</div>
-          <div className="mono font-bold text-xl text-signal">{dayPlan.eating}</div>
+          <div className="mono font-bold text-xl text-signal">{isFreeMealDay ? "CHEAT MEAL" : dayPlan.eating}</div>
           <div className="mono text-[.7rem] text-mute uppercase tracking-[.14em] mt-1">{target.kcal} kcal</div>
           {target.windowStart && target.windowEnd && (
             <div className="mono text-[.62rem] text-warn mt-[2px]">

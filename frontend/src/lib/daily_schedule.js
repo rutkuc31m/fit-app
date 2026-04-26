@@ -65,6 +65,8 @@ export function generateFullSchedule() {
         },
         targets: isFastDay
           ? { kcal: 0, protein: 0, carbs: 0, fat: 0 }
+          : isFreeMealDay
+            ? { kcal: 2000, protein: 130, carbs: 160, fat: 80 }
           : isLowDay
             ? { kcal: 1300, protein: 130, carbs: 60, fat: 65 }
             : { kcal: 1800, protein: 150, carbs: 115, fat: 75 },
