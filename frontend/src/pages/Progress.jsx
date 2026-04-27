@@ -12,6 +12,24 @@ const addDays = (dateStr, days) => {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 };
 const fmt = (value, digits = 1) => value == null ? "--" : Number(value).toFixed(digits);
+const monthDay = (dateStr) => dateStr.slice(5).split("-").reverse().join(".");
+
+const PHASE_FOCUS = {
+  1: "routine, fasting tolerance, core/back-safe form",
+  2: "main fat-loss block, strength retention, protein rhythm",
+  3: "shape, conditioning, tighter execution",
+  4: "stabilize, keep habits, land near target"
+};
+
+const WEIGHT_ROUTE = [
+  ["20.04", 93.0], ["27.04", 89.7], ["04.05", 88.8], ["11.05", 88.0],
+  ["18.05", 87.0], ["25.05", 86.0], ["01.06", 85.0], ["08.06", 84.0],
+  ["15.06", 83.0], ["22.06", 82.0], ["29.06", 81.0], ["06.07", 80.0],
+  ["13.07", 79.2], ["20.07", 78.5], ["27.07", 77.8], ["03.08", 77.0],
+  ["10.08", 76.4], ["17.08", 75.8], ["24.08", 75.3], ["31.08", 75.0],
+  ["07.09", 74.6], ["14.09", 74.2], ["21.09", 73.9], ["28.09", 73.6],
+  ["05.10", 73.3], ["12.10", 73.0], ["19.10", 73.0]
+];
 
 function WeightChart({ logs }) {
   const data = logs.filter((l) => l.weight_kg != null).map((l) => ({ date: l.date, w: l.weight_kg }));
@@ -154,6 +172,61 @@ function WeeklyReviewCard({ review }) {
   );
 }
 
+function SixMonthOverview() {
+  const phaseRows = PLAN.phases.map((p) => {
+    const start = addDays(PLAN.startDate, (p.weeks[0] - 1) * 7);
+    const end = addDays(PLAN.startDate, p.weeks[1] * 7 - 1);
+    return { ...p, start, end, duration: p.weeks[1] - p.weeks[0] + 1, focus: PHASE_FOCUS[p.id] };
+  });
+  const routeChunks = [
+    WEIGHT_ROUTE.slice(0, 7),
+    WEIGHT_ROUTE.slice(7, 14),
+    WEIGHT_ROUTE.slice(14, 21),
+    WEIGHT_ROUTE.slice(21)
+  ];
+
+  return (
+    <AccentCard accent="#30d158" className="p-4" contentClassName="pl-2 flex flex-col gap-4">
+      <div>
+        <div className="section-label mt-0 mb-1">6-month overview</div>
+        <div className="mono text-[.66rem] text-mute leading-snug">
+          static route · weekly targets are trend anchors, not daily judgement
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 min-[520px]:grid-cols-4 gap-2">
+        {phaseRows.map((p) => (
+          <div key={p.id} className="metric-tile text-left">
+            <div className="metric-label" style={{ color: p.color }}>P{p.id} · {p.duration}w</div>
+            <div className="metric-value text-[.86rem]">{p.from}→{p.to}kg</div>
+            <div className="mono text-[.56rem] text-mute tabular-nums mt-[2px]">{monthDay(p.start)}-{monthDay(p.end)}</div>
+            <div className="mono text-[.58rem] text-ink2 leading-snug mt-2">{p.focus}</div>
+          </div>
+        ))}
+      </div>
+
+      <div>
+        <div className="mono text-[.58rem] text-mute uppercase tracking-[.18em] mb-2">weekly weight route</div>
+        <div className="grid grid-cols-2 min-[520px]:grid-cols-4 gap-x-3 gap-y-1">
+          {routeChunks.map((chunk, idx) => (
+            <div key={idx} className="flex flex-col gap-1">
+              {chunk.map(([date, kg], i) => {
+                const week = idx * 7 + i + 1;
+                return (
+                  <div key={`${date}-${kg}`} className="flex items-center justify-between gap-2 mono text-[.62rem] tabular-nums">
+                    <span className="text-mute">W{week} · {date}</span>
+                    <span className={date === "27.04" ? "text-lime font-bold" : "text-ink2"}>{kg.toFixed(1)}kg</span>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </AccentCard>
+  );
+}
+
 export default function Progress() {
   const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
@@ -201,6 +274,7 @@ export default function Progress() {
 
       <WeeklyReviewCard review={review} />
       <AdherenceCard review={review} />
+      <SixMonthOverview />
 
       <div className="section-label">{t("progress.weight_chart")}</div>
       <AccentCard accent="#64d2ff" className="p-4"><WeightChart logs={logs} /></AccentCard>
@@ -212,6 +286,7 @@ export default function Progress() {
             <div className="flex-1">
               <div className="mono text-xs text-ink">P{p.id} · W{p.weeks[0]}–{p.weeks[1]}</div>
               <div className="mono text-[.66rem] text-mute">{p.from} → {p.to}kg</div>
+              <div className="mono text-[.6rem] text-ink2 mt-1">{PHASE_FOCUS[p.id]}</div>
             </div>
           </AccentCard>
         ))}
