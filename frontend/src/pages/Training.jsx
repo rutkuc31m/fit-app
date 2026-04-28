@@ -428,7 +428,7 @@ export default function Training() {
             </button>
           ))}
         </div>
-        {selectedDay ? (
+        {selectedDay && (
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="card-title">{selectedDay.day} · Day {selectedDay.type}</div>
@@ -437,10 +437,6 @@ export default function Training() {
               </div>
             </div>
             <button type="button" className="btn-ghost shrink-0" onClick={() => toggleDay(selectedDay.type)}>close</button>
-          </div>
-        ) : (
-          <div className="mono text-[.66rem] text-ink2 leading-snug bg-bg2/70 border border-line rounded-md px-3 py-2">
-            Bugünkü otomatik açılmaz. Hangi günü çalışacaksan onu seç; makinedeki bölge yazısına göre ilerle.
           </div>
         )}
       </AccentCard>
