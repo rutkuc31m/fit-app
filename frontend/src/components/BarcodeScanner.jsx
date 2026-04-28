@@ -138,10 +138,8 @@ export default function BarcodeScanner({ date, onCapture, onPhoto, onError, onCl
           </button>
         </div>
         {err && <div className="mono text-sm text-warn text-center bg-warn/10 border border-warn/40 rounded-lg px-3 py-2 w-full break-all">ERR: {err}</div>}
-        {!err && (
-          <div className="mono text-[.66rem] text-mute uppercase tracking-[.14em] text-center">
-            {busy ? t("log.analyzing") : t("log.photo_hint")}
-          </div>
+        {!err && busy && (
+          <div className="mono text-[.66rem] text-mute uppercase tracking-[.14em] text-center">{t("log.analyzing")}</div>
         )}
       </div>
     </div>

@@ -27,7 +27,6 @@ export default function Login() {
         accent="#30d158"
         kicker="fit rutkuc"
         title="Six months. One direction."
-        sub="93 to 73 · fat loss · waist down · muscle kept"
         className="text-center"
       >
         <div className="relative z-10 text-center mb-4">

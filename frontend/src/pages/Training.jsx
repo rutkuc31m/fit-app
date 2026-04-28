@@ -352,9 +352,6 @@ export default function Training() {
             <div className="min-w-0">
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.18em]">target map</div>
               <div className="text-sm text-ink leading-snug mt-1">{region.short}</div>
-              <div className="mono text-[.62rem] text-ink2 leading-snug mt-1">
-                Makinede bu bölge yazıyorsa doğru yerdesin. Alet ismine takılma; bölge ve kontrollü tekrar önemli.
-              </div>
             </div>
           </div>
         </button>
@@ -401,7 +398,7 @@ export default function Training() {
         accent={selectedDay?.accent || "#30d158"}
         kicker="training block"
         title={selectedDay ? `Day ${selectedDay.type} · bölgeler` : "Training overview"}
-        sub={selectedDay ? `${t(`training.${day.nameKey}`)} · hedef bölgeye göre çalış · alet ismine takılma` : "A/B/C seç · tekrar basınca kapat · sonra bölgeye göre logla"}
+        sub={selectedDay ? t(`training.${day.nameKey}`) : null}
         metrics={[
           { label: "day", value: selectedDay?.type || "pick", className: "text-lime" },
           { label: "week", value: `W${String(week).padStart(2, "0")}` },
@@ -446,7 +443,6 @@ export default function Training() {
           <div className="min-w-0">
             <div className={`mono text-[.58rem] uppercase tracking-[.18em] ${adjustment.tone}`}>auto-adjust</div>
             <div className="card-title mt-1">{adjustment.label}</div>
-            <div className="mono text-[.66rem] text-ink2 leading-snug mt-2">{adjustment.note}</div>
           </div>
           <div className="text-right shrink-0">
             <div className="mono text-[.52rem] text-mute uppercase tracking-[.14em]">recovery</div>
@@ -464,7 +460,6 @@ export default function Training() {
             <div className="card-title text-cyan">{t("cardio.liss_today")}</div>
             <div className="mono text-[.62rem] text-cyan/80 uppercase tracking-[.14em] tabular-nums">{cardio.liss?.durationMin}min · {cardio.liss?.intensity}</div>
           </div>
-          {cardio.liss?.notes && <div className="mono text-[.66rem] text-ink2 mt-1">{cardio.liss.notes}</div>}
         </AccentCard>
       )}
 
@@ -517,9 +512,6 @@ export default function Training() {
             </div>
             <div className="target-stage">
               <MuscleDiagram muscles={target.muscles} title={target.label} />
-            </div>
-            <div className="mono text-[.66rem] text-ink2 leading-snug w-full border border-line rounded-md bg-bg2/70 px-3 py-2">
-              Gym makinesinde bu bölgeyi gösteren aleti seç. Kontrollü tekrar, tam hareket aralığı ve son sette 1-3 RIR hedef.
             </div>
             <div className="target-modal-actions">
               <button className="btn w-full" onClick={() => setTarget(null)}>{t("common.close")}</button>

@@ -237,17 +237,6 @@ export default function Dashboard() {
           <div className="card-title mb-1">{t("nav.log")}</div>
           <div className="mono font-bold text-xl text-signal">{isFreeMealDay ? "CHEAT MEAL" : dayPlan.eating}</div>
           <div className="mono text-[.7rem] text-mute uppercase tracking-[.14em] mt-1">{target.kcal} kcal</div>
-          {target.windowStart && target.windowEnd && (
-            <div className="mono text-[.62rem] text-warn mt-[2px]">
-              {t("eating.omad_window", { start: target.windowStart, end: target.windowEnd })}
-            </div>
-          )}
-          {dayPlan.eating === "FAST" && (
-            <div className="mono text-[.62rem] text-mute mt-[2px]">{t("eating.fast_allowed")}</div>
-          )}
-          {isFreeMealDay && (
-            <div className="mono text-[.62rem] text-amber mt-[2px]">controlled free meal</div>
-          )}
         </AccentCard>
       </div>
 
@@ -256,7 +245,7 @@ export default function Dashboard() {
         <Icon.clock size={16} className="text-signal" />
         <div className="flex-1">
           <div className="card-title">Schedule</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">Hour-by-hour · D{daysBetween(PLAN.startDate, date) + 1}/182</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">D{daysBetween(PLAN.startDate, date) + 1}/182</div>
         </div>
         <Icon.chev size={14} className="text-mute" />
       </AccentCard>
@@ -264,7 +253,7 @@ export default function Dashboard() {
         <Icon.camera size={16} className="text-signal" />
         <div className="flex-1 min-w-0">
           <div className="card-title">{t("checkin.title")}</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">photos · recovery · W{week}</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">W{week}</div>
         </div>
         <Icon.chev size={14} className="text-mute" />
       </AccentCard>
@@ -272,7 +261,7 @@ export default function Dashboard() {
       {/* Meals today */}
       <div className="section-label">{t("dashboard.meals_today")}</div>
       {meals.length === 0 ? (
-        <Empty icon={<Icon.utensils size={22} />} label={t("dashboard.no_meals")} hint={t("dashboard.meals_today")}
+        <Empty icon={<Icon.utensils size={22} />} label={t("dashboard.no_meals")}
           action={<Link to="/log" className="btn-ghost mt-2">+ {t("log.add_meal")}</Link>} />
       ) : (
         <div className="flex flex-col gap-2">

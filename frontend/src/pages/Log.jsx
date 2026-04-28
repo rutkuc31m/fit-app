@@ -189,7 +189,6 @@ export default function Log() {
         accent="#ff9f0a"
         kicker="nutrition control"
         title="Log fast. Stay honest."
-        sub="Scan · edit grams · protect protein"
         metrics={[
           { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
           { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
@@ -231,7 +230,6 @@ export default function Log() {
                   <Icon.camera size={16} className="text-signal shrink-0" />
                   <div>
                     <div className="mono text-sm text-ink">Kamera / Barkod</div>
-                    <div className="mono text-[.58rem] text-mute">Foto çek veya barkod tara</div>
                   </div>
                 </button>
                 <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openPiece}>
@@ -245,7 +243,6 @@ export default function Log() {
                   <Icon.plus size={16} className="text-signal shrink-0" />
                   <div>
                     <div className="mono text-sm text-ink">Manuell</div>
-                    <div className="mono text-[.58rem] text-mute">Gram ve makro gir</div>
                   </div>
                 </button>
               </div>
@@ -256,7 +253,7 @@ export default function Log() {
 
       {/* Flat food list */}
       {allItems.length === 0 && (
-        <Empty icon={<Icon.utensils size={22} />} label={t("log.title")} hint="Yemek Ekle ile foto, barkod, Stück veya manuel giriş seç" />
+        <Empty icon={<Icon.utensils size={22} />} label={t("log.title")} />
       )}
 
       {allItems.length > 0 && (
@@ -423,7 +420,6 @@ export default function Log() {
             {mode === "quick" && (
               <div className="soft-band px-3 py-3">
                 <div className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.quick_kcal")}</div>
-                <div className="mono text-[.62rem] text-mute leading-relaxed mt-1">{t("log.quick_kcal_hint")}</div>
               </div>
             )}
 

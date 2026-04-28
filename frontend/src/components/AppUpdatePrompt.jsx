@@ -34,9 +34,6 @@ export default function AppUpdatePrompt() {
           <div className="mono text-[.58rem] text-signal uppercase tracking-[.2em]">
             {needRefresh ? t("app_update.ready") : t("app_update.offline")}
           </div>
-          <div className="mono text-[.66rem] text-ink2 mt-[2px]">
-            {needRefresh ? t("app_update.ready_hint") : t("app_update.offline_hint")}
-          </div>
         </div>
         {needRefresh ? (
           <button className="btn-primary shrink-0" onClick={() => updateServiceWorker(true)}>

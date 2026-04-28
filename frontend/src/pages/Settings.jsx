@@ -95,8 +95,7 @@ export default function Settings() {
       <PageCommand
         accent="#64d2ff"
         kicker="system setup"
-        title="Keep the cut quiet, precise and useful."
-        sub="Smart reminders · clean data · no noise by default"
+        title="Settings"
       />
 
       <div className="section-label">{t("settings.profile")}</div>

@@ -41,9 +41,6 @@ export default function PushPrompt() {
             Smart schedule reminders
           </div>
         </div>
-        <div className="mono text-[.7rem] text-mute leading-relaxed">
-          Training, meals, cardio, supplements and sleep can ping at the exact start time. Routine and family reminders stay optional in Settings.
-        </div>
         <div className="flex gap-2 mt-1">
           <button className="btn flex-1" onClick={dismiss} disabled={busy}>later</button>
           <button className="btn-primary flex-1" onClick={enable} disabled={busy}>

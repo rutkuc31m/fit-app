@@ -37,15 +37,6 @@ const TRAINING_DAYS = [
   { type: "C", day: "Cuma", accent: "#ff9f0a" }
 ];
 
-const nextFocusForReview = (review) => {
-  if (!review) return "Log meals, protein and training this week so the signal is usable.";
-  if ((review.protein_days ?? 0) < 3) return "Protein first: keep skyr, chicken, fish or whey ready before adding extras.";
-  if ((review.training_done ?? 0) < (review.training_planned ?? 0)) return "Training rhythm is the lever: finish the planned A/B/C days before adding more.";
-  if ((review.fast_clean_days ?? 0) < 2) return "Protect the two fast days. No bonus training needed there.";
-  if ((review.avg_headache ?? 0) >= 3 || (review.avg_energy ?? 5) <= 2) return "Recovery signal is noisy: salt, water, sleep and lighter gym loads.";
-  return "Stay boring: same food base, same three gym days, weekly trend decides adjustments.";
-};
-
 const defaultTrainingDayType = () => {
   const plan = getDayPlan(todayStr());
   return plan?.type === "B" || plan?.type === "C" ? plan.type : "A";
@@ -124,28 +115,23 @@ function WeeklyReviewCard({ review }) {
   const signalCopy = {
     strong: {
       label: "strong week",
-      tone: "text-lime",
-      note: "Training, tracking and recovery are aligned. Keep the exact rhythm."
+      tone: "text-lime"
     },
     recover: {
       label: "recovery first",
-      tone: "text-cyan",
-      note: "Energy or headache signal is high. Walk easy, salt carefully, sleep hard."
+      tone: "text-cyan"
     },
     audit: {
       label: "audit week",
-      tone: "text-amber",
-      note: "Weight trend is pushing up. Check hidden calories, late salt and meal portions."
+      tone: "text-amber"
     },
     keep_going: {
       label: "collect signal",
-      tone: "text-ink",
-      note: "Keep logging weight, meals and recovery so the next adjustment is obvious."
+      tone: "text-ink"
     }
   }[review.signal] || {
     label: "collect signal",
-    tone: "text-ink",
-    note: "Keep logging weight, meals and recovery so the next adjustment is obvious."
+    tone: "text-ink"
   };
 
   const weightDelta = review.weight_delta == null ? "--" : `${review.weight_delta > 0 ? "+" : ""}${fmt(review.weight_delta)}kg`;
@@ -187,7 +173,6 @@ function WeeklyReviewCard({ review }) {
           </div>
         ))}
       </div>
-      <div className="mono text-[.66rem] text-ink2 leading-snug mt-3">{signalCopy.note}</div>
     </AccentCard>
   );
 }
@@ -209,9 +194,6 @@ function NutritionCockpit({ review }) {
     <AccentCard accent="#ff9f0a" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
       <div>
         <div className="section-label mt-0 mb-1">nutrition cockpit</div>
-        <div className="mono text-[.66rem] text-mute leading-snug">
-          food diary signal · fast log · protein target · no noisy coaching
-        </div>
       </div>
       <div className="grid grid-cols-2 min-[460px]:grid-cols-4 gap-2">
         {items.map(([label, value]) => (
@@ -229,9 +211,6 @@ function NutritionCockpit({ review }) {
             <div className="mono text-[.55rem] text-mute mt-[2px] truncate">{protein}</div>
           </div>
         ))}
-      </div>
-      <div className="mono text-[.66rem] text-ink2 leading-snug bg-bg2/70 border border-line rounded-md px-3 py-2">
-        {nextFocusForReview(review)}
       </div>
     </AccentCard>
   );
@@ -266,9 +245,6 @@ function TrainingPlanOverview() {
     <AccentCard accent={active.accent} className="p-4" contentClassName="pl-2 flex flex-col gap-3">
       <div>
         <div className="section-label mt-0 mb-1">training overview</div>
-        <div className="mono text-[.66rem] text-mute leading-snug">
-          tap a day · current week variants are shown · open Train to log sets
-        </div>
       </div>
       <div className="grid grid-cols-3 gap-2">
         {TRAINING_DAYS.map((day) => (
@@ -325,9 +301,6 @@ function SixMonthOverview() {
     <AccentCard accent="#30d158" className="p-4" contentClassName="pl-2 flex flex-col gap-4">
       <div>
         <div className="section-label mt-0 mb-1">6-month overview</div>
-        <div className="mono text-[.66rem] text-mute leading-snug">
-          static route · weekly targets are trend anchors, not daily judgement
-        </div>
       </div>
 
       <div className="grid grid-cols-2 min-[520px]:grid-cols-4 gap-2">
@@ -389,7 +362,6 @@ export default function Progress() {
         accent="#64d2ff"
         kicker="body data"
         title="Trend over mood."
-        sub="Weight · photos · phase checkpoints"
         metrics={[
           { label: "current", value: <>{latestWeight != null ? latestWeight.toFixed(1) : "--"}<span className="text-mute text-[.62rem] ml-1">kg</span></> },
           { label: "lost", value: <>{lost.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></>, className: "text-lime" },

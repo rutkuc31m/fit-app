@@ -548,7 +548,6 @@ export default function Today() {
                 {day.eating.freeMeal && (
                   <div className="soft-band px-3 py-2 mb-3 text-center">
                     <div className="mono text-[.58rem] text-amber uppercase tracking-[.16em]">{day.eating.freeMeal.label}</div>
-                    <div className="mono text-[.56rem] text-mute leading-relaxed mt-[2px]">{day.eating.freeMeal.note}</div>
                   </div>
                 )}
                 <div className="flex justify-around">
@@ -721,9 +720,6 @@ export default function Today() {
               <div className="mono text-[.66rem] text-ink2 mt-1">{day.supplements.evening.join(", ")}</div>
             </div>
           </div>
-          {day.supplements.note && (
-            <div className="mono text-[.62rem] text-mute mt-2">{day.supplements.note}</div>
-          )}
         </AccentCard>
       )}
     </div>

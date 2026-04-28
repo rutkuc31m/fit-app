@@ -141,7 +141,6 @@ export default function Checkin() {
         accent="#64d2ff"
         kicker="weekly check-in"
         title="Photos tell the truth."
-        sub="Front · side · back · legs"
         metrics={[
           { label: "week", value: `W${String(week).padStart(2, "0")}`, className: "text-cyan" },
           { label: "fields", value: visible.length },
@@ -150,11 +149,6 @@ export default function Checkin() {
       />
 
       <div className="section-label">{t("checkin.title")} · W{week}</div>
-
-      <AccentCard accent="#64d2ff" contentClassName="pl-2 flex items-start gap-2">
-        <Icon.clock size={16} className="text-cyan mt-[2px] shrink-0" />
-        <div className="mono text-[.7rem] text-ink2 leading-relaxed">{t("checkin.reminder")}</div>
-      </AccentCard>
 
       {visible.map((f) => {
         if (PHOTO_FIELDS[f.id]) {
@@ -178,9 +172,11 @@ export default function Checkin() {
                   <div className={`mono text-[.68rem] uppercase tracking-[.14em] ${data[f.id] ? "text-lime" : "text-ink2"}`}>
                     {data[f.id] ? "photo saved" : "no photo yet"}
                   </div>
-                  <div className="mono text-[.58rem] text-mute leading-relaxed">
-                    {count > 0 ? `${count} ${angleKey} upload${count === 1 ? "" : "s"} today` : "camera or gallery · same light"}
-                  </div>
+                  {count > 0 && (
+                    <div className="mono text-[.58rem] text-mute">
+                      {count} {angleKey} upload{count === 1 ? "" : "s"} today
+                    </div>
+                  )}
                 </div>
                 {busy && (
                   <div className="absolute inset-0 bg-bg/80 backdrop-blur-sm grid place-items-center">
