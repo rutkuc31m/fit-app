@@ -297,6 +297,31 @@
     object-fit: contain;
   }
 
+  .target-stage {
+    width: 100%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid theme(colors.line);
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 50% 20%, rgba(48,209,88,.08), transparent 34%),
+      theme(colors.bg2);
+    padding: 10px;
+  }
+  .muscle-diagram {
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 13 / 18;
+    display: grid;
+    place-items: center;
+  }
+  .muscle-diagram svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
   .pull-refresh {
     position: fixed;
     left: 50%;
