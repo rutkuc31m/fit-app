@@ -26,11 +26,11 @@ export default function Log() {
   const [draft, setDraft] = useState(null);
   const [suppressSearchFor, setSuppressSearchFor] = useState("");
   const [results, setResults] = useState([]);
-  const [searching, setSearching] = useState(false);
   const [mode, setMode] = useState("gram"); // gram | piece | quick
   const [pieceFood, setPieceFood] = useState(null);
   const [pieces, setPieces] = useState(1);
   const [editingItemId, setEditingItemId] = useState(null);
+  const [showAddMenu, setShowAddMenu] = useState(false);
 
   const shiftDate = (delta) => {
     const d = new Date(date);
@@ -85,11 +85,9 @@ export default function Log() {
   useEffect(() => {
     const query = (draft?.name || "").trim();
     if (!draft || mode !== "gram" || query.length < 2 || query === suppressSearchFor) { setResults([]); return; }
-    setSearching(true);
     const h = setTimeout(async () => {
       try { setResults(await api.get(`/foods/search?q=${encodeURIComponent(query)}`)); }
       catch { setResults([]); }
-      finally { setSearching(false); }
     }, 350);
     return () => clearTimeout(h);
   }, [draft?.name, mode, suppressSearchFor]);
@@ -144,8 +142,9 @@ export default function Log() {
     setDraft((d) => ({ ...(d || emptyItem), ...scaled, name: pieceFood.name[lang], barcode: null }));
   };
 
-  const openAdd = () => { setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setScanOpen(true); };
-  const openScan = () => { setEditingItemId(null); setScanOpen(true); };
+  const openCamera = () => { setShowAddMenu(false); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setScanOpen(true); };
+  const openPiece = () => { setShowAddMenu(false); setEditingItemId(null); setMode("piece"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setDraft({ ...emptyItem }); };
+  const openManual = () => { setShowAddMenu(false); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setDraft({ ...emptyItem }); };
   const openEdit = (item) => {
     const quick = isQuickEntry(item);
     const amount = quick ? 100 : (Number(item.amount_g) || 100);
@@ -218,19 +217,46 @@ export default function Log() {
         )}
       </AccentCard>
 
-      {/* Action buttons */}
-      <div className="action-row">
-        <button className="btn-primary flex-1 flex items-center justify-center gap-2" onClick={openScan}>
-          <Icon.scan size={15} /> Tarama
-        </button>
-        <button className="btn flex-1 flex items-center justify-center gap-2" onClick={openAdd}>
-          <Icon.plus size={15} /> Ekle
-        </button>
+      {/* Action button */}
+      <div className="action-row justify-center">
+        <div className="relative flex-1 max-w-sm">
+          <button className="btn-primary w-full flex items-center justify-center gap-2 py-3" onClick={() => setShowAddMenu((v) => !v)}>
+            <Icon.plus size={16} /> Yemek Ekle
+          </button>
+          {showAddMenu && (
+            <>
+              <div className="fixed inset-0 z-20" onClick={() => setShowAddMenu(false)} />
+              <div className="absolute left-0 right-0 top-full mt-2 z-30 card overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)] border border-line">
+                <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openCamera}>
+                  <Icon.camera size={16} className="text-signal shrink-0" />
+                  <div>
+                    <div className="mono text-sm text-ink">Kamera / Barkod</div>
+                    <div className="mono text-[.58rem] text-mute">Foto çek veya barkod tara</div>
+                  </div>
+                </button>
+                <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openPiece}>
+                  <Icon.cart size={16} className="text-signal shrink-0" />
+                  <div>
+                    <div className="mono text-sm text-ink">Stückwahl</div>
+                    <div className="mono text-[.58rem] text-mute">Yumurta, ekmek, meyve…</div>
+                  </div>
+                </button>
+                <button className="w-full text-left px-4 py-3 hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openManual}>
+                  <Icon.plus size={16} className="text-signal shrink-0" />
+                  <div>
+                    <div className="mono text-sm text-ink">Manuell</div>
+                    <div className="mono text-[.58rem] text-mute">Gram ve makro gir</div>
+                  </div>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Flat food list */}
       {allItems.length === 0 && (
-        <Empty icon={<Icon.utensils size={22} />} label={t("log.title")} hint="Yemek eklemek için Ekle veya Tarama'ya bas" />
+        <Empty icon={<Icon.utensils size={22} />} label={t("log.title")} hint="Yemek Ekle ile foto, barkod, Stück veya manuel giriş seç" />
       )}
 
       {allItems.length > 0 && (
@@ -266,19 +292,15 @@ export default function Log() {
                   <button className="text-mute hover:text-danger text-lg leading-none" onClick={() => deleteItem(it.id)}>×</button>
                 </div>
                 </div>
-                <div className="mt-3 flex items-center gap-1">
-                  {[25, 50, 75, 100].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={`flex-1 mono text-[.58rem] uppercase tracking-[.12em] rounded-md border px-2 py-[7px] transition ${
-                        pct === value ? "border-amber/70 bg-amber/15 text-amber" : "border-line bg-bg2 text-mute hover:text-ink"
-                      }`}
-                      onClick={() => setItemEatenPct(it, value)}
-                    >
-                      {value}%
-                    </button>
-                  ))}
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={0} max={100} step={10}
+                    value={pct}
+                    onChange={(e) => setItemEatenPct(it, Number(e.target.value))}
+                    className="flex-1 accent-amber h-2 cursor-pointer"
+                  />
+                  <span className="mono text-[.62rem] text-amber font-bold tabular-nums w-[2.4rem] text-right">{pct}%</span>
                 </div>
               </div>
               );
@@ -347,12 +369,8 @@ export default function Log() {
                 value={draft.name}
                 onChange={(e) => updateDraftName(e.target.value)}
               />
-              {mode === "gram" && (searching || results.length > 0 || (draft.name.trim().length >= 2 && draft.name.trim() !== suppressSearchFor)) && (
+              {mode === "gram" && results.length > 0 && (
                 <div className="absolute left-0 right-0 top-full mt-1 z-30 card max-h-52 overflow-y-auto shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)]">
-                  {searching && <div className="px-3 py-2 mono text-[.66rem] text-mute">searching…</div>}
-                  {!searching && results.length === 0 && draft.name.trim().length >= 2 && (
-                    <div className="px-3 py-2 mono text-[.66rem] text-mute">no matches</div>
-                  )}
                   {results.map((r, i) => (
                     <button key={i} type="button" onClick={() => pickResult(r)}
                       className="w-full text-left px-3 py-2 border-b border-line last:border-0 hover:bg-bg2">
