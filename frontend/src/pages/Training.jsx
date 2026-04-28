@@ -459,15 +459,23 @@ export default function Training() {
       {target && (
         <div className="gif-modal-backdrop" onClick={() => setTarget(null)} role="dialog" aria-modal="true">
           <div className="gif-modal-content gif-modal-focus" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="btn-icon absolute right-3 top-3 z-10"
+              onClick={() => setTarget(null)}
+              aria-label={t("common.close")}
+            >
+              <Icon.close size={15} />
+            </button>
             <div className="w-full flex items-start justify-between gap-3">
-              <div className="min-w-0">
+              <div className="min-w-0 pr-11">
                 <div className="mono text-[.58rem] text-signal uppercase tracking-[.18em]">target area</div>
                 <div className="text-base text-ink font-semibold leading-tight mt-1">{target.label}</div>
                 <div className="mono text-[.6rem] text-mute uppercase tracking-[.14em] mt-1">
                   {unique(target.muscles).slice(0, 5).map((m) => muscleLabel(m, lang)).join(" · ")}
                 </div>
               </div>
-              <div className="mono text-[.62rem] text-amber uppercase tracking-[.14em] shrink-0">{target.sets} sets</div>
+              <div className="mono text-[.62rem] text-amber uppercase tracking-[.14em] shrink-0 mr-10">{target.sets} sets</div>
             </div>
             <div className="target-stage">
               <MuscleDiagram muscles={target.muscles} title={target.label} />
@@ -475,7 +483,9 @@ export default function Training() {
             <div className="mono text-[.66rem] text-ink2 leading-snug w-full border border-line rounded-md bg-bg2/70 px-3 py-2">
               Gym makinesinde bu bölgeyi gösteren aleti seç. Kontrollü tekrar, tam hareket aralığı ve son sette 1-3 RIR hedef.
             </div>
-            <button className="btn mt-1 w-full" onClick={() => setTarget(null)}>{t("common.close")}</button>
+            <div className="target-modal-actions">
+              <button className="btn w-full" onClick={() => setTarget(null)}>{t("common.close")}</button>
+            </div>
           </div>
         </div>
       )}
