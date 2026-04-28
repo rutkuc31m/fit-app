@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
-import { todayStr, getDayPlan, getWeekNum, getExercisesForDay } from "../lib/plan";
+import { todayStr, getWeekNum, getExercisesForDay } from "../lib/plan";
 import { getCardioProtocol } from "../lib/protocols";
 import { EXERCISES, MUSCLE_LABELS } from "../lib/exercises";
 import { trainingAdjustment } from "../lib/coaching";
-import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
+import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const numberOrNull = (value) => value === "" ? null : Number(value);
 const clampNumber = (value, min = 0) => Math.max(min, Number(value) || 0);
@@ -67,6 +67,12 @@ const REGION_RULES = [
     muscles: ["cardiovascular_system", "fat_burn"],
     match: ["cardiovascular_system", "fat_burn"]
   }
+];
+
+const TRAINING_DAYS = [
+  { type: "A", day: "Pazartesi", accent: "#30d158", label: "upper" },
+  { type: "B", day: "Carsamba", accent: "#64d2ff", label: "lower" },
+  { type: "C", day: "Cuma", accent: "#ff9f0a", label: "full body" }
 ];
 
 const muscleLabel = (id, lang) => MUSCLE_LABELS[id]?.[lang] || MUSCLE_LABELS[id]?.tr || MUSCLE_LABELS[id]?.en || id;
@@ -216,10 +222,10 @@ export default function Training() {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || "tr").slice(0, 2);
   const [date] = useState(todayStr());
-  const plan = getDayPlan(date);
   const week = getWeekNum(date);
-  const dayType = plan.type === "rest" ? "A" : plan.type;
-  const day = useMemo(() => getExercisesForDay(dayType, week), [dayType, week]);
+  const [selectedDayType, setSelectedDayType] = useState(null);
+  const selectedDay = TRAINING_DAYS.find((d) => d.type === selectedDayType) || null;
+  const day = useMemo(() => selectedDayType ? getExercisesForDay(selectedDayType, week) : null, [selectedDayType, week]);
   const cardio = useMemo(() => getCardioProtocol(week), [week]);
   const [session, setSession] = useState(null);
   const [recovery, setRecovery] = useState({});
@@ -227,29 +233,30 @@ export default function Training() {
   const [target, setTarget] = useState(null);
   const adjustment = trainingAdjustment(recovery);
 
-  const mainExercises = day.exercises.filter((e) => !e.phase1Only && !e.coreFinisher);
-  const coreExercises = day.exercises.filter((e) => e.phase1Only || e.coreFinisher);
+  const mainExercises = day?.exercises?.filter((e) => !e.phase1Only && !e.coreFinisher) || [];
+  const coreExercises = day?.exercises?.filter((e) => e.phase1Only || e.coreFinisher) || [];
   const hasPhase1Core = coreExercises.some((e) => e.phase1Only);
   const mainRegions = useMemo(() => buildRegionGroups(mainExercises), [mainExercises]);
   const coreRegions = useMemo(() => buildRegionGroups(coreExercises), [coreExercises]);
 
   const load = async () => {
     const [s, log] = await Promise.all([
-      api.get(`/training/session?date=${date}&day_type=${dayType}`),
+      selectedDayType ? api.get(`/training/session?date=${date}&day_type=${selectedDayType}`) : Promise.resolve(null),
       api.get(`/logs/${date}`).catch(() => null)
     ]);
-    setSession(s);
+    setSession(s || null);
     setRecovery({
       energy: log?.energy ?? "",
       hunger: log?.hunger ?? "",
       headache: log?.headache ?? ""
     });
   };
-  useEffect(() => { load(); }, [date, dayType]);
+  useEffect(() => { load(); }, [date, selectedDayType]);
 
   const setsFor = (exId) => (session?.sets || []).filter((s) => s.exercise_id === exId);
 
   const addSet = async (region) => {
+    if (!session) return;
     const existing = setsFor(region.id);
     const lastSet = existing[existing.length - 1];
     const body = {
@@ -278,8 +285,15 @@ export default function Training() {
   };
 
   const complete = async () => {
+    if (!session) return;
     await api.put(`/training/session/${session.id}`, { completed: 1 });
     load();
+  };
+
+  const toggleDay = (type) => {
+    setSelectedDayType((current) => current === type ? null : type);
+    setTarget(null);
+    setRest(null);
   };
 
   const renderRegionCard = (region) => {
@@ -384,20 +398,52 @@ export default function Training() {
   return (
     <div className="page page-training">
       <PageCommand
-        accent={plan.type === "rest" ? "#64d2ff" : "#30d158"}
+        accent={selectedDay?.accent || "#30d158"}
         kicker="training block"
-        title={plan.type === "rest" ? "Recovery keeps the cut alive." : `Day ${dayType} · bölgeler`}
-        sub={plan.type === "rest" ? "No ego lifting today · walk easy · sleep hard" : `${t(`training.${day.nameKey}`)} · hedef bölgeye göre çalış · alet ismine takılma`}
+        title={selectedDay ? `Day ${selectedDay.type} · bölgeler` : "Training overview"}
+        sub={selectedDay ? `${t(`training.${day.nameKey}`)} · hedef bölgeye göre çalış · alet ismine takılma` : "A/B/C seç · tekrar basınca kapat · sonra bölgeye göre logla"}
         metrics={[
-          { label: "day", value: plan.type === "rest" ? "REST" : dayType, className: "text-lime" },
+          { label: "day", value: selectedDay?.type || "pick", className: "text-lime" },
           { label: "week", value: `W${String(week).padStart(2, "0")}` },
           { label: "liss", value: `${cardio?.liss?.durationMin || "--"}min`, className: "text-amber" }
         ]}
       />
 
       <div className="section-label">
-        bölgeler · <span className="text-signal">Day {dayType}</span> · {t(`training.${day.nameKey}`)}
+        training overview
       </div>
+
+      <AccentCard accent={selectedDay?.accent || "#30d158"} className="p-4" contentClassName="pl-2 flex flex-col gap-3">
+        <div className="grid grid-cols-3 gap-2">
+          {TRAINING_DAYS.map((dayOption) => (
+            <button
+              key={dayOption.type}
+              type="button"
+              onClick={() => toggleDay(dayOption.type)}
+              className={`metric-tile text-left transition ${selectedDayType === dayOption.type ? "border-lime/60 bg-lime/10" : "hover:border-line2"}`}
+            >
+              <div className="metric-label">{dayOption.day}</div>
+              <div className="metric-value text-[.9rem]" style={{ color: dayOption.accent }}>Day {dayOption.type}</div>
+              <div className="mono text-[.55rem] text-mute truncate">{dayOption.label}</div>
+            </button>
+          ))}
+        </div>
+        {selectedDay ? (
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="card-title">{selectedDay.day} · Day {selectedDay.type}</div>
+              <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-[2px]">
+                W{week} · {mainRegions.length} main areas · {coreRegions.length} core areas
+              </div>
+            </div>
+            <button type="button" className="btn-ghost shrink-0" onClick={() => toggleDay(selectedDay.type)}>close</button>
+          </div>
+        ) : (
+          <div className="mono text-[.66rem] text-ink2 leading-snug bg-bg2/70 border border-line rounded-md px-3 py-2">
+            Bugünkü otomatik açılmaz. Hangi günü çalışacaksan onu seç; makinedeki bölge yazısına göre ilerle.
+          </div>
+        )}
+      </AccentCard>
 
       <AccentCard accent={adjustment.tone === "text-cyan" ? "#64d2ff" : adjustment.tone === "text-amber" ? "#ff9f0a" : "#30d158"}>
         <div className="flex items-start justify-between gap-3">
@@ -415,12 +461,8 @@ export default function Training() {
         </div>
       </AccentCard>
 
-      {plan.type === "rest" && (
-        <Empty icon={<Icon.moon size={22} />} label={t("training.rest")} hint={t("dashboard.rest_day")} />
-      )}
-
       {/* Day C: cardio block on top */}
-      {plan.type === "C" && cardio && (
+      {selectedDayType === "C" && cardio && (
         <AccentCard accent="#64d2ff" className="border-cyan/30">
           <div className="flex justify-between items-baseline">
             <div className="card-title text-cyan">{t("cardio.liss_today")}</div>
@@ -431,10 +473,10 @@ export default function Training() {
       )}
 
       {/* Main regions */}
-      {mainRegions.map(renderRegionCard)}
+      {selectedDay && mainRegions.map(renderRegionCard)}
 
       {/* Core & stability finisher */}
-      {coreRegions.length > 0 && (
+      {selectedDay && coreRegions.length > 0 && (
         <>
           <div className="section-label flex items-center gap-2">
             <span>{t("training_v2.core_stability", "Core & Stability")}</span>
@@ -446,7 +488,7 @@ export default function Training() {
         </>
       )}
 
-      {plan.type !== "rest" && session && (
+      {selectedDay && session && (
         <button
           className={session.completed ? "btn" : "btn-primary"}
           onClick={complete}
