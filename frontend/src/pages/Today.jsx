@@ -513,6 +513,7 @@ export default function Today() {
         const protTarget = day.eating.targets.protein || 0;
         const kcalPct = kcalTarget ? Math.min(100, Math.round((mealsTotals.kcal / kcalTarget) * 100)) : 0;
         const protPct = protTarget ? Math.min(100, Math.round((mealsTotals.protein / protTarget) * 100)) : 0;
+        const proteinLeft = Math.max(0, Math.round(protTarget - mealsTotals.protein));
         const ring = (pct, color, label, value, total, unit) => {
           const r = 20, c = 2 * Math.PI * r;
           const off = c - (pct / 100) * c;
@@ -553,6 +554,16 @@ export default function Today() {
                 <div className="flex justify-around">
                   {ring(kcalPct, "#ff9f0a", "kcal", Math.round(mealsTotals.kcal), kcalTarget, "")}
                   {ring(protPct, "#30d158", "protein", Math.round(mealsTotals.protein), protTarget, "g")}
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="metric-tile px-2 py-2 text-center">
+                    <div className="metric-label">protein left</div>
+                    <div className="metric-value text-[.86rem] text-lime">{proteinLeft}g</div>
+                  </div>
+                  <div className="metric-tile px-2 py-2 text-center">
+                    <div className="metric-label">kcal left</div>
+                    <div className="metric-value text-[.86rem] text-amber">{Math.max(0, Math.round(kcalTarget - mealsTotals.kcal))}</div>
+                  </div>
                 </div>
               </>
             )}

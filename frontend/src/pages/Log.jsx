@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import { api } from "../lib/api";
-import { todayStr } from "../lib/plan";
+import { getDayPlan, getEatingTarget, todayStr } from "../lib/plan";
 import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
 import { eatenPct, effectiveMacros, sumMealMacros } from "../lib/nutrition";
 import BarcodeScanner from "../components/BarcodeScanner";
@@ -16,6 +16,56 @@ const isQuickEntry = (item) =>
   Number(item?.protein_g || 0) === 0 &&
   Number(item?.carbs_g || 0) === 0 &&
   Number(item?.fat_g || 0) === 0;
+const isSunday = (dateStr) => new Date(`${dateStr}T12:00:00`).getDay() === 0;
+const getFoodTarget = (dateStr) => {
+  const plan = getDayPlan(dateStr);
+  const target = getEatingTarget(plan.eating);
+  return plan.eating === "LOW" && isSunday(dateStr) ? { ...target, kcal: 2000, protein: 130, carbs: 160, fat: 80 } : target;
+};
+
+function FoodShortcutRow({ title, items, onAdd, onRemove }) {
+  if (!items?.length) return null;
+  return (
+    <AccentCard accent={title === "Favoriten" ? "#30d158" : "#64d2ff"} className="p-3" contentClassName="pl-2">
+      <div className="section-label mt-0 mb-2">{title}</div>
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {items.slice(0, 12).map((item) => (
+          <button
+            key={`${item.id || item.name}-${item.amount_g}-${item.kcal}`}
+            type="button"
+            onClick={() => onAdd(item)}
+            className="soft-band min-w-[132px] max-w-[156px] px-3 py-2 text-left hover:border-signal/50 transition"
+          >
+            <div className="text-[.76rem] text-ink leading-snug truncate">{item.name}</div>
+            <div className="mono text-[.58rem] text-mute tabular-nums mt-1">
+              {Math.round(Number(item.amount_g) || 0)}g · <span className="text-amber">{Math.round(Number(item.kcal) || 0)}</span> kcal
+            </div>
+            <div className="flex items-center justify-between gap-2 mt-1">
+              <div className="mono text-[.56rem] text-lime tabular-nums">P{Math.round(Number(item.protein_g) || 0)}g</div>
+              {onRemove && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  className="mono text-[.7rem] text-mute hover:text-danger"
+                  onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onRemove(item.id);
+                    }
+                  }}
+                >
+                  ×
+                </span>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+    </AccentCard>
+  );
+}
 
 export default function Log() {
   const { t } = useTranslation();
@@ -31,6 +81,8 @@ export default function Log() {
   const [pieces, setPieces] = useState(1);
   const [editingItemId, setEditingItemId] = useState(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [recentItems, setRecentItems] = useState([]);
+  const [favoriteItems, setFavoriteItems] = useState([]);
 
   const shiftDate = (delta) => {
     const d = new Date(date);
@@ -47,7 +99,18 @@ export default function Log() {
     return d.toLocaleDateString(lang, { weekday: "short", day: "2-digit", month: "2-digit" });
   })();
 
-  const load = async () => setMeals(await api.get(`/meals?date=${date}`));
+  const loadMeals = async () => setMeals(await api.get(`/meals?date=${date}`));
+  const loadLibrary = async () => {
+    const [recent, favorites] = await Promise.all([
+      api.get("/foods/recent").catch(() => []),
+      api.get("/foods/favorites").catch(() => [])
+    ]);
+    setRecentItems(recent || []);
+    setFavoriteItems(favorites || []);
+  };
+  const load = async () => {
+    await Promise.all([loadMeals(), loadLibrary()]);
+  };
   useEffect(() => { load(); }, [date]);
 
   // Ensure a meal exists for the day, return its id
@@ -55,7 +118,7 @@ export default function Log() {
     if (meals.length > 0) return meals[0].id;
     const time = new Date().toTimeString().slice(0, 5);
     const m = await api.post("/meals", { date, time, name: null });
-    await load();
+    await loadMeals();
     return m.id;
   };
 
@@ -68,6 +131,31 @@ export default function Log() {
   // All items flat across all meals
   const allItems = meals.flatMap((m) => m.items);
   const totals = sumMealMacros(meals);
+  const foodTarget = getFoodTarget(date);
+  const proteinLeft = Math.max(0, Math.round((foodTarget.protein || 0) - totals.protein));
+  const itemPayload = (item) => ({
+    name: item.name,
+    barcode: item.barcode || null,
+    amount_g: cleanNumber(item.amount_g, 100),
+    kcal: cleanNumber(item.kcal),
+    protein_g: cleanNumber(item.protein_g),
+    carbs_g: cleanNumber(item.carbs_g),
+    fat_g: cleanNumber(item.fat_g),
+    eaten_pct: 100
+  });
+  const addFoodItem = async (item) => {
+    const mealId = await ensureMeal();
+    await api.post(`/meals/${mealId}/items`, itemPayload(item));
+    await load();
+  };
+  const saveFavorite = async (item) => {
+    await api.post("/foods/favorites", itemPayload(item));
+    await loadLibrary();
+  };
+  const removeFavorite = async (id) => {
+    await api.del(`/foods/favorites/${id}`);
+    await loadLibrary();
+  };
 
   const updateAmount = (g) => {
     if (g === "") return setDraft({ ...draft, amount_g: "" });
@@ -191,7 +279,7 @@ export default function Log() {
         title="Log fast. Stay honest."
         metrics={[
           { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
-          { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
+          { label: `protein · ${proteinLeft}g left`, value: `${Math.round(totals.protein)}/${foodTarget.protein}g`, className: "text-lime" },
           { label: "carbs", value: `${Math.round(totals.carbs)}g`, className: "text-amber" },
           { label: "fat", value: `${Math.round(totals.fat)}g`, className: "text-ink2" }
         ]}
@@ -251,6 +339,9 @@ export default function Log() {
         </div>
       </div>
 
+      <FoodShortcutRow title="Favoriten" items={favoriteItems} onAdd={addFoodItem} onRemove={removeFavorite} />
+      <FoodShortcutRow title="Recent" items={recentItems} onAdd={addFoodItem} />
+
       {/* Flat food list */}
       {allItems.length === 0 && (
         <Empty icon={<Icon.utensils size={22} />} label={t("log.title")} />
@@ -285,6 +376,13 @@ export default function Log() {
                 </button>
                 <div className="flex items-center gap-3 shrink-0 pt-[2px]">
                   <div className="mono text-sm text-amber font-bold tabular-nums">{Math.round(eff.kcal)}</div>
+                  <button
+                    className="text-mute hover:text-lime text-base leading-none"
+                    aria-label="favorite"
+                    onClick={(e) => { e.stopPropagation(); saveFavorite(it); }}
+                  >
+                    ☆
+                  </button>
                   <button className="text-mute hover:text-signal mono text-[.62rem] uppercase tracking-[.14em] leading-none" onClick={() => openEdit(it)}>{t("log.edit")}</button>
                   <button className="text-mute hover:text-danger text-lg leading-none" onClick={() => deleteItem(it.id)}>×</button>
                 </div>

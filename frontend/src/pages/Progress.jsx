@@ -177,6 +177,35 @@ function WeeklyReviewCard({ review }) {
   );
 }
 
+function WeeklyScoreCard({ review }) {
+  if (!review) return null;
+  const trainingPlanned = review.training_planned || 0;
+  const trainingPct = trainingPlanned ? Math.round(((review.training_done || 0) / trainingPlanned) * 100) : 0;
+  const proteinPct = Math.round(((review.protein_days || 0) / 5) * 100);
+  const fastPct = Math.round(((review.fast_clean_days || 0) / 2) * 100);
+  const weeklyScore = Math.round(((review.adherence_pct || 0) + proteinPct + fastPct + trainingPct) / 4);
+  const items = [
+    ["score", `${weeklyScore}%`, "text-lime"],
+    ["protein", `${review.protein_days ?? 0}/5`, "text-lime"],
+    ["gym", `${review.training_done || 0}/${trainingPlanned}`, "text-amber"],
+    ["fast", `${review.fast_clean_days ?? 0}/2`, "text-cyan"]
+  ];
+
+  return (
+    <AccentCard accent="#30d158" className="p-4" contentClassName="pl-2">
+      <div className="section-label mt-0 mb-2">weekly score</div>
+      <div className="grid grid-cols-4 gap-2">
+        {items.map(([label, value, cls]) => (
+          <div key={label} className="metric-tile text-center px-2 py-2">
+            <div className="metric-label">{label}</div>
+            <div className={`metric-value text-[.9rem] ${cls}`}>{value}</div>
+          </div>
+        ))}
+      </div>
+    </AccentCard>
+  );
+}
+
 function NutritionCockpit({ review }) {
   const items = [
     ["protein avg", review ? `${fmt(review.avg_protein_g, 0)}g` : "--"],
@@ -381,6 +410,7 @@ export default function Progress() {
       </AccentCard>
 
       <WeeklyReviewCard review={review} />
+      <WeeklyScoreCard review={review} />
       <AdherenceCard review={review} />
       <NutritionCockpit review={review} />
       <SixMonthOverview />

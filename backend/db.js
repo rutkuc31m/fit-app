@@ -108,6 +108,22 @@ CREATE TABLE IF NOT EXISTS meal_photos (
 );
 CREATE INDEX IF NOT EXISTS idx_meal_photos_user_date ON meal_photos(user_id, date);
 
+CREATE TABLE IF NOT EXISTS favorite_foods (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name       TEXT NOT NULL,
+  barcode    TEXT,
+  amount_g   REAL DEFAULT 100,
+  kcal       REAL DEFAULT 0,
+  protein_g  REAL DEFAULT 0,
+  carbs_g    REAL DEFAULT 0,
+  fat_g      REAL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_favorite_foods_user ON favorite_foods(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_favorite_foods_user_name ON favorite_foods(user_id, name COLLATE NOCASE);
+
 CREATE TABLE IF NOT EXISTS training_sessions (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

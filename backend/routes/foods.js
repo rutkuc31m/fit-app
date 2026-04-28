@@ -35,6 +35,15 @@ const parseAiJson = (text) => {
   if (!match) return null;
   try { return JSON.parse(match[0]); } catch { return null; }
 };
+const cleanFoodItem = (body = {}) => ({
+  name: String(body.name || "").trim(),
+  barcode: body.barcode || null,
+  amount_g: Number.isFinite(Number(body.amount_g)) ? Number(body.amount_g) : 100,
+  kcal: Number.isFinite(Number(body.kcal)) ? Number(body.kcal) : 0,
+  protein_g: Number.isFinite(Number(body.protein_g)) ? Number(body.protein_g) : 0,
+  carbs_g: Number.isFinite(Number(body.carbs_g)) ? Number(body.carbs_g) : 0,
+  fat_g: Number.isFinite(Number(body.fat_g)) ? Number(body.fat_g) : 0
+});
 
 r.post("/meal-photo", (req, res) => {
   const { data_url, date } = req.body || {};
@@ -198,6 +207,43 @@ r.get("/recent", (req, res) => {
      GROUP BY name COLLATE NOCASE ORDER BY MAX(id) DESC LIMIT 30`
   ).all(req.user.id);
   res.json(rows);
+});
+
+r.get("/favorites", (req, res) => {
+  const rows = db.prepare(
+    `SELECT id, name, barcode, amount_g, kcal, protein_g, carbs_g, fat_g, updated_at
+     FROM favorite_foods
+     WHERE user_id = ?
+     ORDER BY updated_at DESC, id DESC`
+  ).all(req.user.id);
+  res.json(rows);
+});
+
+r.post("/favorites", (req, res) => {
+  const item = cleanFoodItem(req.body);
+  if (!item.name) return res.status(400).json({ error: "name_required" });
+
+  const existing = db.prepare("SELECT id FROM favorite_foods WHERE user_id = ? AND name = ? COLLATE NOCASE")
+    .get(req.user.id, item.name);
+  if (existing) {
+    db.prepare(
+      `UPDATE favorite_foods
+       SET barcode = ?, amount_g = ?, kcal = ?, protein_g = ?, carbs_g = ?, fat_g = ?, updated_at = datetime('now')
+       WHERE user_id = ? AND id = ?`
+    ).run(item.barcode, item.amount_g, item.kcal, item.protein_g, item.carbs_g, item.fat_g, req.user.id, existing.id);
+    return res.json(db.prepare("SELECT * FROM favorite_foods WHERE user_id = ? AND id = ?").get(req.user.id, existing.id));
+  }
+
+  const info = db.prepare(
+    `INSERT INTO favorite_foods (user_id, name, barcode, amount_g, kcal, protein_g, carbs_g, fat_g)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(req.user.id, item.name, item.barcode, item.amount_g, item.kcal, item.protein_g, item.carbs_g, item.fat_g);
+  res.json(db.prepare("SELECT * FROM favorite_foods WHERE user_id = ? AND id = ?").get(req.user.id, info.lastInsertRowid));
+});
+
+r.delete("/favorites/:id", (req, res) => {
+  db.prepare("DELETE FROM favorite_foods WHERE user_id = ? AND id = ?").run(req.user.id, req.params.id);
+  res.json({ ok: true });
 });
 
 export default r;
