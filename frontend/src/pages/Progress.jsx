@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
-import { PLAN, todayStr } from "../lib/plan";
+import { PLAN, todayStr, getWeekNum, getDayPlan, getExercisesForDay } from "../lib/plan";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const addDays = (dateStr, days) => {
@@ -30,6 +30,26 @@ const WEIGHT_ROUTE = [
   ["07.09", 74.6], ["14.09", 74.2], ["21.09", 73.9], ["28.09", 73.6],
   ["05.10", 73.3], ["12.10", 73.0], ["19.10", 73.0]
 ];
+
+const TRAINING_DAYS = [
+  { type: "A", day: "Pazartesi", accent: "#30d158" },
+  { type: "B", day: "Carsamba", accent: "#64d2ff" },
+  { type: "C", day: "Cuma", accent: "#ff9f0a" }
+];
+
+const nextFocusForReview = (review) => {
+  if (!review) return "Log meals, protein and training this week so the signal is usable.";
+  if ((review.protein_days ?? 0) < 3) return "Protein first: keep skyr, chicken, fish or whey ready before adding extras.";
+  if ((review.training_done ?? 0) < (review.training_planned ?? 0)) return "Training rhythm is the lever: finish the planned A/B/C days before adding more.";
+  if ((review.fast_clean_days ?? 0) < 2) return "Protect the two fast days. No bonus training needed there.";
+  if ((review.avg_headache ?? 0) >= 3 || (review.avg_energy ?? 5) <= 2) return "Recovery signal is noisy: salt, water, sleep and lighter gym loads.";
+  return "Stay boring: same food base, same three gym days, weekly trend decides adjustments.";
+};
+
+const defaultTrainingDayType = () => {
+  const plan = getDayPlan(todayStr());
+  return plan?.type === "B" || plan?.type === "C" ? plan.type : "A";
+};
 
 function WeightChart({ logs }) {
   const data = logs.filter((l) => l.weight_kg != null).map((l) => ({ date: l.date, w: l.weight_kg }));
@@ -172,6 +192,122 @@ function WeeklyReviewCard({ review }) {
   );
 }
 
+function NutritionCockpit({ review }) {
+  const items = [
+    ["protein avg", review ? `${fmt(review.avg_protein_g, 0)}g` : "--"],
+    ["protein days", review ? `${review.protein_days ?? 0}/5` : "--"],
+    ["kcal avg", review ? fmt(review.avg_kcal, 0) : "--"],
+    ["meal days", review ? `${review.meal_days ?? 0}/7` : "--"]
+  ];
+  const targets = [
+    ["OMAD", `${PLAN.eatingTargets.OMAD.kcal} kcal`, `${PLAN.eatingTargets.OMAD.protein}g protein`],
+    ["LOW", `${PLAN.eatingTargets.LOW.kcal} kcal`, `${PLAN.eatingTargets.LOW.protein}g protein`],
+    ["FAST", "0 kcal", "water · coffee · tea"]
+  ];
+
+  return (
+    <AccentCard accent="#ff9f0a" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
+      <div>
+        <div className="section-label mt-0 mb-1">nutrition cockpit</div>
+        <div className="mono text-[.66rem] text-mute leading-snug">
+          food diary signal · fast log · protein target · no noisy coaching
+        </div>
+      </div>
+      <div className="grid grid-cols-2 min-[460px]:grid-cols-4 gap-2">
+        {items.map(([label, value]) => (
+          <div key={label} className="metric-tile">
+            <div className="metric-label">{label}</div>
+            <div className="metric-value text-[.9rem]">{value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {targets.map(([label, kcal, protein]) => (
+          <div key={label} className="metric-tile px-2 py-2">
+            <div className="metric-label">{label}</div>
+            <div className="metric-value text-[.78rem]">{kcal}</div>
+            <div className="mono text-[.55rem] text-mute mt-[2px] truncate">{protein}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mono text-[.66rem] text-ink2 leading-snug bg-bg2/70 border border-line rounded-md px-3 py-2">
+        {nextFocusForReview(review)}
+      </div>
+    </AccentCard>
+  );
+}
+
+function TrainingPlanOverview() {
+  const [openDay, setOpenDay] = useState(defaultTrainingDayType);
+  const week = getWeekNum(todayStr());
+  const active = TRAINING_DAYS.find((d) => d.type === openDay) || TRAINING_DAYS[0];
+  const plan = getExercisesForDay(active.type, week);
+  const main = plan?.exercises?.filter((ex) => !ex.coreFinisher && !ex.phase1Only) || [];
+  const core = plan?.exercises?.filter((ex) => ex.coreFinisher || ex.phase1Only) || [];
+  const totalSets = (plan?.exercises || []).reduce((sum, ex) => sum + (Number(ex.sets) || 0), 0);
+
+  const exerciseRow = (ex) => (
+    <div key={ex.id} className="flex items-start justify-between gap-3 border-b border-line last:border-0 py-2">
+      <div className="min-w-0">
+        <div className="text-sm text-ink leading-snug">{ex.name}</div>
+        {ex.substituted && (
+          <div className="mono text-[.54rem] text-warn uppercase tracking-[.12em] mt-[2px]">
+            phase 1 guided variant
+          </div>
+        )}
+      </div>
+      <div className="mono text-[.66rem] text-amber tabular-nums shrink-0">
+        {ex.sets}x{ex.reps}{ex.unit || ""}
+      </div>
+    </div>
+  );
+
+  return (
+    <AccentCard accent={active.accent} className="p-4" contentClassName="pl-2 flex flex-col gap-3">
+      <div>
+        <div className="section-label mt-0 mb-1">training overview</div>
+        <div className="mono text-[.66rem] text-mute leading-snug">
+          tap a day · current week variants are shown · open Train to log sets
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {TRAINING_DAYS.map((day) => (
+          <button
+            key={day.type}
+            type="button"
+            onClick={() => setOpenDay(day.type)}
+            className={`metric-tile text-left transition ${openDay === day.type ? "border-lime/60 bg-lime/10" : "hover:border-line2"}`}
+          >
+            <div className="metric-label">{day.day}</div>
+            <div className="metric-value text-[.9rem]" style={{ color: day.accent }}>Day {day.type}</div>
+            <div className="mono text-[.55rem] text-mute truncate">{PLAN.training[day.type]?.nameKey === "day_a" ? "upper" : PLAN.training[day.type]?.nameKey === "day_b" ? "lower" : "full body"}</div>
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="card-title">{active.day} · Day {active.type}</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mt-[2px]">
+            W{week} · {main.length} main · {core.length} core · {totalSets} sets
+          </div>
+        </div>
+        <Link to="/training" className="btn-ghost shrink-0">log</Link>
+      </div>
+      <div className="rounded-md border border-line bg-bg2/50 px-3">
+        {main.map(exerciseRow)}
+      </div>
+      {core.length > 0 && (
+        <div>
+          <div className="mono text-[.58rem] text-mute uppercase tracking-[.18em] mb-1">core / stability</div>
+          <div className="rounded-md border border-line bg-bg2/50 px-3">
+            {core.map(exerciseRow)}
+          </div>
+        </div>
+      )}
+    </AccentCard>
+  );
+}
+
 function SixMonthOverview() {
   const phaseRows = PLAN.phases.map((p) => {
     const start = addDays(PLAN.startDate, (p.weeks[0] - 1) * 7);
@@ -274,7 +410,9 @@ export default function Progress() {
 
       <WeeklyReviewCard review={review} />
       <AdherenceCard review={review} />
+      <NutritionCockpit review={review} />
       <SixMonthOverview />
+      <TrainingPlanOverview />
 
       <div className="section-label">{t("progress.weight_chart")}</div>
       <AccentCard accent="#64d2ff" className="p-4"><WeightChart logs={logs} /></AccentCard>
