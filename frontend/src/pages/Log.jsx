@@ -67,6 +67,51 @@ function FoodShortcutRow({ title, items, onAdd, onRemove, limit = 12 }) {
   );
 }
 
+function HistoryPicker({ items, onAdd }) {
+  const [open, setOpen] = useState(false);
+  if (!items?.length) return null;
+  const preview = items.slice(0, 3).map((item) => item.name).join(" · ");
+  return (
+    <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2">
+      <button
+        type="button"
+        className="w-full flex items-center justify-between gap-3 text-left"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <div className="min-w-0">
+          <div className="section-label mt-0 mb-1">History · {items.length}</div>
+          <div className="mono text-[.62rem] text-mute truncate">{preview}</div>
+        </div>
+        <Icon.chev size={16} className={`text-cyan shrink-0 transition ${open ? "rotate-90" : ""}`} />
+      </button>
+      {open && (
+        <div className="mt-3 rounded-lg border border-line bg-bg2/55 overflow-hidden max-h-[360px] overflow-y-auto">
+          {items.slice(0, 100).map((item) => (
+            <button
+              key={`${item.id || item.name}-${item.amount_g}-${item.kcal}`}
+              type="button"
+              onClick={() => { onAdd(item); setOpen(false); }}
+              className="w-full px-3 py-2 border-b border-line last:border-0 text-left hover:bg-surface2/70 active:bg-surface2 transition"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[.78rem] text-ink leading-snug truncate">{item.name}</div>
+                  <div className="mono text-[.56rem] text-mute tabular-nums mt-[2px]">
+                    {Math.round(Number(item.amount_g) || 0)}g · <span className="text-lime">P</span>{Math.round(Number(item.protein_g) || 0)}g
+                  </div>
+                </div>
+                <div className="mono text-[.72rem] text-amber font-bold tabular-nums shrink-0">
+                  {Math.round(Number(item.kcal) || 0)}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </AccentCard>
+  );
+}
+
 export default function Log() {
   const { t } = useTranslation();
   const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
@@ -340,7 +385,7 @@ export default function Log() {
       </div>
 
       <FoodShortcutRow title="Favoriten" items={favoriteItems} onAdd={addFoodItem} onRemove={removeFavorite} />
-      <FoodShortcutRow title="History" items={recentItems} onAdd={addFoodItem} limit={100} />
+      <HistoryPicker items={recentItems} onAdd={addFoodItem} />
 
       {/* Flat food list */}
       {allItems.length === 0 && (
