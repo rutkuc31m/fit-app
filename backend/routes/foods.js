@@ -199,12 +199,37 @@ Return ONLY JSON with typical per-100g macros. Non-zero positive numbers. No pro
   } catch (e) { next(e); }
 });
 
-// Recent unique items (for quick add from history)
+// Latest unique items (for quick add from history)
 r.get("/recent", (req, res) => {
   const rows = db.prepare(
-    `SELECT name, barcode, MAX(kcal) AS kcal, MAX(protein_g) AS protein_g, MAX(carbs_g) AS carbs_g, MAX(fat_g) AS fat_g, MAX(amount_g) AS amount_g
-     FROM meal_items WHERE meal_id IN (SELECT id FROM meals WHERE user_id = ?)
-     GROUP BY name COLLATE NOCASE ORDER BY MAX(id) DESC LIMIT 30`
+    `SELECT id, name, barcode, kcal, protein_g, carbs_g, fat_g, amount_g
+     FROM (
+       SELECT mi.id, mi.name, mi.barcode, mi.kcal, mi.protein_g, mi.carbs_g, mi.fat_g, mi.amount_g,
+              ROW_NUMBER() OVER (PARTITION BY lower(mi.name) ORDER BY mi.id DESC) AS rn
+       FROM meal_items mi
+       JOIN meals m ON m.id = mi.meal_id
+       WHERE m.user_id = ?
+     )
+     WHERE rn = 1
+     ORDER BY id DESC
+     LIMIT 100`
+  ).all(req.user.id);
+  res.json(rows);
+});
+
+r.get("/history", (req, res) => {
+  const rows = db.prepare(
+    `SELECT id, name, barcode, kcal, protein_g, carbs_g, fat_g, amount_g
+     FROM (
+       SELECT mi.id, mi.name, mi.barcode, mi.kcal, mi.protein_g, mi.carbs_g, mi.fat_g, mi.amount_g,
+              ROW_NUMBER() OVER (PARTITION BY lower(mi.name) ORDER BY mi.id DESC) AS rn
+       FROM meal_items mi
+       JOIN meals m ON m.id = mi.meal_id
+       WHERE m.user_id = ?
+     )
+     WHERE rn = 1
+     ORDER BY id DESC
+     LIMIT 100`
   ).all(req.user.id);
   res.json(rows);
 });

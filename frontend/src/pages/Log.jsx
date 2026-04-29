@@ -23,13 +23,13 @@ const getFoodTarget = (dateStr) => {
   return plan.eating === "LOW" && isSunday(dateStr) ? { ...target, kcal: 2000, protein: 130, carbs: 160, fat: 80 } : target;
 };
 
-function FoodShortcutRow({ title, items, onAdd, onRemove }) {
+function FoodShortcutRow({ title, items, onAdd, onRemove, limit = 12 }) {
   if (!items?.length) return null;
   return (
     <AccentCard accent={title === "Favoriten" ? "#30d158" : "#64d2ff"} className="p-3" contentClassName="pl-2">
-      <div className="section-label mt-0 mb-2">{title}</div>
+      <div className="section-label mt-0 mb-2">{title} · {items.length}</div>
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {items.slice(0, 12).map((item) => (
+        {items.slice(0, limit).map((item) => (
           <button
             key={`${item.id || item.name}-${item.amount_g}-${item.kcal}`}
             type="button"
@@ -102,7 +102,7 @@ export default function Log() {
   const loadMeals = async () => setMeals(await api.get(`/meals?date=${date}`));
   const loadLibrary = async () => {
     const [recent, favorites] = await Promise.all([
-      api.get("/foods/recent").catch(() => []),
+      api.get("/foods/history").catch(() => api.get("/foods/recent").catch(() => [])),
       api.get("/foods/favorites").catch(() => [])
     ]);
     setRecentItems(recent || []);
@@ -340,7 +340,7 @@ export default function Log() {
       </div>
 
       <FoodShortcutRow title="Favoriten" items={favoriteItems} onAdd={addFoodItem} onRemove={removeFavorite} />
-      <FoodShortcutRow title="Recent" items={recentItems} onAdd={addFoodItem} />
+      <FoodShortcutRow title="History" items={recentItems} onAdd={addFoodItem} limit={100} />
 
       {/* Flat food list */}
       {allItems.length === 0 && (
