@@ -147,9 +147,11 @@
   }
   .modal-shell {
     @apply fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+16px)];
+    overscroll-behavior: contain;
   }
   .modal-panel {
     @apply card w-full max-w-md p-4 flex flex-col gap-3 relative max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-32px)] overflow-y-auto;
+    overscroll-behavior: contain;
   }
   .modal-actions {
     @apply sticky bottom-[-1rem] -mx-4 -mb-4 flex gap-2 mt-1 p-4 bg-surface/95 border-t border-line/70 backdrop-blur;
@@ -282,6 +284,11 @@
     max-width: min(520px, calc(100vw - 24px));
     border-color: rgba(48,209,88,.45);
     box-shadow: 0 28px 80px -40px rgba(48,209,88,.65), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .target-modal-panel {
+    align-items: center;
+    padding: 12px;
+    gap: 8px;
   }
   .gif-stage {
     width: 100%;

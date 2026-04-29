@@ -233,6 +233,28 @@ export default function Training() {
   const [target, setTarget] = useState(null);
   const adjustment = trainingAdjustment(recovery);
 
+  useEffect(() => {
+    if (!target) return undefined;
+    const scrollY = window.scrollY;
+    const previous = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width
+    };
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    return () => {
+      document.body.style.overflow = previous.overflow;
+      document.body.style.position = previous.position;
+      document.body.style.top = previous.top;
+      document.body.style.width = previous.width;
+      window.scrollTo(0, scrollY);
+    };
+  }, [target]);
+
   const mainExercises = day?.exercises?.filter((e) => !e.phase1Only && !e.coreFinisher) || [];
   const coreExercises = day?.exercises?.filter((e) => e.phase1Only || e.coreFinisher) || [];
   const hasPhase1Core = coreExercises.some((e) => e.phase1Only);
@@ -490,8 +512,8 @@ export default function Training() {
 
       {rest && <RestTimer key={rest.key} seconds={rest.seconds} onClose={() => setRest(null)} />}
       {target && (
-        <div className="gif-modal-backdrop" onClick={() => setTarget(null)} role="dialog" aria-modal="true">
-          <div className="gif-modal-content gif-modal-focus" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-shell" onClick={() => setTarget(null)} role="dialog" aria-modal="true">
+          <div className="modal-panel target-modal-panel gif-modal-focus" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               className="btn-icon absolute right-3 top-3 z-10"
