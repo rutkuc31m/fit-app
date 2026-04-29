@@ -8,11 +8,11 @@ const PLAN = {
     { id: 4, weeks: [21, 26] }
   ],
   weeklyPattern: {
-    1: { type: "A", eating: "OMAD" },
+    1: { type: "A", eating: "TRAINING" },
     2: { type: "rest", eating: "FAST" },
-    3: { type: "B", eating: "OMAD" },
+    3: { type: "B", eating: "TRAINING" },
     4: { type: "rest", eating: "LOW" },
-    5: { type: "C", eating: "OMAD" },
+    5: { type: "C", eating: "TRAINING" },
     6: { type: "rest", eating: "FAST" },
     0: { type: "rest", eating: "LOW" }
   }
@@ -67,7 +67,7 @@ const getFootballMode = (weekNum) => {
 
 function buildDaySchedule(opts) {
   const {
-    isTrainingDay, isFastDay, isWeekend, dayType, phase, stepTarget, cardio,
+    isTrainingDay, isFastDay, isTrainingFuelDay, isWeekend, dayType, phase, stepTarget, cardio,
     isCheckpointDay, football
   } = opts;
   const schedule = [];
@@ -80,7 +80,7 @@ function buildDaySchedule(opts) {
   }
 
   if (!isWeekend) {
-    schedule.push({ time: "07:30", action: "Ise gidis", details: isFastDay ? "Sadece su ve siyah kahve" : "Kahve serbest, yemek yok", category: "routine" });
+    schedule.push({ time: "07:30", action: "Ise gidis", details: isFastDay ? "Sadece su ve siyah kahve" : isTrainingFuelDay ? "Kahve serbest; ana ogun oglen" : "Kahve serbest, yemek yok", category: "routine" });
     schedule.push({ time: "10:00", action: "Kisa mola", details: "Ayaga kalk, 2dk yuru, su ic", category: "activity" });
     schedule.push({ time: "12:00", action: "Ogle yuruyusu", details: "30dk rahat tempo yuruyus", category: "cardio", duration: "30dk" });
     schedule.push({ time: "15:00", action: "Ikindi molasi", details: "500ml su, 5dk ayakta mola", category: "routine" });
@@ -100,14 +100,17 @@ function buildDaySchedule(opts) {
   }
 
   if (isTrainingDay) {
+    if (isTrainingFuelDay) {
+      schedule.push({ time: "13:00", action: "Training meal - ana ogun", details: "~1000kcal. Protein + temiz karbonhidrat", category: "nutrition", duration: "30-45dk" });
+    }
     schedule.push({ time: "18:50", action: "Gym hazirlik", details: "Gym cantasi, su sisesi, kulaklik", category: "training" });
     schedule.push({ time: "19:00", action: `GYM - Gun ${dayType}`, details: { A: "Ust Vucut (Push/Pull)", B: "Alt Vucut", C: "Full Body + Kardiyo" }[dayType], category: "training", duration: "45-60dk" });
     if (dayType === "C") {
       schedule.push({ time: "19:45", action: "Post-training LISS", details: `${cardio.liss.durationMin}dk egimli yuruyus bandi veya bisiklet`, category: "cardio" });
     }
-    schedule.push({ time: "20:00", action: "Post-workout shake", details: "30g whey + su", category: "nutrition" });
-    schedule.push({ time: "20:15", action: "OMAD - Ana ogun", details: "Protein once, sonra sebze, en son karbonhidrat", category: "nutrition", duration: "45-60dk" });
-    schedule.push({ time: "21:15", action: "Aksam yuruyusu", details: "30dk sakin yuruyus - sindirim ve toparlanma", category: "cardio", duration: "30dk" });
+    schedule.push({ time: "20:45", action: "Post-workout protein", details: "Whey + skyr. Hafif tut; protein tamamla", category: "nutrition" });
+    schedule.push({ time: "21:15", action: "Kapanis", details: "Hedef: 1500-1800kcal, 130-150g protein", category: "nutrition", duration: "15-25dk" });
+    schedule.push({ time: "21:30", action: "Aksam yuruyusu", details: "30dk sakin yuruyus - sindirim ve toparlanma", category: "cardio", duration: "30dk" });
   }
 
   if (!isTrainingDay && !isFastDay) {
@@ -140,6 +143,7 @@ export function getScheduleForDate(dateStr) {
   const football = getFootballMode(weekNum);
   const isTrainingDay = dayPlan.type !== "rest";
   const isFastDay = dayPlan.eating === "FAST";
+  const isTrainingFuelDay = dayPlan.eating === "TRAINING";
   const isWeekend = dow === 0 || dow === 6;
   const weeksIntoPhase = weekNum - phase.weeks[0];
   const stepTarget = Math.min(
@@ -150,6 +154,7 @@ export function getScheduleForDate(dateStr) {
   return buildDaySchedule({
     isTrainingDay,
     isFastDay,
+    isTrainingFuelDay,
     isWeekend,
     dayType: dayPlan.type,
     phase: phase.id,

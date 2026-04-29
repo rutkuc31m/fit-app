@@ -22,7 +22,7 @@ const DEFAULT_PREFS = {
 const PREF_ROWS = [
   { key: "quote_enabled", label: "Daily quote", sub: "07:00 motivation" },
   { key: "workout_enabled", label: "Training", sub: "Check-in, gym prep and workout blocks" },
-  { key: "meal_enabled", label: "Meals", sub: "OMAD, shake and nutrition windows" },
+  { key: "meal_enabled", label: "Meals", sub: "Split meals, OMAD and nutrition windows" },
   { key: "supp_enabled", label: "Supplements", sub: "Morning and evening supplement blocks" },
   { key: "cardio_enabled", label: "Cardio", sub: "Walks, LISS, HIIT and football blocks" },
   { key: "sleep_enabled", label: "Sleep", sub: "Bedtime target and wind-down" },

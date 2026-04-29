@@ -24,6 +24,7 @@ export function generateFullSchedule() {
 
     const isTrainingDay = dayPlan.type !== "rest";
     const isFastDay = dayPlan.eating === "FAST";
+    const isTrainingFuelDay = dayPlan.eating === "TRAINING";
     const isLowDay = dayPlan.eating === "LOW";
     const isWeekend = dow === 0 || dow === 6;
     const isFreeMealDay = dow === 0 && isLowDay;
@@ -54,28 +55,29 @@ export function generateFullSchedule() {
       // ── EATING ──
       eating: {
         mode: dayPlan.eating,
-        label: isFastDay ? "ORUÇ" : isFreeMealDay ? "CHEAT MEAL" : isLowDay ? "DÜŞÜK KALORİ" : "OMAD",
+        label: isFastDay ? "ORUÇ" : isFreeMealDay ? "CHEAT MEAL" : isTrainingFuelDay ? "SPLIT MEAL" : isLowDay ? "DÜŞÜK KALORİ" : "OMAD",
         freeMeal: isFreeMealDay ? {
           label: "controlled free meal",
           note: "Protein first. One meal, not a cheat day."
         } : null,
         window: isFastDay ? null : {
-          start: isTrainingDay ? "19:30" : "18:00",
-          end: isTrainingDay ? "20:45" : "19:00"
+          start: isTrainingFuelDay ? "13:00" : "18:00",
+          end: isTrainingFuelDay ? "22:00" : "19:00"
         },
         targets: isFastDay
           ? { kcal: 0, protein: 0, carbs: 0, fat: 0 }
           : isFreeMealDay
             ? { kcal: 2000, protein: 130, carbs: 160, fat: 80 }
+          : isTrainingFuelDay
+            ? { kcal: 1800, protein: 150, carbs: 115, fat: 75 }
           : isLowDay
             ? { kcal: 1300, protein: 130, carbs: 60, fat: 65 }
             : { kcal: 1800, protein: 150, carbs: 115, fat: 75 },
-        preShake: isTrainingDay && !isFastDay ? {
-          time: "19:30",
-          desc: "30g whey + su",
-          kcal: 120,
-          protein: 25
-        } : null
+        mealSplit: isTrainingFuelDay ? {
+          mainMeal: { time: "13:00", kcal: 1000, label: "ana öğün" },
+          postWorkout: { time: "20:45", kcal: 500, protein: 55, label: "whey + skyr" }
+        } : null,
+        preShake: null
       },
 
       // ── TRAINING ──
@@ -120,6 +122,7 @@ export function generateFullSchedule() {
         isTrainingDay,
         isFastDay,
         isLowDay,
+        isTrainingFuelDay,
         isFreeMealDay,
         isWeekend,
         dayType: dayPlan.type,
@@ -181,7 +184,7 @@ export function generateFullSchedule() {
 function generateDaySchedule(opts) {
   const {
     isTrainingDay, isFastDay, isLowDay, isWeekend,
-    isFreeMealDay,
+    isFreeMealDay, isTrainingFuelDay,
     dayType, weekNum, phase, stepTarget, cardio,
     isCheckpointDay, football
   } = opts;
@@ -217,7 +220,7 @@ function generateDaySchedule(opts) {
     schedule.push({
       time: "07:30",
       action: "İşe gidiş",
-      details: isFastDay ? "Sadece su ve siyah kahve" : "Kahve serbest, yemek yok (OMAD penceresi akşam)",
+      details: isFastDay ? "Sadece su ve siyah kahve" : isTrainingFuelDay ? "Kahve serbest; ana öğün öğlen" : "Kahve serbest, yemek yok (OMAD penceresi akşam)",
       category: "routine"
     });
 
@@ -306,6 +309,16 @@ function generateDaySchedule(opts) {
 
   // ── EVENING — TRAINING DAYS ──
   if (isTrainingDay) {
+    if (isTrainingFuelDay) {
+      schedule.push({
+        time: "13:00",
+        action: "Training meal — ana öğün",
+        details: "~1000kcal. Protein + temiz karbonhidrat; akşam gym performansı için.",
+        category: "nutrition",
+        duration: "30-45dk"
+      });
+    }
+
     schedule.push({
       time: "18:50",
       action: "Gym hazırlık",
@@ -331,22 +344,22 @@ function generateDaySchedule(opts) {
     }
 
     schedule.push({
-      time: "20:00",
-      action: "Post-workout shake",
-      details: "30g whey + su (120kcal, 25g protein) — yeme penceresi açılır",
+      time: "20:45",
+      action: "Post-workout protein",
+      details: "Whey + skyr. Hafif tut; protein tamamla, gece dev öğün yok.",
       category: "nutrition"
     });
 
     schedule.push({
-      time: "20:15",
-      action: "OMAD — Ana öğün",
-      details: "Tek büyük öğün (~1650-1680kcal kalan). Protein önce, sonra sebze, en son karbonhidrat.",
+      time: "21:15",
+      action: "Kapanış",
+      details: "Gerekirse küçük tavuk/balık ekle. Hedef: 1500-1800kcal, 130-150g protein.",
       category: "nutrition",
-      duration: "45-60dk"
+      duration: "15-25dk"
     });
 
     schedule.push({
-      time: "21:15",
+      time: "21:30",
       action: "Akşam yürüyüşü",
       details: "30dk sakin yürüyüş — sindirim + toparlanma",
       category: "cardio",

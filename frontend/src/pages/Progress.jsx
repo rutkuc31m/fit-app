@@ -214,7 +214,7 @@ function NutritionCockpit({ review }) {
     ["meal days", review ? `${review.meal_days ?? 0}/7` : "--"]
   ];
   const targets = [
-    ["OMAD", `${PLAN.eatingTargets.OMAD.kcal} kcal`, `${PLAN.eatingTargets.OMAD.protein}g protein`],
+    ["GYM", `${PLAN.eatingTargets.TRAINING.kcal} kcal`, `${PLAN.eatingTargets.TRAINING.protein}g protein`],
     ["LOW", `${PLAN.eatingTargets.LOW.kcal} kcal`, `${PLAN.eatingTargets.LOW.protein}g protein`],
     ["FAST", "0 kcal", "water · coffee · tea"]
   ];

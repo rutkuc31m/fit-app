@@ -31,17 +31,18 @@ const dateRange = (from, to) => {
 const dayPlan = (date) => {
   const dow = new Date(`${date}T12:00:00`).getDay();
   return {
-    1: { type: "A", eating: "OMAD" },
+    1: { type: "A", eating: "TRAINING" },
     2: { type: "rest", eating: "FAST" },
-    3: { type: "B", eating: "OMAD" },
+    3: { type: "B", eating: "TRAINING" },
     4: { type: "rest", eating: "LOW" },
-    5: { type: "C", eating: "OMAD" },
+    5: { type: "C", eating: "TRAINING" },
     6: { type: "rest", eating: "FAST" },
     0: { type: "rest", eating: "LOW" }
   }[dow];
 };
 
 const eatingTarget = (mode) => ({
+  TRAINING: { kcal: 1800, protein_g: 150 },
   OMAD: { kcal: 1800, protein_g: 150 },
   LOW: { kcal: 1300, protein_g: 130 },
   FAST: { kcal: 0, protein_g: 0 }

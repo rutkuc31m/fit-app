@@ -23,19 +23,31 @@ export const PLAN = {
     { id: 4, nameKey: "phase4", weeks: [21, 26], from: 75, to: 73, color: "#30d158" }
   ],
 
-  // Weekly pattern by getDay() (0=Sun..6=Sat). ADF-hybrid with OMAD.
+  // Weekly pattern by getDay() (0=Sun..6=Sat). Gym days use split meals; rest days keep fast/OMAD-low structure.
   weeklyPattern: {
-    1: { type: "A",    eating: "OMAD" },
+    1: { type: "A",    eating: "TRAINING" },
     2: { type: "rest", eating: "FAST" },
-    3: { type: "B",    eating: "OMAD" },
+    3: { type: "B",    eating: "TRAINING" },
     4: { type: "rest", eating: "LOW" },
-    5: { type: "C",    eating: "OMAD" },
+    5: { type: "C",    eating: "TRAINING" },
     6: { type: "rest", eating: "FAST" },
     0: { type: "rest", eating: "LOW" }
   },
 
   // Eating windows & targets
   eatingTargets: {
+    TRAINING: {
+      kcal: 1800,
+      protein: 150,
+      carbs: 115,
+      fat: 75,
+      windowStart: "13:00",
+      windowEnd:   "22:00",
+      mealSplit: {
+        mainMeal: { time: "13:00", kcal: 1000, note: "protein + clean carbs before evening gym" },
+        postWorkout: { time: "20:45", kcal: 500, protein: 55, note: "whey + skyr, light enough before sleep" }
+      }
+    },
     OMAD: {
       kcal: 1800,
       protein: 150,

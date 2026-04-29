@@ -63,6 +63,7 @@ export default function Dashboard() {
   const dayLabelKey =
     dayPlan.eating === "FAST" ? "dashboard.fast_day" :
     dayPlan.type !== "rest"   ? "dashboard.training_day" : "dashboard.rest_day";
+  const eatingLabel = isFreeMealDay ? "CHEAT MEAL" : dayPlan.eating === "TRAINING" ? "SPLIT MEAL" : dayPlan.eating;
 
   return (
     <div className="page page-dashboard">
@@ -235,7 +236,7 @@ export default function Dashboard() {
         </AccentCard>
         <AccentCard as={Link} to="/log" accent="#ff9f0a" className="p-4 hover:border-line2">
           <div className="card-title mb-1">{t("nav.log")}</div>
-          <div className="mono font-bold text-xl text-signal">{isFreeMealDay ? "CHEAT MEAL" : dayPlan.eating}</div>
+          <div className="mono font-bold text-xl text-signal">{eatingLabel}</div>
           <div className="mono text-[.7rem] text-mute uppercase tracking-[.14em] mt-1">{target.kcal} kcal</div>
         </AccentCard>
       </div>

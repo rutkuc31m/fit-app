@@ -248,10 +248,11 @@ const dayHash = (dateStr) => {
   return Math.abs(h);
 };
 
-// One meal per day (OMAD or LOW). FAST → no meal.
+// Recipe base. TRAINING days reuse OMAD bowls, but the app now splits timing into lunch + post-workout protein.
 export function getDayRecipes(dateStr, eating) {
   if (eating === "FAST") return [];
-  const pool = RECIPES.filter((r) => r.mode === eating);
+  const recipeMode = eating === "TRAINING" ? "OMAD" : eating;
+  const pool = RECIPES.filter((r) => r.mode === recipeMode);
   if (pool.length === 0) return [];
   return [pool[dayHash(dateStr) % pool.length]];
 }
