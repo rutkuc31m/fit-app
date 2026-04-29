@@ -1,0 +1,63 @@
+export const GYM80_AREAS = [
+  { id: "all", label: "All", tone: "#30d158" },
+  { id: "upper", label: "Upper", tone: "#64d2ff" },
+  { id: "lower", label: "Lower", tone: "#30d158" },
+  { id: "core", label: "Core", tone: "#ff9f0a" },
+  { id: "full", label: "Full", tone: "#bf5af2" }
+];
+
+export const GYM80_MACHINES = [
+  { id: "gym80-3012n", code: "3012N", name: "Pull Over Machine", series: "80Sygnum", area: "upper", muscles: ["back", "lats"] },
+  { id: "gym80-3014", code: "3014", name: "Chest Crossover Machine", series: "80Sygnum", area: "upper", muscles: ["chest"] },
+  { id: "gym80-3050", code: "3050", name: "Shoulder Lateral Raise with Grips", series: "80Sygnum", area: "upper", muscles: ["side_delts"] },
+  { id: "gym80-3098", code: "3098", name: "Horizontal Biceps", series: "80Sygnum", area: "upper", muscles: ["biceps"] },
+  { id: "gym80-3099", code: "3099", name: "Standing Shoulder Lateral Raise", series: "80Sygnum", area: "upper", muscles: ["side_delts", "shoulders"] },
+  { id: "gym80-3121", code: "3121", name: "Standing Chest Crossover Machine", series: "80Sygnum", area: "upper", muscles: ["chest", "shoulders_front"] },
+  { id: "gym80-3225", code: "3225", name: "Twister Machine", series: "80Sygnum", area: "core", muscles: ["core", "obliques"] },
+  { id: "gym80-4002", code: "4002", name: "Basic Multi Press Station", series: "80Classics", area: "upper", muscles: ["chest", "shoulders", "triceps"] },
+  { id: "gym80-4042", code: "4042", name: "Adjustable V Station", series: "80Classics", area: "upper", muscles: ["back", "lats", "biceps"] },
+  { id: "gym80-4329n", code: "4329N", name: "Pure Kraft Incline Chest Press Dual", series: "Pure Kraft", area: "upper", muscles: ["upper_chest", "triceps"] },
+  { id: "gym80-4340", code: "4340", name: "Pure Kraft High Row with Movable Handles", series: "Pure Kraft", area: "upper", muscles: ["back", "lats", "rear_delts"] },
+  { id: "gym80-4342n", code: "4342N", name: "Pure Kraft Rotating Abdominal Crunch", series: "Pure Kraft", area: "core", muscles: ["core"] },
+  { id: "gym80-4353n", code: "4353N", name: "Pure Kraft Pendulum Squat", series: "Pure Kraft", area: "lower", muscles: ["quads", "glutes"] },
+  { id: "gym80-4360", code: "4360", name: "Pure Kraft Belt Squat", series: "Pure Kraft", area: "lower", muscles: ["quads", "glutes"] },
+  { id: "gym80-4374", code: "4374", name: "Pure Kraft Standing Abduction", series: "Pure Kraft", area: "lower", muscles: ["abductors", "glutes"] },
+  { id: "gym80-4376", code: "4376", name: "Pure Kraft Lying Inner Chest Dual", series: "Pure Kraft", area: "upper", muscles: ["chest"] },
+  { id: "gym80-4379", code: "4379", name: "Pure Kraft Overhead Triceps", series: "Pure Kraft", area: "upper", muscles: ["triceps"] },
+  { id: "gym80-4380", code: "4380", name: "Pure Kraft Donkey Calf", series: "Pure Kraft", area: "lower", muscles: ["calves"] },
+  { id: "gym80-4381", code: "4381", name: "Sissy Squat Special", series: "80Athletics", area: "lower", muscles: ["quads"] },
+  { id: "gym80-4383", code: "4383", name: "Pure Kraft 55 Degree Rowing Machine", series: "Pure Kraft", area: "upper", muscles: ["back", "rhomboids", "rear_delts"] },
+  { id: "gym80-4384", code: "4384", name: "Pure Kraft Abduction 3D", series: "Pure Kraft", area: "lower", muscles: ["abductors", "glutes"] },
+  { id: "gym80-4385", code: "4385", name: "Pure Kraft Standing Shoulder Lateral Raise", series: "Pure Kraft", area: "upper", muscles: ["side_delts"] },
+  { id: "gym80-4386", code: "4386", name: "Pure Kraft Booty Booster Special", series: "Pure Kraft", area: "lower", muscles: ["glutes"] },
+  { id: "gym80-4401", code: "4401", name: "Deadlift Machine", series: "80Classics", area: "full", muscles: ["posterior_chain", "glutes", "hamstrings", "lower_back"] },
+  { id: "gym80-4434", code: "4434", name: "Glute Ham Developer", series: "80Athletics", area: "lower", muscles: ["hamstrings", "glutes", "lower_back"] },
+  { id: "gym80-5002", code: "5002", name: "Innovation Glutes Machine", series: "80Sygnum Innovation", area: "lower", muscles: ["glutes"] },
+  { id: "gym80-5003", code: "5003", name: "Innovation Rowing Machine", series: "80Sygnum Innovation", area: "upper", muscles: ["back", "rhomboids"] },
+  { id: "gym80-5004", code: "5004", name: "Innovation Curler Machine", series: "80Sygnum Innovation", area: "upper", muscles: ["biceps"] },
+  { id: "gym80-5006", code: "5006", name: "Innovation Multi Extension Machine", series: "80Sygnum Innovation", area: "upper", muscles: ["triceps", "shoulders"] },
+  { id: "gym80-5011", code: "5011", name: "Abduction and Adduction Combo", series: "80Sygnum Innovation", area: "lower", muscles: ["abductors", "adductors"] },
+  { id: "gym80-5012", code: "5012", name: "Abdominal and Back Combo", series: "80Sygnum Innovation", area: "core", muscles: ["core", "lower_back"] },
+  { id: "gym80-5013", code: "5013", name: "Leg Curl and Leg Extension Combo", series: "80Sygnum Innovation", area: "lower", muscles: ["quads", "hamstrings"] },
+  { id: "gym80-5014", code: "5014", name: "Butterfly and Butterfly Reverse Combo", series: "80Sygnum Innovation", area: "upper", muscles: ["chest", "rear_delts"] },
+  { id: "gym80-5015", code: "5015", name: "Shoulder and Lat Pull Combo", series: "80Sygnum Innovation", area: "upper", muscles: ["shoulders", "lats"] },
+  { id: "gym80-5101", code: "5101", name: "Cable Art No. 1 Shoulder & Back+", series: "80Sygnum Cable Art", area: "upper", muscles: ["shoulders", "back"] },
+  { id: "gym80-5102", code: "5102", name: "Cable Art No. 2 Latissimus & Trapecius+", series: "80Sygnum Cable Art", area: "upper", muscles: ["lats", "traps"] },
+  { id: "gym80-5103", code: "5103", name: "Cable Art No. 3 Chest & Shoulder+", series: "80Sygnum Cable Art", area: "upper", muscles: ["chest", "shoulders"] },
+  { id: "gym80-5104", code: "5104", name: "Cable Art No. 4 Biceps & Triceps+", series: "80Sygnum Cable Art", area: "upper", muscles: ["biceps", "triceps"] },
+  { id: "gym80-5105", code: "5105", name: "Cable Art No. 5 Upper Body", series: "80Sygnum Cable Art", area: "upper", muscles: ["upper_body"] },
+  { id: "gym80-5106", code: "5106", name: "Cable Art No. 6 Legs", series: "80Sygnum Cable Art", area: "lower", muscles: ["legs"] },
+  { id: "gym80-5201", code: "5201", name: "Multi-Power Station", series: "80Sygnum", area: "full", muscles: ["full_body"] },
+  { id: "gym80-5242", code: "5242", name: "Multi-Power Station PrivateGym", series: "80Sygnum", area: "full", muscles: ["full_body"] },
+  { id: "gym80-80a00013", code: "80A00013", name: "Reverse Hyper Extension Machine", series: "80Athletics", area: "lower", muscles: ["glutes", "hamstrings", "lower_back"] },
+  { id: "gym80-80a00014", code: "80A00014", name: "Standing Chest Press", series: "80Athletics", area: "upper", muscles: ["chest", "triceps"] },
+  { id: "gym80-80a00015", code: "80A00015", name: "Triceps Dip", series: "80Athletics", area: "upper", muscles: ["triceps", "chest"] },
+  { id: "gym80-80a00016", code: "80A00016", name: "Bent Over Lateral Raise", series: "80Athletics", area: "upper", muscles: ["rear_delts", "side_delts"] },
+  { id: "gym80-80a00029", code: "80A00029", name: "Leg Extension", series: "80Athletics", area: "lower", muscles: ["quads"] },
+  { id: "gym80-80a00030", code: "80A00030", name: "Leg Curl", series: "80Athletics", area: "lower", muscles: ["hamstrings"] },
+  { id: "gym80-80a00031", code: "80A00031", name: "Power Rack Cable", series: "80Athletics", area: "full", muscles: ["full_body", "lats", "legs"] }
+];
+
+export function machineById(id) {
+  return GYM80_MACHINES.find((machine) => machine.id === id);
+}

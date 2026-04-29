@@ -8,7 +8,16 @@ r.use(requireAuth);
 // Get a session, creating it only for training screens that pass day_type.
 r.get("/session", (req, res) => {
   const { date, day_type } = req.query;
-  let sess = db.prepare("SELECT * FROM training_sessions WHERE user_id = ? AND date = ?").get(req.user.id, date);
+  let sess = day_type
+    ? db.prepare("SELECT * FROM training_sessions WHERE user_id = ? AND date = ? AND day_type = ? ORDER BY id DESC").get(req.user.id, date, day_type)
+    : db.prepare("SELECT * FROM training_sessions WHERE user_id = ? AND date = ? ORDER BY id DESC").get(req.user.id, date);
+  if (!sess && day_type) {
+    sess = db.prepare("SELECT * FROM training_sessions WHERE user_id = ? AND date = ? ORDER BY id DESC").get(req.user.id, date);
+    if (sess) {
+      db.prepare("UPDATE training_sessions SET day_type = ? WHERE id = ? AND user_id = ?").run(day_type, sess.id, req.user.id);
+      sess = db.prepare("SELECT * FROM training_sessions WHERE id = ?").get(sess.id);
+    }
+  }
   if (!sess && day_type) {
     const info = db.prepare("INSERT INTO training_sessions (user_id, date, day_type) VALUES (?, ?, ?)")
       .run(req.user.id, date, day_type);
