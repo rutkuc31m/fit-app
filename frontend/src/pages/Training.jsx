@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
-import { GYM80_AREAS, GYM80_MACHINES } from "../lib/gym80Catalog";
+import { FULLBODY_PLAN, GYM80_AREAS, GYM80_MACHINES } from "../lib/gym80Catalog";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const areaTone = (areaId) => GYM80_AREAS.find((area) => area.id === areaId)?.tone || "#64d2ff";
@@ -36,6 +36,7 @@ export default function Training() {
   const week = getWeekNum(date);
   const [session, setSession] = useState(null);
   const [areaFilter, setAreaFilter] = useState("recommended");
+  const [planDay, setPlanDay] = useState("A");
   const [query, setQuery] = useState("");
   const [availableIds, setAvailableIds] = useState(() => {
     try {
@@ -113,6 +114,18 @@ export default function Training() {
     load();
   };
 
+  const plan = FULLBODY_PLAN.find((item) => item.id === planDay) || FULLBODY_PLAN[0];
+
+  const resolvePlanMachine = (item) => {
+    const candidates = item.codes
+      .map((code) => GYM80_MACHINES.find((machine) => machine.code === code))
+      .filter(Boolean);
+    return candidates.find((machine) => availableIds.has(machine.id))
+      || candidates.find((machine) => machine.recommended)
+      || candidates[0]
+      || null;
+  };
+
   const renderMachineCard = (machine) => {
     const done = doneIds.has(machine.id);
     const available = availableIds.has(machine.id);
@@ -183,6 +196,55 @@ export default function Training() {
           </div>
         </AccentCard>
       )}
+
+      <AccentCard accent={plan.accent} className="p-3" contentClassName="pl-2 flex flex-col gap-3">
+        <div className="grid grid-cols-3 gap-2">
+          {FULLBODY_PLAN.map((day) => (
+            <button
+              key={day.id}
+              type="button"
+              className={`metric-tile text-left transition ${planDay === day.id ? "border-lime/60 bg-lime/10" : "hover:border-line2"}`}
+              onClick={() => setPlanDay(day.id)}
+            >
+              <div className="metric-label">day {day.id}</div>
+              <div className="metric-value text-[.78rem]" style={{ color: day.accent }}>{day.focus}</div>
+            </button>
+          ))}
+        </div>
+        <div>
+          <div className="section-label mt-0 mb-2">{plan.label}</div>
+          <div className="flex flex-col divide-y divide-line rounded-lg border border-line bg-bg2/45 overflow-hidden">
+            {plan.items.map((item) => {
+              const machine = resolvePlanMachine(item);
+              const done = machine ? doneIds.has(machine.id) : false;
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  className="w-full px-3 py-2 text-left hover:bg-surface2/70 active:bg-surface2 transition"
+                  onClick={() => machine && toggleMachine(machine)}
+                  disabled={!machine}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm text-ink font-semibold leading-snug truncate">{item.label}</div>
+                      <div className="mono text-[.56rem] text-mute uppercase tracking-[.12em] mt-[2px] truncate">
+                        {machine ? `${machine.code} · ${machine.name}` : "machine not mapped"}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="mono text-[.62rem] text-amber tabular-nums">{item.sets}x{item.reps}</div>
+                      <div className={`h-7 w-7 rounded-md border grid place-items-center ${done ? "border-lime/60 bg-lime/15 text-lime" : "border-line text-mute"}`}>
+                        {done ? <Icon.check size={13} /> : <Icon.plus size={13} />}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </AccentCard>
 
       <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2">

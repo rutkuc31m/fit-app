@@ -144,3 +144,49 @@ export function machineById(id) {
 GYM80_MACHINES.forEach((machine) => {
   machine.recommended = RECOMMENDED_CODES.has(machine.code);
 });
+
+export const FULLBODY_PLAN = [
+  {
+    id: "A",
+    label: "Fullbody A",
+    focus: "push + quads",
+    accent: "#30d158",
+    items: [
+      { label: "Leg Press", sets: "3", reps: "10-15", codes: ["3030", "3046", "5001", "80CL0001"] },
+      { label: "Chest Press", sets: "3", reps: "8-12", codes: ["3016", "3041", "5901", "4364"] },
+      { label: "Seated Row", sets: "3", reps: "10-12", codes: ["3040", "5003", "4319", "5907"] },
+      { label: "Shoulder Lateral Raise", sets: "3", reps: "12-20", codes: ["3050", "4385", "3099"] },
+      { label: "Leg Curl", sets: "2-3", reps: "10-15", codes: ["3003", "80CL0003", "80A00030", "5013"] },
+      { label: "Ab Crunch", sets: "3", reps: "10-15", codes: ["3037", "80CL0007", "3008", "80CL0008"] }
+    ]
+  },
+  {
+    id: "B",
+    label: "Fullbody B",
+    focus: "pull + hamstrings/core",
+    accent: "#64d2ff",
+    items: [
+      { label: "Leg Curl", sets: "3", reps: "10-15", codes: ["3003", "80CL0003", "80A00030", "5013"] },
+      { label: "Lat Pulldown", sets: "3", reps: "8-12", codes: ["3044", "4116", "4042", "5015"] },
+      { label: "Incline Chest Press", sets: "2-3", reps: "8-12", codes: ["3023N", "3042", "4329N", "4365"] },
+      { label: "Low / High Row", sets: "3", reps: "10-12", codes: ["4319", "4340", "4383", "3040"] },
+      { label: "Abduction / Glute", sets: "2-3", reps: "12-20", codes: ["3028", "5011", "4384", "5002"] },
+      { label: "Abdominal & Back", sets: "2-3", reps: "10-15", codes: ["5012", "3038", "80CL0006", "4119"] }
+    ]
+  },
+  {
+    id: "C",
+    label: "Fullbody C",
+    focus: "balanced + pump",
+    accent: "#ff9f0a",
+    items: [
+      { label: "Leg Extension", sets: "3", reps: "12-15", codes: ["80A00029", "80CL0001", "3123", "5013"] },
+      { label: "Leg Curl", sets: "3", reps: "12-15", codes: ["3003", "80CL0003", "80A00030", "5013"] },
+      { label: "Chest Press / Butterfly", sets: "3", reps: "10-15", codes: ["3016", "3041", "5014", "5909"] },
+      { label: "Lat Pulldown / Pull Over", sets: "3", reps: "10-15", codes: ["3044", "3012N", "4116", "5015"] },
+      { label: "Shoulder Lateral Raise", sets: "3", reps: "15-20", codes: ["3050", "4385", "3099"] },
+      { label: "Biceps + Triceps", sets: "2", reps: "12-15", codes: ["3010", "3098", "3011", "80CL0010"] },
+      { label: "Ab Crunch", sets: "3", reps: "12-15", codes: ["3037", "80CL0007", "3008", "80CL0008"] }
+    ]
+  }
+];
