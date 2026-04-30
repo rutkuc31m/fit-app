@@ -34,7 +34,7 @@ export default function Training() {
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
   const [session, setSession] = useState(null);
-  const [areaFilter, setAreaFilter] = useState("all");
+  const [areaFilter, setAreaFilter] = useState("recommended");
   const [query, setQuery] = useState("");
 
   const load = async () => {
@@ -60,7 +60,8 @@ export default function Training() {
   const filteredMachines = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return GYM80_MACHINES.filter((machine) => {
-      if (areaFilter !== "all" && machine.area !== areaFilter) return false;
+      if (areaFilter === "recommended" && !machine.recommended) return false;
+      if (!["all", "recommended"].includes(areaFilter) && machine.area !== areaFilter) return false;
       if (!needle) return true;
       return [machine.code, machine.name, machine.series, machine.area, ...(machine.muscles || [])]
         .join(" ")
@@ -113,7 +114,7 @@ export default function Training() {
             </div>
             <div className="text-sm text-ink font-semibold leading-snug mt-[2px] truncate">{machine.name}</div>
             <div className="mono text-[.56rem] text-ink2 uppercase tracking-[.12em] mt-[3px] truncate">
-              {machine.area} · {(machine.muscles || []).slice(0, 4).join(" · ")}
+              {machine.recommended ? "recommended · " : ""}{machine.area} · {(machine.muscles || []).slice(0, 4).join(" · ")}
             </div>
           </div>
         </button>
@@ -155,7 +156,7 @@ export default function Training() {
       )}
 
       <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {GYM80_AREAS.map((area) => (
             <button
               key={area.id}

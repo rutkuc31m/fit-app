@@ -1,10 +1,19 @@
 export const GYM80_AREAS = [
+  { id: "recommended", label: "Rec", tone: "#30d158" },
   { id: "all", label: "All", tone: "#30d158" },
   { id: "upper", label: "Upper", tone: "#64d2ff" },
   { id: "lower", label: "Lower", tone: "#30d158" },
   { id: "core", label: "Core", tone: "#ff9f0a" },
   { id: "full", label: "Full", tone: "#bf5af2" }
 ];
+
+const RECOMMENDED_CODES = new Set([
+  "3003", "3010", "3011", "3012N", "3016", "3023N", "3028", "3030", "3037", "3038",
+  "3040", "3041", "3043", "3044", "3046", "3050", "3098", "4002", "4034", "4042",
+  "4116", "4119", "4319", "4329N", "4340", "4342N", "5001", "5003", "5011", "5012",
+  "5013", "5014", "5015", "80A00029", "80A00030", "80CL0001", "80CL0003", "80CL0006",
+  "80CL0007"
+]);
 
 export const GYM80_MACHINES = [
   { id: "gym80-3003", code: "3003", name: "Seated Leg Curl", series: "80Sygnum", area: "lower", muscles: ["hamstrings"] },
@@ -130,3 +139,7 @@ export const GYM80_MACHINES = [
 export function machineById(id) {
   return GYM80_MACHINES.find((machine) => machine.id === id);
 }
+
+GYM80_MACHINES.forEach((machine) => {
+  machine.recommended = RECOMMENDED_CODES.has(machine.code);
+});
