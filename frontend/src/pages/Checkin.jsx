@@ -127,7 +127,7 @@ export default function Checkin() {
         setData((d) => ({
           ...d,
           [angle]: latest.path,
-          _photoCounts: { ...(d._photoCounts || {}), [latest.angle]: latest.count_today }
+          _photoCounts: { ...(d._photoCounts || {}), [latest.angle]: latest.count_today, total: latest.count_today }
         }));
       }
     } finally {

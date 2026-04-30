@@ -24,7 +24,6 @@ r.get("/", (req, res) => {
 r.get("/:week", (req, res) => {
   const week = parseInt(req.params.week, 10);
   const row = db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
-  if (!row) return res.json(null);
   const today = new Date().toISOString().slice(0, 10);
   const counts = db.prepare(`
     SELECT angle, COUNT(*) AS count
@@ -34,7 +33,7 @@ r.get("/:week", (req, res) => {
   `).all(req.user.id, today);
   const totalCount = counts.reduce((sum, r) => sum + Number(r.count || 0), 0);
   res.json({
-    ...row,
+    ...(row || { week_number: week, date: today }),
     photo_counts: { ...Object.fromEntries(counts.map((r) => [r.angle, r.count])), total: totalCount }
   });
 });
@@ -81,16 +80,17 @@ r.post("/:week/photo", (req, res) => {
   writeFileSync(join(userDir, fname), buf);
   const relPath = `/photos/${req.user.id}/${fname}`;
 
+  const existing = db.prepare("SELECT id FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
+  if (!existing) {
+    db.prepare("INSERT INTO weekly_checkins (user_id, week_number, date) VALUES (?, ?, ?)")
+      .run(req.user.id, week, photoDate);
+  }
+
   // Keep legacy angle columns working, but general photos only go to progress history.
   if (angle !== "general") {
     const col = `photo_${angle}`;
-    const existing = db.prepare("SELECT id FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
-    if (existing) {
-      db.prepare(`UPDATE weekly_checkins SET ${col} = ? WHERE id = ?`).run(relPath, existing.id);
-    } else {
-      db.prepare(`INSERT INTO weekly_checkins (user_id, week_number, date, ${col}) VALUES (?, ?, ?, ?)`)
-        .run(req.user.id, week, photoDate, relPath);
-    }
+    const row = db.prepare("SELECT id FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
+    db.prepare(`UPDATE weekly_checkins SET ${col} = ? WHERE id = ?`).run(relPath, row.id);
   }
 
   db.prepare("INSERT INTO progress_photos (user_id, date, path, angle) VALUES (?, ?, ?, ?)")
