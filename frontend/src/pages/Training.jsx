@@ -6,6 +6,7 @@ import { GYM80_AREAS, GYM80_MACHINES } from "../lib/gym80Catalog";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const areaTone = (areaId) => GYM80_AREAS.find((area) => area.id === areaId)?.tone || "#64d2ff";
+const GYM80_AVAILABLE_KEY = "fitapp:gym80:available";
 
 function buildDoneMap(sets = []) {
   const map = new Map();
@@ -36,6 +37,13 @@ export default function Training() {
   const [session, setSession] = useState(null);
   const [areaFilter, setAreaFilter] = useState("recommended");
   const [query, setQuery] = useState("");
+  const [availableIds, setAvailableIds] = useState(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(GYM80_AVAILABLE_KEY) || "[]"));
+    } catch {
+      return new Set();
+    }
+  });
 
   const load = async () => {
     const s = await api.get(`/training/session?date=${date}&day_type=GYM80`);
@@ -60,15 +68,26 @@ export default function Training() {
   const filteredMachines = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return GYM80_MACHINES.filter((machine) => {
+      if (areaFilter === "available" && !availableIds.has(machine.id)) return false;
       if (areaFilter === "recommended" && !machine.recommended) return false;
-      if (!["all", "recommended"].includes(areaFilter) && machine.area !== areaFilter) return false;
+      if (!["all", "recommended", "available"].includes(areaFilter) && machine.area !== areaFilter) return false;
       if (!needle) return true;
       return [machine.code, machine.name, machine.series, machine.area, ...(machine.muscles || [])]
         .join(" ")
         .toLowerCase()
         .includes(needle);
     });
-  }, [areaFilter, query]);
+  }, [areaFilter, availableIds, query]);
+
+  const toggleAvailable = (machine) => {
+    setAvailableIds((current) => {
+      const next = new Set(current);
+      if (next.has(machine.id)) next.delete(machine.id);
+      else next.add(machine.id);
+      localStorage.setItem(GYM80_AVAILABLE_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   const toggleMachine = async (machine) => {
     if (!session) return;
@@ -96,6 +115,7 @@ export default function Training() {
 
   const renderMachineCard = (machine) => {
     const done = doneIds.has(machine.id);
+    const available = availableIds.has(machine.id);
     return (
       <AccentCard
         key={machine.id}
@@ -103,21 +123,30 @@ export default function Training() {
         className={`p-3 transition ${done ? "border-lime/70 bg-lime/10" : "hover:border-line2"}`}
         contentClassName="pl-2"
       >
-        <button type="button" className="w-full text-left flex items-center gap-3" onClick={() => toggleMachine(machine)}>
+        <div className="w-full flex items-center gap-3">
           <div className={`h-10 w-10 rounded-lg border flex items-center justify-center shrink-0 ${done ? "border-lime/60 bg-lime/15 text-lime" : "border-line bg-bg2 text-mute"}`}>
             {done ? <Icon.check size={17} /> : <Icon.plus size={17} />}
           </div>
-          <div className="min-w-0 flex-1">
+          <button type="button" className="min-w-0 flex-1 text-left" onClick={() => toggleMachine(machine)}>
             <div className="flex items-center gap-2 min-w-0">
               <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em] shrink-0">{machine.code}</div>
               <div className="mono text-[.55rem] text-mute uppercase tracking-[.12em] truncate">{machine.series}</div>
             </div>
             <div className="text-sm text-ink font-semibold leading-snug mt-[2px] truncate">{machine.name}</div>
             <div className="mono text-[.56rem] text-ink2 uppercase tracking-[.12em] mt-[3px] truncate">
-              {machine.recommended ? "recommended · " : ""}{machine.area} · {(machine.muscles || []).slice(0, 4).join(" · ")}
+              {available ? "in gym · " : ""}{machine.recommended ? "recommended · " : ""}{machine.area} · {(machine.muscles || []).slice(0, 4).join(" · ")}
             </div>
-          </div>
-        </button>
+          </button>
+          <button
+            type="button"
+            className={`btn-icon shrink-0 ${available ? "text-amber border-amber/50 bg-amber/10" : "text-mute"}`}
+            onClick={() => toggleAvailable(machine)}
+            aria-label="mark machine in gym"
+            title="mark machine in gym"
+          >
+            <Icon.star size={15} fill={available ? "currentColor" : "none"} />
+          </button>
+        </div>
       </AccentCard>
     );
   };
@@ -133,7 +162,7 @@ export default function Training() {
           { label: "done", value: doneMachines.length, className: "text-lime" },
           { label: "upper", value: areaCounts.upper || 0, className: "text-cyan" },
           { label: "lower", value: areaCounts.lower || 0, className: "text-lime" },
-          { label: "core", value: areaCounts.core || 0, className: "text-amber" }
+          { label: "gym", value: availableIds.size, className: "text-amber" }
         ]}
       />
 

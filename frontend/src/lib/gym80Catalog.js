@@ -1,4 +1,5 @@
 export const GYM80_AREAS = [
+  { id: "available", label: "Gym", tone: "#ff9f0a" },
   { id: "recommended", label: "Rec", tone: "#30d158" },
   { id: "all", label: "All", tone: "#30d158" },
   { id: "upper", label: "Upper", tone: "#64d2ff" },
