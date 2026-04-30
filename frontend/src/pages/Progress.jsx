@@ -404,7 +404,7 @@ export default function Progress() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="card-title">Progress photos</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">front · side · back · weekly check-in</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">general upload · private history</div>
         </div>
         <Icon.chev size={14} className="text-mute shrink-0" />
       </AccentCard>

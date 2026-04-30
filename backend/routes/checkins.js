@@ -32,9 +32,10 @@ r.get("/:week", (req, res) => {
     WHERE user_id = ? AND date = ?
     GROUP BY angle
   `).all(req.user.id, today);
+  const totalCount = counts.reduce((sum, r) => sum + Number(r.count || 0), 0);
   res.json({
     ...row,
-    photo_counts: Object.fromEntries(counts.map((r) => [r.angle, r.count]))
+    photo_counts: { ...Object.fromEntries(counts.map((r) => [r.angle, r.count])), total: totalCount }
   });
 });
 
@@ -61,12 +62,13 @@ r.put("/:week", (req, res) => {
   res.json(db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week));
 });
 
-// POST /api/checkins/:week/photo  — body { angle: "front"|"side"|"back"|"legs", data_url: "data:image/jpeg;base64,..." }
+// POST /api/checkins/:week/photo  — body { angle?: "general"|"front"|"side"|"back"|"legs", data_url: "data:image/jpeg;base64,..." }
 r.post("/:week/photo", (req, res) => {
   const week = parseInt(req.params.week, 10);
-  const { angle, data_url, date } = req.body || {};
+  const { data_url, date } = req.body || {};
+  const angle = req.body?.angle || "general";
   const photoDate = date || new Date().toISOString().slice(0, 10);
-  if (!angle || !["front", "side", "back", "legs"].includes(angle)) return res.status(400).json({ error: "bad_angle" });
+  if (!["general", "front", "side", "back", "legs"].includes(angle)) return res.status(400).json({ error: "bad_angle" });
   if (!data_url || !data_url.startsWith("data:image/")) return res.status(400).json({ error: "bad_data" });
 
   const m = data_url.match(/^data:image\/(\w+);base64,(.+)$/);
@@ -79,21 +81,23 @@ r.post("/:week/photo", (req, res) => {
   writeFileSync(join(userDir, fname), buf);
   const relPath = `/photos/${req.user.id}/${fname}`;
 
-  // upsert into weekly_checkins
-  const col = `photo_${angle}`;
-  const existing = db.prepare("SELECT id FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
-  if (existing) {
-    db.prepare(`UPDATE weekly_checkins SET ${col} = ? WHERE id = ?`).run(relPath, existing.id);
-  } else {
-    db.prepare(`INSERT INTO weekly_checkins (user_id, week_number, date, ${col}) VALUES (?, ?, ?, ?)`)
-      .run(req.user.id, week, photoDate, relPath);
+  // Keep legacy angle columns working, but general photos only go to progress history.
+  if (angle !== "general") {
+    const col = `photo_${angle}`;
+    const existing = db.prepare("SELECT id FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);
+    if (existing) {
+      db.prepare(`UPDATE weekly_checkins SET ${col} = ? WHERE id = ?`).run(relPath, existing.id);
+    } else {
+      db.prepare(`INSERT INTO weekly_checkins (user_id, week_number, date, ${col}) VALUES (?, ?, ?, ?)`)
+        .run(req.user.id, week, photoDate, relPath);
+    }
   }
-  // also add to progress_photos for history
+
   db.prepare("INSERT INTO progress_photos (user_id, date, path, angle) VALUES (?, ?, ?, ?)")
     .run(req.user.id, photoDate, relPath, angle);
   const countToday = db.prepare(
-    "SELECT COUNT(*) AS count FROM progress_photos WHERE user_id = ? AND date = ? AND angle = ?"
-  ).get(req.user.id, photoDate, angle)?.count || 0;
+    "SELECT COUNT(*) AS count FROM progress_photos WHERE user_id = ? AND date = ?"
+  ).get(req.user.id, photoDate)?.count || 0;
 
   res.json({ angle, path: relPath, count_today: countToday });
 });

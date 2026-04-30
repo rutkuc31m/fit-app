@@ -80,7 +80,7 @@ export default function Checkin() {
   const date = todayStr();
   const week = getWeekNum(date);
   const order = PROTOCOLS.weeklyCheckpoint.order;
-  const visible = useMemo(() => order.filter((f) => !f.biweekly), [order]);
+  const visible = useMemo(() => order.filter((f) => !f.biweekly && !PHOTO_FIELDS[f.id]), [order]);
   const [data, setData] = useState({});
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(null);
@@ -135,6 +135,8 @@ export default function Checkin() {
     }
   };
 
+  const onGeneralPhoto = (files) => onPhoto("general", files);
+
   return (
     <div className="page page-checkin">
       <PageCommand
@@ -144,64 +146,48 @@ export default function Checkin() {
         metrics={[
           { label: "week", value: `W${String(week).padStart(2, "0")}`, className: "text-cyan" },
           { label: "fields", value: visible.length },
-          { label: "photos", value: "4", className: "text-amber" }
+          { label: "photos", value: data._photoCounts?.total || 0, className: "text-amber" }
         ]}
       />
 
       <div className="section-label">{t("checkin.title")} · W{week}</div>
 
+      <AccentCard accent="#64d2ff" className={uploading === "general" ? "border-amber/60" : ""}>
+        <div className="flex justify-between items-center gap-2">
+          <div>
+            <div className="card-title">Progress photos</div>
+            <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mt-[2px]">general upload</div>
+          </div>
+          <span className={`chip ${uploading === "general" ? "chip-energy" : (data._photoCounts?.total || 0) > 0 ? "chip-hydro" : "chip-mute"}`}>
+            {uploading === "general" ? "uploading" : `${data._photoCounts?.total || 0} saved`}
+          </span>
+        </div>
+        <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 min-h-[122px] grid place-items-center relative">
+          <div className="flex flex-col items-center gap-2 text-center px-4 py-5">
+            <Icon.camera size={24} className={(data._photoCounts?.total || 0) > 0 ? "text-lime" : "text-cyan"} />
+            <div className={`mono text-[.68rem] uppercase tracking-[.14em] ${(data._photoCounts?.total || 0) > 0 ? "text-lime" : "text-ink2"}`}>
+              {(data._photoCounts?.total || 0) > 0 ? "photos saved" : "no photo yet"}
+            </div>
+          </div>
+          {uploading === "general" && (
+            <div className="absolute inset-0 bg-bg/80 backdrop-blur-sm grid place-items-center">
+              <div className="mono text-[.66rem] text-amber uppercase tracking-[.16em]">compressing · uploading</div>
+            </div>
+          )}
+        </div>
+        <label className={`btn-ghost mt-2 inline-flex items-center justify-center gap-2 cursor-pointer w-full ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
+          <Icon.camera size={14} />
+          <span>{uploading === "general" ? "Uploading" : "Add photo"}</span>
+          <input type="file" accept="image/*" multiple className="hidden"
+            disabled={!!uploading}
+            onChange={(e) => {
+              onGeneralPhoto(e.target.files);
+              e.currentTarget.value = "";
+            }} />
+        </label>
+      </AccentCard>
+
       {visible.map((f) => {
-        if (PHOTO_FIELDS[f.id]) {
-          const angleKey = f.id.replace("photo_", "");
-          const busy = uploading === f.id;
-          const count = data._photoCounts?.[angleKey] || 0;
-          return (
-            <AccentCard key={f.id} accent="#64d2ff" className={busy ? "border-amber/60" : ""}>
-              <div className="flex justify-between items-center gap-2">
-                <div>
-                  <div className="card-title">{t(`checkin.${angleKey}`)}</div>
-                  <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mt-[2px]">photo check-in</div>
-                </div>
-                <span className={`chip ${busy ? "chip-energy" : data[f.id] ? "chip-hydro" : "chip-mute"}`}>
-                  {busy ? "uploading" : data[f.id] ? "saved" : "empty"}
-                </span>
-              </div>
-              <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 min-h-[122px] grid place-items-center relative">
-                <div className="flex flex-col items-center gap-2 text-center px-4 py-5">
-                  <Icon.camera size={24} className={data[f.id] ? "text-lime" : "text-cyan"} />
-                  <div className={`mono text-[.68rem] uppercase tracking-[.14em] ${data[f.id] ? "text-lime" : "text-ink2"}`}>
-                    {data[f.id] ? "photo saved" : "no photo yet"}
-                  </div>
-                  {count > 0 && (
-                    <div className="mono text-[.58rem] text-mute">
-                      {count} {angleKey} upload{count === 1 ? "" : "s"} today
-                    </div>
-                  )}
-                </div>
-                {busy && (
-                  <div className="absolute inset-0 bg-bg/80 backdrop-blur-sm grid place-items-center">
-                    <div className="mono text-[.66rem] text-amber uppercase tracking-[.16em]">compressing · uploading</div>
-                  </div>
-                )}
-              </div>
-              {data[f.id] && (
-                <div className="mono text-[.56rem] text-mute uppercase tracking-[.12em] mt-2 text-center">
-                  saved privately · gallery view later
-                </div>
-              )}
-              <label className={`btn-ghost mt-2 inline-flex items-center justify-center gap-2 cursor-pointer w-full ${busy ? "opacity-60 pointer-events-none" : ""}`}>
-                <Icon.camera size={14} />
-                <span>{busy ? "Uploading" : data[f.id] ? "Add another photo" : "Add photo"}</span>
-                <input type="file" accept="image/*" multiple className="hidden"
-                  disabled={!!uploading}
-                  onChange={(e) => {
-                    onPhoto(f.id, e.target.files);
-                    e.currentTarget.value = "";
-                  }} />
-              </label>
-            </AccentCard>
-          );
-        }
         if (f.type === "number") {
           const c = colorOf(f.id);
           return (
