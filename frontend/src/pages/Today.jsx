@@ -49,6 +49,23 @@ const windowState = (eating) => {
 };
 
 const fastGuardrails = ["water", "coffee", "easy walk", "sleep"];
+const TODAY_CALL_KEY = "fitapp:today-call";
+
+const FOOD_CHOICES = [
+  { id: "FAST", label: "FAST", kcal: 0, protein: 0, window: null, tone: "#64d2ff", hint: "water / coffee" },
+  { id: "LOW", label: "LOW", kcal: 1300, protein: 130, window: { start: "18:00", end: "19:00" }, tone: "#ff9f0a", hint: "omad low" },
+  { id: "OMAD", label: "OMAD", kcal: 1800, protein: 150, window: { start: "19:30", end: "20:45" }, tone: "#30d158", hint: "one meal" },
+  { id: "TRAIN", label: "TRAIN", kcal: 1800, protein: 150, window: { start: "13:00", end: "22:00" }, tone: "#30d158", hint: "split meal" },
+  { id: "CHEAT", label: "CHEAT", kcal: 2200, protein: 140, window: { start: "18:00", end: "21:00" }, tone: "#ff453a", hint: "free meal" }
+];
+
+const GYM_CHOICES = [
+  { id: "REST", label: "REST", hint: "walk only", tone: "#64d2ff" },
+  { id: "GYM", label: "GYM", hint: "full session", tone: "#30d158" },
+  { id: "LIGHT", label: "LIGHT", hint: "pump / mobility", tone: "#ff9f0a" },
+  { id: "CARDIO", label: "CARDIO", hint: "walk / bike", tone: "#bf5af2" },
+  { id: "CUSTOM", label: "CUSTOM", hint: "your call", tone: "#64d2ff" }
+];
 
 const recoverySnapshotKey = (value = {}) => JSON.stringify({
   energy: value.energy === "" || value.energy == null ? null : Number(value.energy),
@@ -58,6 +75,55 @@ const recoverySnapshotKey = (value = {}) => JSON.stringify({
 
 const hasRecoveryValue = (value = {}) =>
   ["energy", "hunger", "headache"].some((field) => value[field] !== "" && value[field] != null);
+
+const todayCallKey = (date) => `${TODAY_CALL_KEY}:${date}`;
+
+const readTodayCallPrefs = (date, fallback = {}) => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(todayCallKey(date)) || "{}");
+    return {
+      foodId: raw.foodId || fallback.foodId || "TRAIN",
+      gymId: raw.gymId || fallback.gymId || "GYM"
+    };
+  } catch {
+    return {
+      foodId: fallback.foodId || "TRAIN",
+      gymId: fallback.gymId || "GYM"
+    };
+  }
+};
+
+const writeTodayCallPrefs = (date, prefs) => {
+  try {
+    localStorage.setItem(todayCallKey(date), JSON.stringify(prefs));
+  } catch {}
+};
+
+const findFoodChoice = (id) => FOOD_CHOICES.find((choice) => choice.id === id) || FOOD_CHOICES[3];
+const findGymChoice = (id) => GYM_CHOICES.find((choice) => choice.id === id) || GYM_CHOICES[1];
+
+const buildEffectiveDay = (day, foodChoice, gymChoice) => ({
+  ...day,
+  eating: {
+    ...day.eating,
+    mode: foodChoice.id,
+    label: foodChoice.label,
+    window: foodChoice.window,
+    targets: {
+      ...day.eating.targets,
+      kcal: foodChoice.kcal,
+      protein: foodChoice.protein
+    }
+  },
+  training: gymChoice.id === "REST"
+    ? null
+    : {
+        ...(day.training || {}),
+        type: gymChoice.id,
+        label: gymChoice.label,
+        timeSlot: day.training?.timeSlot || "18:30 – 19:30"
+      }
+});
 
 const buildTodayDay = (date, session) => {
   const sourceDate = date < PLAN.startDate ? PLAN.startDate : date;
@@ -180,10 +246,10 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   );
 }
 
-function CommandCard({ readiness, day, leftKg, journeyPct }) {
+function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice, onFoodChange, onGymChange }) {
   if (!readiness) return null;
-  const fastDay = !day?.eating?.window;
-  const timing = windowState(day.eating);
+  const fastDay = !foodChoice?.window;
+  const timing = windowState(foodChoice);
   const accent = readiness.color;
   return (
     <div className="command-card" style={{ borderColor: `${accent}70`, background: `linear-gradient(135deg, ${accent}14 0%, rgba(28,28,30,.94) 48%, rgba(10,10,11,.94) 100%)` }}>
@@ -205,15 +271,56 @@ function CommandCard({ readiness, day, leftKg, journeyPct }) {
       <div className="grid grid-cols-3 gap-2 mt-4 pl-2">
         <div className="command-metric">
           <div className="metric-label">food</div>
-          <div className="metric-value text-[.78rem]" style={{ color: fastDay ? "#64d2ff" : "#ff9f0a" }}>{fastDay ? "FAST" : day.eating.label}</div>
+          <div className="metric-value text-[.78rem]" style={{ color: foodChoice.tone }}>{foodChoice.label}</div>
         </div>
         <div className="command-metric">
           <div className="metric-label">kcal</div>
-          <div className="metric-value text-[.78rem] text-amber">{day.eating.targets.kcal}</div>
+          <div className="metric-value text-[.78rem] text-amber">{foodChoice.kcal}</div>
         </div>
         <div className="command-metric">
           <div className="metric-label">gym</div>
-          <div className="metric-value text-[.78rem] text-lime">{day.training?.type || "REST"}</div>
+          <div className="metric-value text-[.78rem]" style={{ color: gymChoice.tone }}>{gymChoice.label}</div>
+        </div>
+      </div>
+
+      <div className="grid gap-2 mt-3 pl-2">
+        <div>
+          <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em] mb-2">food</div>
+          <div className="flex flex-wrap gap-1.5">
+            {FOOD_CHOICES.map((choice) => {
+              const active = choice.id === foodChoice.id;
+              return (
+                <button
+                  key={choice.id}
+                  type="button"
+                  className={`chip ${active ? "chip-signal" : "chip-mute"}`}
+                  style={active ? { borderColor: choice.tone, color: choice.tone, background: `${choice.tone}14` } : null}
+                  onClick={() => onFoodChange(choice.id)}
+                >
+                  {choice.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div>
+          <div className="mono text-[.52rem] text-mute uppercase tracking-[.18em] mb-2">gym</div>
+          <div className="flex flex-wrap gap-1.5">
+            {GYM_CHOICES.map((choice) => {
+              const active = choice.id === gymChoice.id;
+              return (
+                <button
+                  key={choice.id}
+                  type="button"
+                  className={`chip ${active ? "chip-signal" : "chip-mute"}`}
+                  style={active ? { borderColor: choice.tone, color: choice.tone, background: `${choice.tone}14` } : null}
+                  onClick={() => onGymChange(choice.id)}
+                >
+                  {choice.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -277,6 +384,7 @@ export default function Today() {
   const [savedRecoveryKey, setSavedRecoveryKey] = useState(null);
   const [recoverySaving, setRecoverySaving] = useState(false);
   const [, setClockTick] = useState(0);
+  const [callPrefs, setCallPrefs] = useState(() => readTodayCallPrefs(todayStr()));
   const week = getWeekNum(date);
   const phase = getPhase(week);
   const dayIdx = daysBetween(PLAN.startDate, date) + 1;
@@ -307,9 +415,20 @@ export default function Today() {
   }, []);
 
   const day = useMemo(() => buildTodayDay(date, session), [date, session]);
+  const foodChoice = useMemo(() => findFoodChoice(callPrefs.foodId), [callPrefs.foodId]);
+  const gymChoice = useMemo(() => findGymChoice(callPrefs.gymId), [callPrefs.gymId]);
+  const effectiveDay = useMemo(() => buildEffectiveDay(day, foodChoice, gymChoice), [day, foodChoice, gymChoice]);
   const preStart = date < PLAN.startDate;
-  const readiness = day ? dailyReadiness({ day, recovery, mealsTotals, session }) : null;
-  const recoveryNote = recoverySaved ? recoveryCoachNote(recovery, !day?.eating?.window) : null;
+  const readiness = effectiveDay ? dailyReadiness({ day: effectiveDay, recovery, mealsTotals, session }) : null;
+  const recoveryNote = recoverySaved ? recoveryCoachNote(recovery, !foodChoice?.window) : null;
+
+  useEffect(() => {
+    setCallPrefs(readTodayCallPrefs(date));
+  }, [date]);
+
+  useEffect(() => {
+    writeTodayCallPrefs(date, callPrefs);
+  }, [date, callPrefs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -446,7 +565,16 @@ export default function Today() {
         </AccentCard>
       )}
 
-      <CommandCard readiness={readiness} day={day} leftKg={leftKg} journeyPct={journeyPct} />
+      <CommandCard
+        readiness={readiness}
+        day={effectiveDay}
+        leftKg={leftKg}
+        journeyPct={journeyPct}
+        foodChoice={foodChoice}
+        gymChoice={gymChoice}
+        onFoodChange={(foodId) => setCallPrefs((prev) => ({ ...prev, foodId }))}
+        onGymChange={(gymId) => setCallPrefs((prev) => ({ ...prev, gymId }))}
+      />
 
       <RecoveryCheck
         value={recovery}
@@ -493,8 +621,8 @@ export default function Today() {
 
       {/* Meals ring */}
       {(() => {
-        const kcalTarget = day.eating.targets.kcal || 0;
-        const protTarget = day.eating.targets.protein || 0;
+        const kcalTarget = foodChoice.kcal || 0;
+        const protTarget = foodChoice.protein || 0;
         const kcalPct = kcalTarget ? Math.min(100, Math.round((mealsTotals.kcal / kcalTarget) * 100)) : 0;
         const protPct = protTarget ? Math.min(100, Math.round((mealsTotals.protein / protTarget) * 100)) : 0;
         const ring = (pct, color, label, value, total, unit) => {
@@ -613,17 +741,17 @@ export default function Today() {
       })()}
 
       {/* Training card */}
-      {day.training ? (
+      {effectiveDay.training ? (
         <AccentCard as={Link} to="/training" accent="#30d158" className="block hover:brightness-110">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <div className="mono text-[.58rem] text-lime uppercase tracking-[.2em]">training · day {day.training.type}</div>
+              <div className="mono text-[.58rem] text-lime uppercase tracking-[.2em]">training · {gymChoice.label}</div>
               <div className="font-display text-[1.25rem] text-ink leading-none tabular-nums mt-[2px]"
                 style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-                {day.training.label}
+                {effectiveDay.training.label}
               </div>
               <div className="mono text-[.6rem] text-mute uppercase tracking-[.14em] mt-1">
-                {day.training.timeSlot}
+                {effectiveDay.training.timeSlot}
               </div>
             </div>
             <div className="text-right shrink-0 pl-2">
