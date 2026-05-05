@@ -243,11 +243,6 @@ export default function Training() {
         </AccentCard>
       )}
 
-      <div className="section-label flex items-center justify-between gap-3">
-        <span>gym80 whitelist</span>
-        <span className="mono text-[.58rem] text-mute">W{String(week).padStart(2, "0")} · {studioMachines.length}</span>
-      </div>
-
       {session && (
         <button
           className={session.completed ? "btn" : "btn-primary"}
