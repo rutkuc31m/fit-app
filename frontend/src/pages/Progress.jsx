@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
-import { PLAN, todayStr } from "../lib/plan";
+import { PLAN, todayStr, getWeekNum } from "../lib/plan";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const addDays = (dateStr, days) => {
@@ -235,17 +235,19 @@ function NutritionCockpit({ review }) {
 }
 
 function SixMonthOverview() {
+  const currentWeek = getWeekNum(todayStr());
   const phaseRows = PLAN.phases.map((p) => {
     const start = addDays(PLAN.startDate, (p.weeks[0] - 1) * 7);
     const end = addDays(PLAN.startDate, p.weeks[1] * 7 - 1);
     return { ...p, start, end, duration: p.weeks[1] - p.weeks[0] + 1, focus: PHASE_FOCUS[p.id] };
   });
+  const routeStart = Math.max(0, currentWeek - 1);
+  const routeEnd = Math.min(WEIGHT_ROUTE.length, routeStart + 8);
+  const routeEntries = WEIGHT_ROUTE.slice(routeStart, routeEnd);
   const routeChunks = [
-    WEIGHT_ROUTE.slice(0, 7),
-    WEIGHT_ROUTE.slice(7, 14),
-    WEIGHT_ROUTE.slice(14, 21),
-    WEIGHT_ROUTE.slice(21)
-  ];
+    routeEntries.slice(0, 4),
+    routeEntries.slice(4)
+  ].filter((chunk) => chunk.length);
 
   return (
     <AccentCard accent="#30d158" className="p-4" contentClassName="pl-2 flex flex-col gap-4">
@@ -266,15 +268,19 @@ function SixMonthOverview() {
 
       <div>
         <div className="mono text-[.58rem] text-mute uppercase tracking-[.18em] mb-2">weekly weight route</div>
-        <div className="grid grid-cols-2 min-[520px]:grid-cols-4 gap-x-3 gap-y-1">
+        <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mb-2">
+          current week · W{currentWeek}
+        </div>
+        <div className="grid grid-cols-1 min-[520px]:grid-cols-2 gap-x-3 gap-y-1">
           {routeChunks.map((chunk, idx) => (
             <div key={idx} className="flex flex-col gap-1">
               {chunk.map(([date, kg], i) => {
-                const week = idx * 7 + i + 1;
+                const week = routeStart + idx * 4 + i + 1;
+                const isCurrent = week === currentWeek;
                 return (
                   <div key={`${date}-${kg}`} className="flex items-center justify-between gap-2 mono text-[.62rem] tabular-nums">
                     <span className="text-mute">W{week} · {date}</span>
-                    <span className={date === "27.04" ? "text-lime font-bold" : "text-ink2"}>{kg.toFixed(1)}kg</span>
+                    <span className={isCurrent ? "text-lime font-bold" : "text-ink2"}>{kg.toFixed(1)}kg</span>
                   </div>
                 );
               })}
