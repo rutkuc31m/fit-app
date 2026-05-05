@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
 import { GYM80_MACHINES } from "../lib/gym80Catalog";
@@ -120,7 +119,6 @@ function focusLine(doneMachines) {
 }
 
 export default function Training() {
-  const { t } = useTranslation();
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
   const [session, setSession] = useState(null);
@@ -173,12 +171,6 @@ export default function Training() {
       weight_kg: null,
       reps: null
     });
-    load();
-  };
-
-  const complete = async () => {
-    if (!session) return;
-    await api.put(`/training/session/${session.id}`, { completed: 1 });
     load();
   };
 
@@ -243,15 +235,6 @@ export default function Training() {
         </AccentCard>
       )}
 
-      {session && (
-        <button
-          className={session.completed ? "btn" : "btn-primary"}
-          onClick={complete}
-          disabled={session.completed}
-        >
-          {session.completed ? <span className="inline-flex items-center gap-2 justify-center"><Icon.check size={14} /> {t("training.complete")}</span> : t("training.complete")}
-        </button>
-      )}
     </div>
   );
 }
