@@ -185,7 +185,6 @@ export default function Log() {
   const allItems = meals.flatMap((m) => m.items);
   const totals = sumMealMacros(meals);
   const foodTarget = getFoodTarget(date);
-  const proteinLeft = Math.max(0, Math.round((foodTarget.protein || 0) - totals.protein));
   const itemPayload = (item) => ({
     name: item.name,
     barcode: item.barcode || null,
@@ -332,7 +331,7 @@ export default function Log() {
         title="Log fast. Stay honest."
         metrics={[
           { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
-          { label: `protein · ${proteinLeft}g left`, value: `${Math.round(totals.protein)}/${foodTarget.protein}g`, className: "text-lime" },
+          { label: "protein", value: `${Math.round(totals.protein)}/${foodTarget.protein}g`, className: "text-lime" },
           { label: "carbs", value: `${Math.round(totals.carbs)}g`, className: "text-amber" },
           { label: "fat", value: `${Math.round(totals.fat)}g`, className: "text-ink2" }
         ]}
