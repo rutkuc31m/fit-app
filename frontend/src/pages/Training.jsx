@@ -8,6 +8,20 @@ import { AccentCard, Icon, PageCommand } from "../components/ui";
 const areaTone = (areaId) => GYM80_AREAS.find((area) => area.id === areaId)?.tone || "#64d2ff";
 const GYM80_AVAILABLE_KEY = "fitapp:gym80:available";
 
+const readLocalAvailableIds = () => {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(GYM80_AVAILABLE_KEY) || "[]"));
+  } catch {
+    return new Set();
+  }
+};
+
+const writeLocalAvailableIds = (ids) => {
+  try {
+    localStorage.setItem(GYM80_AVAILABLE_KEY, JSON.stringify([...ids]));
+  } catch {}
+};
+
 function buildDoneMap(sets = []) {
   const map = new Map();
   sets.forEach((set) => {
@@ -38,17 +52,35 @@ export default function Training() {
   const [areaFilter, setAreaFilter] = useState("recommended");
   const [planDay, setPlanDay] = useState("A");
   const [query, setQuery] = useState("");
-  const [availableIds, setAvailableIds] = useState(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem(GYM80_AVAILABLE_KEY) || "[]"));
-    } catch {
-      return new Set();
-    }
-  });
+  const [availableIds, setAvailableIds] = useState(() => readLocalAvailableIds());
 
   const load = async () => {
-    const s = await api.get(`/training/session?date=${date}&day_type=GYM80`);
+    const [s, remoteFavorites] = await Promise.all([
+      api.get(`/training/session?date=${date}&day_type=GYM80`),
+      api.get("/training/favorite-machines").catch(() => [])
+    ]);
     setSession(s || null);
+
+    const remoteIds = new Set((remoteFavorites || []).map((row) => row.machine_id).filter(Boolean));
+    const localIds = readLocalAvailableIds();
+
+    if (remoteIds.size === 0 && localIds.size > 0) {
+      const machinesToSync = GYM80_MACHINES.filter((machine) => localIds.has(machine.id));
+      await Promise.all(machinesToSync.map((machine) => api.post("/training/favorite-machines", {
+        machine_id: machine.id,
+        code: machine.code,
+        name: machine.name,
+        series: machine.series,
+        area: machine.area,
+        muscles: machine.muscles || []
+      }).catch(() => null)));
+      setAvailableIds(localIds);
+      writeLocalAvailableIds(localIds);
+      return;
+    }
+
+    setAvailableIds(remoteIds);
+    writeLocalAvailableIds(remoteIds);
   };
 
   useEffect(() => { load(); }, [date]);
@@ -81,13 +113,24 @@ export default function Training() {
   }, [areaFilter, availableIds, query]);
 
   const toggleAvailable = (machine) => {
-    setAvailableIds((current) => {
-      const next = new Set(current);
-      if (next.has(machine.id)) next.delete(machine.id);
-      else next.add(machine.id);
-      localStorage.setItem(GYM80_AVAILABLE_KEY, JSON.stringify([...next]));
-      return next;
-    });
+    const next = new Set(availableIds);
+    const isOn = next.has(machine.id);
+    if (isOn) next.delete(machine.id);
+    else next.add(machine.id);
+    setAvailableIds(next);
+    writeLocalAvailableIds(next);
+    if (isOn) {
+      api.del(`/training/favorite-machines/${encodeURIComponent(machine.id)}`).catch(() => null);
+    } else {
+      api.post("/training/favorite-machines", {
+        machine_id: machine.id,
+        code: machine.code,
+        name: machine.name,
+        series: machine.series,
+        area: machine.area,
+        muscles: machine.muscles || []
+      }).catch(() => null);
+    }
   };
 
   const toggleMachine = async (machine) => {

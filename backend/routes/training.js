@@ -28,6 +28,56 @@ r.get("/session", (req, res) => {
   res.json({ ...sess, sets });
 });
 
+r.get("/favorite-machines", (req, res) => {
+  const rows = db.prepare(`
+    SELECT machine_id, code, name, series, area, muscles, created_at, updated_at
+    FROM favorite_machines
+    WHERE user_id = ?
+    ORDER BY updated_at DESC, id DESC
+  `).all(req.user.id).map((row) => ({
+    ...row,
+    muscles: row.muscles ? JSON.parse(row.muscles) : []
+  }));
+  res.json(rows);
+});
+
+r.post("/favorite-machines", (req, res) => {
+  const { machine_id, code, name, series, area, muscles } = req.body || {};
+  if (!machine_id) return res.status(400).json({ error: "machine_id_required" });
+  db.prepare(`
+    INSERT INTO favorite_machines (user_id, machine_id, code, name, series, area, muscles, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+    ON CONFLICT(user_id, machine_id) DO UPDATE SET
+      code = excluded.code,
+      name = excluded.name,
+      series = excluded.series,
+      area = excluded.area,
+      muscles = excluded.muscles,
+      updated_at = datetime('now')
+  `).run(
+    req.user.id,
+    machine_id,
+    code || null,
+    name || null,
+    series || null,
+    area || null,
+    JSON.stringify(Array.isArray(muscles) ? muscles : [])
+  );
+
+  const row = db.prepare(`
+    SELECT machine_id, code, name, series, area, muscles, created_at, updated_at
+    FROM favorite_machines
+    WHERE user_id = ? AND machine_id = ?
+  `).get(req.user.id, machine_id);
+
+  res.json({ ...row, muscles: row.muscles ? JSON.parse(row.muscles) : [] });
+});
+
+r.delete("/favorite-machines/:machineId", (req, res) => {
+  db.prepare("DELETE FROM favorite_machines WHERE user_id = ? AND machine_id = ?").run(req.user.id, req.params.machineId);
+  res.json({ ok: true });
+});
+
 r.put("/session/:id", (req, res) => {
   const { completed, cardio_min, notes, day_type } = req.body || {};
   db.prepare(`UPDATE training_sessions SET

@@ -124,6 +124,21 @@ CREATE TABLE IF NOT EXISTS favorite_foods (
 CREATE INDEX IF NOT EXISTS idx_favorite_foods_user ON favorite_foods(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_favorite_foods_user_name ON favorite_foods(user_id, name COLLATE NOCASE);
 
+CREATE TABLE IF NOT EXISTS favorite_machines (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  machine_id TEXT NOT NULL,
+  code       TEXT,
+  name       TEXT,
+  series     TEXT,
+  area       TEXT,
+  muscles    TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_favorite_machines_user ON favorite_machines(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_favorite_machines_user_machine ON favorite_machines(user_id, machine_id);
+
 CREATE TABLE IF NOT EXISTS training_sessions (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
