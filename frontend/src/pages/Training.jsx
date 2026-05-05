@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
@@ -55,7 +55,7 @@ export default function Training() {
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
   const [session, setSession] = useState(null);
-  const [areaFilter, setAreaFilter] = useState("recommended");
+  const [areaFilter, setAreaFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [availableIds, setAvailableIds] = useState(() => readLocalAvailableIds());
 
@@ -107,8 +107,7 @@ export default function Training() {
     const needle = query.trim().toLowerCase();
     return GYM80_MACHINES.filter((machine) => {
       if (areaFilter === "available" && !availableIds.has(machine.id)) return false;
-      if (areaFilter === "recommended" && !machine.recommended) return false;
-      if (!["all", "recommended", "available"].includes(areaFilter) && machine.area !== areaFilter) return false;
+      if (!["all", "available"].includes(areaFilter) && machine.area !== areaFilter) return false;
       if (!needle) return true;
       return [machine.code, machine.name, machine.series, machine.area, ...(machine.muscles || [])]
         .join(" ")
