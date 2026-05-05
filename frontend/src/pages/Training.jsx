@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
-import { GYM80_AREA_TONES, GYM80_MACHINES } from "../lib/gym80Catalog";
+import { GYM80_MACHINES } from "../lib/gym80Catalog";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
-const GYM80_AVAILABLE_KEY = "fitapp:gym80:available";
 const GYM80_BY_CODE = new Map(GYM80_MACHINES.map((machine) => [machine.code, machine]));
 
 const RAW_STUDIO_CODES = [
@@ -26,19 +25,7 @@ const resolveCode = (raw) => {
 
 const STUDIO_CODES = new Set(RAW_STUDIO_CODES.map(resolveCode).filter(Boolean));
 
-const readLocalAvailableIds = () => {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(GYM80_AVAILABLE_KEY) || "[]"));
-  } catch {
-    return new Set();
-  }
-};
-
-const writeLocalAvailableIds = (ids) => {
-  try {
-    localStorage.setItem(GYM80_AVAILABLE_KEY, JSON.stringify([...ids]));
-  } catch {}
-};
+const STUDIO_MACHINES = GYM80_MACHINES.filter((machine) => STUDIO_CODES.has(machine.code));
 
 function buildDoneMap(sets = []) {
   const map = new Map();
@@ -137,61 +124,27 @@ export default function Training() {
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
   const [session, setSession] = useState(null);
-  const [query, setQuery] = useState("");
-  const [availableIds, setAvailableIds] = useState(() => readLocalAvailableIds());
 
   const load = async () => {
-    const [s, remoteFavorites] = await Promise.all([
-      api.get(`/training/session?date=${date}&day_type=GYM80`),
-      api.get("/training/favorite-machines").catch(() => [])
-    ]);
+    const s = await api.get(`/training/session?date=${date}&day_type=GYM80`);
     setSession(s || null);
-
-    const remoteIds = new Set((remoteFavorites || []).map((row) => row.machine_id).filter(Boolean));
-    const localIds = readLocalAvailableIds();
-
-    if (remoteIds.size === 0 && localIds.size > 0) {
-      const machinesToSync = GYM80_MACHINES.filter((machine) => localIds.has(machine.id));
-      await Promise.all(machinesToSync.map((machine) => api.post("/training/favorite-machines", {
-        machine_id: machine.id,
-        code: machine.code,
-        name: machine.name,
-        series: machine.series,
-        area: machine.area,
-        muscles: machine.muscles || []
-      }).catch(() => null)));
-      setAvailableIds(localIds);
-      writeLocalAvailableIds(localIds);
-      return;
-    }
-
-    setAvailableIds(remoteIds);
-    writeLocalAvailableIds(remoteIds);
   };
 
   useEffect(() => {
     load();
   }, [date]);
 
-  const visibleMachines = useMemo(
-    () => GYM80_MACHINES.filter((machine) => STUDIO_CODES.has(machine.code) || availableIds.has(machine.id)),
-    [availableIds]
-  );
-
-  const visibleMachineIds = useMemo(() => new Set(visibleMachines.map((machine) => machine.id)), [visibleMachines]);
+  const studioMachines = STUDIO_MACHINES;
 
   const doneSetIdsByMachine = useMemo(() => buildDoneMap(session?.sets || []), [session]);
-  const doneIds = useMemo(
-    () => new Set([...doneSetIdsByMachine.keys()].filter((machineId) => visibleMachineIds.has(machineId))),
-    [doneSetIdsByMachine, visibleMachineIds]
-  );
+  const doneIds = useMemo(() => new Set([...doneSetIdsByMachine.keys()]), [doneSetIdsByMachine]);
 
   const doneMachines = useMemo(
-    () => visibleMachines.filter((machine) => doneIds.has(machine.id)),
-    [visibleMachines, doneIds]
+    () => studioMachines.filter((machine) => doneIds.has(machine.id)),
+    [studioMachines, doneIds]
   );
 
-  const planDays = useMemo(() => buildPlan(visibleMachines), [visibleMachines]);
+  const planDays = useMemo(() => buildPlan(studioMachines), [studioMachines]);
 
   const areaCounts = useMemo(() => {
     const counts = { upper: 0, core: 0, support: 0 };
@@ -204,38 +157,6 @@ export default function Training() {
     });
     return counts;
   }, [doneMachines]);
-
-  const filteredMachines = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return visibleMachines.filter((machine) => {
-      if (!needle) return true;
-      return [machine.code, machine.name, machine.series, machine.area, ...(machine.muscles || [])]
-        .join(" ")
-        .toLowerCase()
-        .includes(needle);
-    });
-  }, [visibleMachines, query]);
-
-  const toggleAvailable = (machine) => {
-    const next = new Set(availableIds);
-    const isOn = next.has(machine.id);
-    if (isOn) next.delete(machine.id);
-    else next.add(machine.id);
-    setAvailableIds(next);
-    writeLocalAvailableIds(next);
-    if (isOn) {
-      api.del(`/training/favorite-machines/${encodeURIComponent(machine.id)}`).catch(() => null);
-    } else {
-      api.post("/training/favorite-machines", {
-        machine_id: machine.id,
-        code: machine.code,
-        name: machine.name,
-        series: machine.series,
-        area: machine.area,
-        muscles: machine.muscles || []
-      }).catch(() => null);
-    }
-  };
 
   const toggleMachine = async (machine) => {
     if (!session) return;
@@ -261,56 +182,18 @@ export default function Training() {
     load();
   };
 
-  const renderMachineCard = (machine) => {
-    const done = doneIds.has(machine.id);
-    const available = availableIds.has(machine.id);
-    return (
-      <AccentCard
-        key={machine.id}
-        accent={done ? "#30d158" : GYM80_AREA_TONES[machine.area] || "#64d2ff"}
-        className={`p-3 transition ${done ? "border-lime/70 bg-lime/10" : "hover:border-line2"}`}
-        contentClassName="pl-2"
-      >
-        <div className="w-full flex items-center gap-3">
-          <div className={`h-10 w-10 rounded-lg border flex items-center justify-center shrink-0 ${done ? "border-lime/60 bg-lime/15 text-lime" : "border-line bg-bg2 text-mute"}`}>
-            {done ? <Icon.check size={17} /> : <Icon.plus size={17} />}
-          </div>
-          <button type="button" className="min-w-0 flex-1 text-left" onClick={() => toggleMachine(machine)}>
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em] shrink-0">{machine.code}</div>
-              <div className="mono text-[.55rem] text-mute uppercase tracking-[.12em] truncate">{machine.series}</div>
-            </div>
-            <div className="text-sm text-ink font-semibold leading-snug mt-[2px] truncate">{machine.name}</div>
-            <div className="mono text-[.56rem] text-ink2 uppercase tracking-[.12em] mt-[3px] truncate">
-              {available ? "in gym · " : ""}{machine.area} · {(machine.muscles || []).slice(0, 4).join(" · ")}
-            </div>
-          </button>
-          <button
-            type="button"
-            className={`btn-icon shrink-0 ${available ? "text-amber border-amber/50 bg-amber/10" : "text-mute"}`}
-            onClick={() => toggleAvailable(machine)}
-            aria-label="mark machine in gym"
-            title="mark machine in gym"
-          >
-            <Icon.star size={15} fill={available ? "currentColor" : "none"} />
-          </button>
-        </div>
-      </AccentCard>
-    );
-  };
-
   return (
     <div className="page page-training">
       <PageCommand
         accent="#30d158"
         kicker="gym80 logbook"
-        title="Gym only"
+        title="Gym plan"
         sub={focusLine(doneMachines)}
         metrics={[
           { label: "done", value: doneMachines.length, className: "text-lime" },
           { label: "upper", value: areaCounts.upper || 0, className: "text-cyan" },
           { label: "core", value: areaCounts.core || 0, className: "text-amber" },
-          { label: "gym", value: availableIds.size, className: "text-amber" }
+          { label: "gym", value: studioMachines.length, className: "text-amber" }
         ]}
       />
 
@@ -360,26 +243,9 @@ export default function Training() {
         </AccentCard>
       )}
 
-      <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
-        <div className="section-label mt-0 mb-0">gym list</div>
-        <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em]">
-          studio whitelist + current stars
-        </div>
-        <input
-          className="input mono text-sm w-full"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="search machine / muscle"
-        />
-      </AccentCard>
-
       <div className="section-label flex items-center justify-between gap-3">
-        <span>gym80 machines</span>
-        <span className="mono text-[.58rem] text-mute">W{String(week).padStart(2, "0")} · {filteredMachines.length}</span>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        {filteredMachines.map(renderMachineCard)}
+        <span>gym80 whitelist</span>
+        <span className="mono text-[.58rem] text-mute">W{String(week).padStart(2, "0")} · {studioMachines.length}</span>
       </div>
 
       {session && (
