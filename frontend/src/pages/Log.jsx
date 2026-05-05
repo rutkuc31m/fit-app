@@ -331,7 +331,7 @@ export default function Log() {
         title="Log fast. Stay honest."
         metrics={[
           { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
-          { label: "protein", value: `${Math.round(totals.protein)}/${foodTarget.protein}g`, className: "text-lime" },
+          { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
           { label: "carbs", value: `${Math.round(totals.carbs)}g`, className: "text-amber" },
           { label: "fat", value: `${Math.round(totals.fat)}g`, className: "text-ink2" }
         ]}
