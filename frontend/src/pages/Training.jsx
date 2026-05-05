@@ -9,7 +9,6 @@ const areaTone = (areaId) => GYM80_AREAS.find((area) => area.id === areaId)?.ton
 const GYM80_AVAILABLE_KEY = "fitapp:gym80:available";
 const FILTER_CHOICES = [
   { id: "all", label: "All", tone: "#30d158" },
-  { id: "recommended", label: "Rec", tone: "#30d158" },
   { id: "available", label: "Gym", tone: "#ff9f0a" }
 ];
 const GYM80_BY_CODE = new Map(GYM80_MACHINES.map((machine) => [machine.code, machine]));
