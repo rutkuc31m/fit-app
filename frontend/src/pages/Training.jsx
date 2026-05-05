@@ -7,6 +7,11 @@ import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const areaTone = (areaId) => GYM80_AREAS.find((area) => area.id === areaId)?.tone || "#64d2ff";
 const GYM80_AVAILABLE_KEY = "fitapp:gym80:available";
+const FILTER_CHOICES = [
+  { id: "all", label: "All", tone: "#30d158" },
+  { id: "recommended", label: "Rec", tone: "#30d158" },
+  { id: "available", label: "Gym", tone: "#ff9f0a" }
+];
 const GYM80_BY_CODE = new Map(GYM80_MACHINES.map((machine) => [machine.code, machine]));
 
 const machineFromCode = (code) => GYM80_BY_CODE.get(code);
@@ -392,7 +397,7 @@ export default function Training() {
 
       <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2">
-          {GYM80_AREAS.map((area) => (
+          {FILTER_CHOICES.map((area) => (
             <button
               key={area.id}
               type="button"
