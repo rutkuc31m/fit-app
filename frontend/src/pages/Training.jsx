@@ -2,18 +2,29 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
-import { GYM80_AREAS, GYM80_MACHINES } from "../lib/gym80Catalog";
+import { GYM80_AREA_TONES, GYM80_MACHINES } from "../lib/gym80Catalog";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
-const areaTone = (areaId) => GYM80_AREAS.find((area) => area.id === areaId)?.tone || "#64d2ff";
 const GYM80_AVAILABLE_KEY = "fitapp:gym80:available";
-const FILTER_CHOICES = [
-  { id: "all", label: "All", tone: "#30d158" },
-  { id: "available", label: "Gym", tone: "#ff9f0a" }
-];
 const GYM80_BY_CODE = new Map(GYM80_MACHINES.map((machine) => [machine.code, machine]));
 
-const machineFromCode = (code) => GYM80_BY_CODE.get(code);
+const RAW_STUDIO_CODES = [
+  "3041", "3043", "3016", "5014", "3020", "3044", "3098", "3040", "3036", "5012",
+  "3010", "3002", "3050", "3011", "3008", "3005", "5011", "3001", "3018", "3017",
+  "4366", "4355", "4379", "4383", "4319", "4018", "4385", "3031", "4023", "4012",
+  "4170", "4329", "4002", "4374", "4038", "4159n", "4314", "4384", "3031", "5014",
+  "3018", "5013"
+];
+
+const resolveCode = (raw) => {
+  const upper = String(raw || "").trim().toUpperCase();
+  if (!upper) return null;
+  if (GYM80_BY_CODE.has(upper)) return upper;
+  if (GYM80_BY_CODE.has(`${upper}N`)) return `${upper}N`;
+  return null;
+};
+
+const STUDIO_CODES = new Set(RAW_STUDIO_CODES.map(resolveCode).filter(Boolean));
 
 const readLocalAvailableIds = () => {
   try {
@@ -39,15 +50,86 @@ function buildDoneMap(sets = []) {
   return map;
 }
 
+function pickMachine(visibleMachines, usedIds, candidateCodes) {
+  for (const code of candidateCodes) {
+    const machine = visibleMachines.find((item) => item.code === code && !usedIds.has(item.id));
+    if (machine) return machine;
+  }
+  return null;
+}
+
+function buildPlan(visibleMachines) {
+  const sections = [
+    {
+      day: "Day 1",
+      title: "Push A",
+      focus: "chest / shoulders / triceps / core",
+      slots: [
+        { label: "chest", codes: ["3041", "3016", "4329N", "5014", "5901", "3014"] },
+        { label: "shoulders", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
+        { label: "triceps", codes: ["3011", "4379", "5006", "3036", "5904", "5104"] },
+        { label: "core", codes: ["5012", "3037", "3008", "4342N", "4119"] }
+      ]
+    },
+    {
+      day: "Day 2",
+      title: "Pull A",
+      focus: "back / biceps / glute support / core",
+      slots: [
+        { label: "lat", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
+        { label: "row", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
+        { label: "biceps", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
+        { label: "support", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+      ]
+    },
+    {
+      day: "Day 3",
+      title: "Upper B",
+      focus: "chest / back / shoulders / arms",
+      slots: [
+        { label: "chest", codes: ["4329N", "3041", "3016", "5014", "3014", "3097"] },
+        { label: "back", codes: ["4319", "3044", "3040", "4018", "4383", "4340"] },
+        { label: "shoulders", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
+        { label: "arms", codes: ["3011", "4379", "4366", "4355", "5006", "5104"] }
+      ]
+    },
+    {
+      day: "Day 4",
+      title: "Pull B",
+      focus: "back / shoulders / glute support / core",
+      slots: [
+        { label: "back", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
+        { label: "delts", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
+        { label: "touch", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
+        { label: "support", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+      ]
+    }
+  ];
+
+  return sections.map((section) => {
+    const usedIds = new Set();
+    const machines = section.slots
+      .map((slot) => {
+        const machine = pickMachine(visibleMachines, usedIds, slot.codes);
+        if (!machine) return null;
+        usedIds.add(machine.id);
+        return { ...slot, machine };
+      })
+      .filter(Boolean);
+    return { ...section, machines };
+  });
+}
+
 function focusLine(doneMachines) {
-  if (doneMachines.length === 0) return "Bugün ilk makineyi seç.";
+  if (doneMachines.length === 0) return "Bugün ilk üst vücut makinesini seç.";
   const counts = doneMachines.reduce((acc, machine) => {
-    acc[machine.area] = (acc[machine.area] || 0) + 1;
+    if (machine.area === "upper") acc.upper += 1;
+    if (machine.area === "core" || (machine.muscles || []).includes("lower_back")) acc.support += 1;
     return acc;
-  }, {});
-  if ((counts.upper || 0) >= 4) return "Upper volume iyi; bir sonraki sefer açı değiştir.";
-  if (doneMachines.length >= 5) return "Denge iyi; chest, back, shoulders ve glutes arasında ilerle.";
-  return "Hips-up odaklı devam; chest, back, shoulders, arms ve glutes dengesini koru.";
+  }, { upper: 0, support: 0 });
+  if (counts.upper >= 4) return "Upper hacmi iyi; bir sonraki seans açı değiştir.";
+  if (counts.support >= 2) return "Core ve support da doluyor; denge iyi.";
+  return "Chest, back, shoulders ve arms dengesini koru.";
 }
 
 export default function Training() {
@@ -55,7 +137,6 @@ export default function Training() {
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
   const [session, setSession] = useState(null);
-  const [areaFilter, setAreaFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [availableIds, setAvailableIds] = useState(() => readLocalAvailableIds());
 
@@ -88,33 +169,52 @@ export default function Training() {
     writeLocalAvailableIds(remoteIds);
   };
 
-  useEffect(() => { load(); }, [date]);
+  useEffect(() => {
+    load();
+  }, [date]);
 
-  const doneSetIdsByMachine = useMemo(() => buildDoneMap(session?.sets || []), [session]);
-  const doneIds = useMemo(() => new Set(doneSetIdsByMachine.keys()), [doneSetIdsByMachine]);
-  const doneMachines = useMemo(
-    () => GYM80_MACHINES.filter((machine) => doneIds.has(machine.id)),
-    [doneIds]
+  const visibleMachines = useMemo(
+    () => GYM80_MACHINES.filter((machine) => STUDIO_CODES.has(machine.code) || availableIds.has(machine.id)),
+    [availableIds]
   );
 
+  const visibleMachineIds = useMemo(() => new Set(visibleMachines.map((machine) => machine.id)), [visibleMachines]);
+
+  const doneSetIdsByMachine = useMemo(() => buildDoneMap(session?.sets || []), [session]);
+  const doneIds = useMemo(
+    () => new Set([...doneSetIdsByMachine.keys()].filter((machineId) => visibleMachineIds.has(machineId))),
+    [doneSetIdsByMachine, visibleMachineIds]
+  );
+
+  const doneMachines = useMemo(
+    () => visibleMachines.filter((machine) => doneIds.has(machine.id)),
+    [visibleMachines, doneIds]
+  );
+
+  const planDays = useMemo(() => buildPlan(visibleMachines), [visibleMachines]);
+
   const areaCounts = useMemo(() => {
-    const counts = { upper: 0, lower: 0, core: 0, full: 0 };
-    doneMachines.forEach((machine) => { counts[machine.area] = (counts[machine.area] || 0) + 1; });
+    const counts = { upper: 0, core: 0, support: 0 };
+    doneMachines.forEach((machine) => {
+      if (machine.area === "upper") counts.upper += 1;
+      if (machine.area === "core") counts.core += 1;
+      if (machine.area === "core" || (machine.muscles || []).includes("glutes") || (machine.muscles || []).includes("lower_back")) {
+        counts.support += 1;
+      }
+    });
     return counts;
   }, [doneMachines]);
 
   const filteredMachines = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return GYM80_MACHINES.filter((machine) => {
-      if (areaFilter === "available" && !availableIds.has(machine.id)) return false;
-      if (!["all", "available"].includes(areaFilter) && machine.area !== areaFilter) return false;
+    return visibleMachines.filter((machine) => {
       if (!needle) return true;
       return [machine.code, machine.name, machine.series, machine.area, ...(machine.muscles || [])]
         .join(" ")
         .toLowerCase()
         .includes(needle);
     });
-  }, [areaFilter, availableIds, query]);
+  }, [visibleMachines, query]);
 
   const toggleAvailable = (machine) => {
     const next = new Set(availableIds);
@@ -167,7 +267,7 @@ export default function Training() {
     return (
       <AccentCard
         key={machine.id}
-        accent={done ? "#30d158" : areaTone(machine.area)}
+        accent={done ? "#30d158" : GYM80_AREA_TONES[machine.area] || "#64d2ff"}
         className={`p-3 transition ${done ? "border-lime/70 bg-lime/10" : "hover:border-line2"}`}
         contentClassName="pl-2"
       >
@@ -182,7 +282,7 @@ export default function Training() {
             </div>
             <div className="text-sm text-ink font-semibold leading-snug mt-[2px] truncate">{machine.name}</div>
             <div className="mono text-[.56rem] text-ink2 uppercase tracking-[.12em] mt-[3px] truncate">
-              {available ? "in gym · " : ""}{machine.recommended ? "recommended · " : ""}{machine.area} · {(machine.muscles || []).slice(0, 4).join(" · ")}
+              {available ? "in gym · " : ""}{machine.area} · {(machine.muscles || []).slice(0, 4).join(" · ")}
             </div>
           </button>
           <button
@@ -204,15 +304,43 @@ export default function Training() {
       <PageCommand
         accent="#30d158"
         kicker="gym80 logbook"
-        title="Machine tracker"
+        title="Gym only"
         sub={focusLine(doneMachines)}
         metrics={[
           { label: "done", value: doneMachines.length, className: "text-lime" },
           { label: "upper", value: areaCounts.upper || 0, className: "text-cyan" },
-          { label: "lower", value: areaCounts.lower || 0, className: "text-lime" },
+          { label: "core", value: areaCounts.core || 0, className: "text-amber" },
           { label: "gym", value: availableIds.size, className: "text-amber" }
         ]}
       />
+
+      <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
+        <div className="section-label mt-0 mb-0">4-day upper rotation</div>
+        <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em]">
+          chest / back / shoulders / arms x2, glute + core support
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {planDays.map((day) => (
+            <div key={day.day} className="rounded-lg border border-line bg-bg2/70 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em]">{day.day}</div>
+                <div className="mono text-[.55rem] text-mute uppercase tracking-[.12em] truncate">{day.title}</div>
+              </div>
+              <div className="text-xs text-ink2 mt-1">{day.focus}</div>
+              <div className="mt-3 flex flex-col gap-1.5">
+                {day.machines.map(({ label, machine }) => (
+                  <div key={`${day.day}-${label}-${machine.id}`} className="flex items-center justify-between gap-2 rounded-md border border-line/80 bg-bg/60 px-2 py-1.5">
+                    <div className="mono text-[.55rem] uppercase tracking-[.12em] text-mute shrink-0">{label}</div>
+                    <div className="text-[.62rem] text-ink text-right truncate" title={`${machine.code} ${machine.name}`}>
+                      {machine.code} · {machine.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </AccentCard>
 
       {doneMachines.length > 0 && (
         <AccentCard accent="#30d158" className="p-3" contentClassName="pl-2">
@@ -233,17 +361,9 @@ export default function Training() {
       )}
 
       <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
-        <div className="grid grid-cols-3 gap-2">
-          {FILTER_CHOICES.map((area) => (
-            <button
-              key={area.id}
-              type="button"
-              className={`metric-tile text-center transition ${areaFilter === area.id ? "border-cyan/60 bg-cyan/10" : "hover:border-line2"}`}
-              onClick={() => setAreaFilter(area.id)}
-            >
-              <div className="metric-value text-[.72rem]" style={{ color: area.tone }}>{area.label}</div>
-            </button>
-          ))}
+        <div className="section-label mt-0 mb-0">gym list</div>
+        <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em]">
+          studio whitelist + current stars
         </div>
         <input
           className="input mono text-sm w-full"
@@ -255,7 +375,7 @@ export default function Training() {
 
       <div className="section-label flex items-center justify-between gap-3">
         <span>gym80 machines</span>
-        <span className="mono text-[.58rem] text-mute">W{String(week).padStart(2, "0")} · {filteredMachines.length}/{GYM80_MACHINES.length}</span>
+        <span className="mono text-[.58rem] text-mute">W{String(week).padStart(2, "0")} · {filteredMachines.length}</span>
       </div>
 
       <div className="flex flex-col gap-2">

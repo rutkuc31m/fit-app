@@ -1,22 +1,13 @@
-export const GYM80_AREAS = [
-  { id: "available", label: "Gym", tone: "#ff9f0a" },
-  { id: "recommended", label: "Rec", tone: "#30d158" },
-  { id: "all", label: "All", tone: "#30d158" },
-  { id: "upper", label: "Upper", tone: "#64d2ff" },
-  { id: "lower", label: "Lower", tone: "#30d158" },
-  { id: "core", label: "Core", tone: "#ff9f0a" },
-  { id: "full", label: "Full", tone: "#bf5af2" }
-];
-
-const RECOMMENDED_CODES = new Set([
-  "3003", "3010", "3011", "3012N", "3016", "3023N", "3028", "3030", "3037", "3038",
-  "3040", "3041", "3043", "3044", "3046", "3050", "3098", "4002", "4034", "4042",
-  "4116", "4119", "4319", "4329N", "4340", "4342N", "5001", "5003", "5011", "5012",
-  "5013", "5014", "5015", "80A00029", "80A00030", "80CL0001", "80CL0003", "80CL0006",
-  "80CL0007"
-]);
+export const GYM80_AREA_TONES = {
+  upper: "#64d2ff",
+  lower: "#30d158",
+  core: "#ff9f0a",
+  full: "#bf5af2"
+};
 
 export const GYM80_MACHINES = [
+  { id: "gym80-3001", code: "3001", name: "Leg Extension", series: "80Sygnum", area: "lower", muscles: ["quads"] },
+  { id: "gym80-3002", code: "3002", name: "Lying Leg Curl", series: "80Sygnum", area: "lower", muscles: ["hamstrings"] },
   { id: "gym80-3003", code: "3003", name: "Seated Leg Curl", series: "80Sygnum", area: "lower", muscles: ["hamstrings"] },
   { id: "gym80-3005", code: "3005", name: "Glutes Kick Radial", series: "80Sygnum", area: "lower", muscles: ["glutes"] },
   { id: "gym80-3008", code: "3008", name: "Total Ab", series: "80Sygnum", area: "core", muscles: ["core"] },
@@ -27,6 +18,8 @@ export const GYM80_MACHINES = [
   { id: "gym80-3014", code: "3014", name: "Chest Crossover Machine", series: "80Sygnum", area: "upper", muscles: ["chest"] },
   { id: "gym80-3016", code: "3016", name: "Seated Chest Press", series: "80Sygnum", area: "upper", muscles: ["chest", "triceps"] },
   { id: "gym80-3017", code: "3017", name: "Chin Dip Assist", series: "80Sygnum", area: "upper", muscles: ["lats", "triceps", "chest"] },
+  { id: "gym80-3018", code: "3018", name: "Standing Calf Raise Machine", series: "80Sygnum", area: "lower", muscles: ["calves"] },
+  { id: "gym80-3020", code: "3020", name: "Lat Pulldown Machine", series: "80Sygnum", area: "upper", muscles: ["lats", "biceps"] },
   { id: "gym80-3023n", code: "3023N", name: "Incline Chest Press", series: "80Sygnum", area: "upper", muscles: ["upper_chest", "triceps"] },
   { id: "gym80-3027", code: "3027", name: "Seated Calf Press", series: "80Sygnum", area: "lower", muscles: ["calves"] },
   { id: "gym80-3028", code: "3028", name: "Abduction Machine", series: "80Sygnum", area: "lower", muscles: ["abductors", "glutes"] },
@@ -59,8 +52,11 @@ export const GYM80_MACHINES = [
   { id: "gym80-4004", code: "4004", name: "Crossover Cable Station", series: "80Classics", area: "upper", muscles: ["chest", "shoulders", "arms"] },
   { id: "gym80-4012", code: "4012", name: "Adjustable Cable Crossover Station", series: "80Classics", area: "full", muscles: ["full_body"] },
   { id: "gym80-4016", code: "4016", name: "Rowing Station", series: "80Classics", area: "upper", muscles: ["back", "rhomboids"] },
+  { id: "gym80-4018", code: "4018", name: "Pure Kraft T-Bar Row", series: "Pure Kraft", area: "upper", muscles: ["back", "rhomboids"] },
   { id: "gym80-4034", code: "4034", name: "Dual Adjustable Pulley", series: "80Classics", area: "full", muscles: ["full_body"] },
   { id: "gym80-4036", code: "4036", name: "Smith Machine Station", series: "80Classics", area: "full", muscles: ["full_body"] },
+  { id: "gym80-4023", code: "4023", name: "Pure Kraft 45 Degrees Linear Leg Press", series: "Pure Kraft", area: "lower", muscles: ["quads", "glutes"] },
+  { id: "gym80-4038", code: "4038", name: "Pure Kraft Squat Machine", series: "Pure Kraft", area: "lower", muscles: ["quads", "glutes"] },
   { id: "gym80-4042", code: "4042", name: "Adjustable V Station", series: "80Classics", area: "upper", muscles: ["back", "lats", "biceps"] },
   { id: "gym80-4116", code: "4116", name: "Lat Pull Station", series: "80Classics", area: "upper", muscles: ["lats", "biceps"] },
   { id: "gym80-4119", code: "4119", name: "45 Degree Back Extension", series: "80Classics", area: "core", muscles: ["lower_back", "glutes"] },
@@ -69,9 +65,11 @@ export const GYM80_MACHINES = [
   { id: "gym80-4319", code: "4319", name: "Pure Kraft Low Row Dual", series: "Pure Kraft", area: "upper", muscles: ["back", "lats", "rhomboids"] },
   { id: "gym80-4327", code: "4327", name: "Pure Kraft Power Row Dual", series: "Pure Kraft", area: "upper", muscles: ["back", "lats"] },
   { id: "gym80-4329n", code: "4329N", name: "Pure Kraft Incline Chest Press Dual", series: "Pure Kraft", area: "upper", muscles: ["upper_chest", "triceps"] },
+  { id: "gym80-4314", code: "4314", name: "Pure Kraft Seated Leg Press Dual", series: "Pure Kraft", area: "lower", muscles: ["quads", "glutes"] },
   { id: "gym80-4340", code: "4340", name: "Pure Kraft High Row with Movable Handles", series: "Pure Kraft", area: "upper", muscles: ["back", "lats", "rear_delts"] },
   { id: "gym80-4342n", code: "4342N", name: "Pure Kraft Rotating Abdominal Crunch", series: "Pure Kraft", area: "core", muscles: ["core"] },
   { id: "gym80-4353n", code: "4353N", name: "Pure Kraft Pendulum Squat", series: "Pure Kraft", area: "lower", muscles: ["quads", "glutes"] },
+  { id: "gym80-4355", code: "4355", name: "Pure Kraft Biceps Curl Dual", series: "Pure Kraft", area: "upper", muscles: ["biceps"] },
   { id: "gym80-4360", code: "4360", name: "Pure Kraft Belt Squat", series: "Pure Kraft", area: "lower", muscles: ["quads", "glutes"] },
   { id: "gym80-4364", code: "4364", name: "Pure Kraft Strong Bench Press Dual", series: "Pure Kraft Strong", area: "upper", muscles: ["chest", "triceps"] },
   { id: "gym80-4365", code: "4365", name: "Pure Kraft Strong Incline Chest Press Dual", series: "Pure Kraft Strong", area: "upper", muscles: ["upper_chest", "triceps"] },
@@ -90,6 +88,8 @@ export const GYM80_MACHINES = [
   { id: "gym80-4385", code: "4385", name: "Pure Kraft Standing Shoulder Lateral Raise", series: "Pure Kraft", area: "upper", muscles: ["side_delts"] },
   { id: "gym80-4386", code: "4386", name: "Pure Kraft Booty Booster Special", series: "Pure Kraft", area: "lower", muscles: ["glutes"] },
   { id: "gym80-4388", code: "4388", name: "Pure Kraft Viking Press", series: "Pure Kraft", area: "upper", muscles: ["shoulders", "triceps"] },
+  { id: "gym80-4159n", code: "4159N", name: "Pure Kraft Hack Squat", series: "Pure Kraft", area: "lower", muscles: ["quads", "glutes"] },
+  { id: "gym80-4170", code: "4170", name: "8-Station Tower", series: "Sygnum Stations", area: "full", muscles: ["full_body", "lats", "back", "chest", "arms"] },
   { id: "gym80-4401", code: "4401", name: "Deadlift Machine", series: "80Classics", area: "full", muscles: ["posterior_chain", "glutes", "hamstrings", "lower_back"] },
   { id: "gym80-4416", code: "4416", name: "Bootymizer", series: "80Athletics", area: "lower", muscles: ["glutes"] },
   { id: "gym80-4434", code: "4434", name: "Glute Ham Developer", series: "80Athletics", area: "lower", muscles: ["hamstrings", "glutes", "lower_back"] },
@@ -140,7 +140,3 @@ export const GYM80_MACHINES = [
 export function machineById(id) {
   return GYM80_MACHINES.find((machine) => machine.id === id);
 }
-
-GYM80_MACHINES.forEach((machine) => {
-  machine.recommended = RECOMMENDED_CODES.has(machine.code);
-});
