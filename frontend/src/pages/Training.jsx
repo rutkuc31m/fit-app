@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
@@ -14,99 +14,6 @@ const FILTER_CHOICES = [
 const GYM80_BY_CODE = new Map(GYM80_MACHINES.map((machine) => [machine.code, machine]));
 
 const machineFromCode = (code) => GYM80_BY_CODE.get(code);
-
-const PROGRAM_TEMPLATES = {
-  3: [
-    {
-      day: "Day 1",
-      title: "Push",
-      focus: "chest · shoulders · triceps",
-      codes: ["3016", "3023N", "3043", "3050", "3011", "5901"]
-    },
-    {
-      day: "Day 2",
-      title: "Pull",
-      focus: "lats · rows · biceps",
-      codes: ["3044", "3040", "4319", "4340", "3012N", "3098"]
-    },
-    {
-      day: "Day 3",
-      title: "Glute/Core",
-      focus: "glutes · abs · lower back",
-      codes: ["3028", "5012", "3038", "4119", "3008", "3037"]
-    }
-  ],
-  4: [
-    {
-      day: "Day 1",
-      title: "Push",
-      focus: "chest · shoulders · triceps",
-      codes: ["3016", "3023N", "3043", "3050", "3011", "5904"]
-    },
-    {
-      day: "Day 2",
-      title: "Pull",
-      focus: "lats · row · biceps",
-      codes: ["3044", "3040", "4319", "4340", "3012N", "3098"]
-    },
-    {
-      day: "Day 3",
-      title: "Chest",
-      focus: "flat · incline · fly",
-      codes: ["3041", "3042", "3014", "3097", "5909", "4364"]
-    },
-    {
-      day: "Day 4",
-      title: "Glute/Core",
-      focus: "glutes · abs · back support",
-      codes: ["3028", "5012", "3038", "4119", "3008", "3037"]
-    }
-  ],
-  5: [
-    {
-      day: "Day 1",
-      title: "Push A",
-      focus: "chest first",
-      codes: ["3016", "3023N", "3043", "3050", "3011", "5901"]
-    },
-    {
-      day: "Day 2",
-      title: "Pull A",
-      focus: "back thickness",
-      codes: ["3044", "3040", "4319", "4340", "3012N", "3098"]
-    },
-    {
-      day: "Day 3",
-      title: "Chest B",
-      focus: "press · incline · fly",
-      codes: ["3041", "3042", "3014", "3097", "5909", "4364"]
-    },
-    {
-      day: "Day 4",
-      title: "Shoulders",
-      focus: "delts · rear delts · press",
-      codes: ["3043", "3050", "3099", "5014", "4385", "4388"]
-    },
-    {
-      day: "Day 5",
-      title: "Glute/Core",
-      focus: "glutes · abs · lower back",
-      codes: ["3028", "5012", "3038", "4119", "3010", "3011"]
-    }
-  ]
-};
-
-const buildProgram = (days, availableIds) =>
-  (PROGRAM_TEMPLATES[days] || PROGRAM_TEMPLATES[3]).map((slot) => ({
-    ...slot,
-    machines: slot.codes
-      .map((code) => machineFromCode(code))
-      .filter(Boolean)
-      .map((machine) => ({
-        ...machine,
-        available: availableIds.has(machine.id)
-      }))
-  }));
 
 const readLocalAvailableIds = () => {
   try {
@@ -143,67 +50,6 @@ function focusLine(doneMachines) {
   return "Hips-up odaklı devam; chest, back, shoulders, arms ve glutes dengesini koru.";
 }
 
-function ProgramCard({ days, availableIds, onDaysChange }) {
-  const program = useMemo(() => buildProgram(days, availableIds), [days, availableIds]);
-
-  return (
-    <AccentCard accent="#bf5af2" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <div className="section-label mt-0 mb-1">recommended program</div>
-          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em]">hips-up · glutes/core included · starred machines highlighted</div>
-        </div>
-        <div className="flex items-center gap-1">
-          {[3, 4, 5].map((count) => (
-            <button
-              key={count}
-              type="button"
-              className={`h-8 min-w-8 px-3 rounded-md border mono text-[.62rem] transition ${
-                days === count ? "border-violet-400/70 bg-violet-400/10 text-ink" : "border-line bg-bg2 text-mute hover:border-line2"
-              }`}
-              onClick={() => onDaysChange(count)}
-            >
-              {count}d
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-2">
-        {program.map((slot, idx) => (
-          <div key={slot.day} className="soft-band px-3 py-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="mono text-[.58rem] text-cyan uppercase tracking-[.14em]">{slot.day}</div>
-                <div className="font-display text-[1.05rem] text-ink leading-none mt-[2px]">{slot.title}</div>
-                <div className="mono text-[.56rem] text-mute uppercase tracking-[.12em] mt-1">{slot.focus}</div>
-              </div>
-              <div className="mono text-[.54rem] text-mute uppercase tracking-[.14em]">#{idx + 1}</div>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-3">
-              {slot.machines.map((machine) => (
-              <div
-                key={machine.id}
-                className={`rounded-md border px-2 py-1.5 min-w-0 ${
-                    machine.available ? "border-lime/40 bg-lime/10" : "border-line bg-bg2/70"
-                }`}
-              >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className={`mono text-[.56rem] shrink-0 ${machine.available ? "text-lime" : "text-cyan"}`}>
-                      {machine.code}
-                    </span>
-                    <span className="mono text-[.58rem] text-ink2 truncate">{machine.name}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </AccentCard>
-  );
-}
-
 export default function Training() {
   const { t } = useTranslation();
   const [date] = useState(todayStr());
@@ -212,7 +58,6 @@ export default function Training() {
   const [areaFilter, setAreaFilter] = useState("recommended");
   const [query, setQuery] = useState("");
   const [availableIds, setAvailableIds] = useState(() => readLocalAvailableIds());
-  const [programDays, setProgramDays] = useState(3);
 
   const load = async () => {
     const [s, remoteFavorites] = await Promise.all([
@@ -368,12 +213,6 @@ export default function Training() {
           { label: "lower", value: areaCounts.lower || 0, className: "text-lime" },
           { label: "gym", value: availableIds.size, className: "text-amber" }
         ]}
-      />
-
-      <ProgramCard
-        days={programDays}
-        availableIds={availableIds}
-        onDaysChange={setProgramDays}
       />
 
       {doneMachines.length > 0 && (
