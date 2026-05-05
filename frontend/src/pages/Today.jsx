@@ -1,31 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { PLAN, todayStr, fmtDate, getWeekNum, getPhase, daysBetween } from "../lib/plan";
+import { PLAN, todayStr, fmtDate, getWeekNum, getPhase, getDayPlan, getEatingTarget, daysBetween } from "../lib/plan";
 import { useAuth } from "../lib/auth.jsx";
-import FULL_SCHEDULE from "../lib/daily_schedule";
 import { api } from "../lib/api";
 import { dailyReadiness, recoveryCoachNote } from "../lib/coaching";
 import { effectiveMacro } from "../lib/nutrition";
 import { AccentCard, Icon, Empty } from "../components/ui";
-
-const CAT_STYLE = {
-  routine:    { dot: "#a1a1a6", label: "ROUT" },
-  supplement: { dot: "#bf5af2", label: "SUPP" },
-  checkpoint: { dot: "#30d158", label: "CHK"  },
-  exercise:   { dot: "#ff9f0a", label: "EXR"  },
-  activity:   { dot: "#ff9f0a", label: "ACT"  },
-  cardio:     { dot: "#64d2ff", label: "CAR"  },
-  training:   { dot: "#30d158", label: "GYM"  },
-  nutrition:  { dot: "#ff9f0a", label: "EAT"  },
-  family:     { dot: "#bf5af2", label: "FAM"  },
-  sleep:      { dot: "#0a84ff", label: "SLP"  }
-};
-
-const nowHHMM = () => {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-};
 
 const hhmmToMin = (s) => {
   if (!s) return 0;
@@ -77,6 +58,66 @@ const recoverySnapshotKey = (value = {}) => JSON.stringify({
 
 const hasRecoveryValue = (value = {}) =>
   ["energy", "hunger", "headache"].some((field) => value[field] !== "" && value[field] != null);
+
+const buildTodayDay = (date, session) => {
+  const sourceDate = date < PLAN.startDate ? PLAN.startDate : date;
+  const weekNumber = getWeekNum(sourceDate);
+  const phase = getPhase(weekNumber);
+  const dayPlan = getDayPlan(sourceDate);
+  const dow = new Date(`${sourceDate}T12:00:00`).getDay();
+  const isFastDay = dayPlan?.eating === "FAST";
+  const isTrainingFuelDay = dayPlan?.eating === "TRAINING";
+  const isLowDay = dayPlan?.eating === "LOW";
+  const targets = getEatingTarget(dayPlan?.eating);
+  const training = dayPlan?.type !== "rest"
+    ? {
+        type: dayPlan.type,
+        label: { A: "Üst Vücut (Push/Pull)", B: "Alt Vücut", C: "Full Body + Kardiyo" }[dayPlan.type],
+        timeSlot: "18:30 – 19:30"
+      }
+    : null;
+  const freeMeal = dow === 0 && isLowDay
+    ? {
+        label: "controlled free meal",
+        note: "Protein first. One meal, not a cheat day."
+      }
+    : null;
+
+  return {
+    date: sourceDate,
+    dayName: ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"][dow],
+    dayNumber: daysBetween(PLAN.startDate, sourceDate) + 1,
+    weekNumber,
+    phase,
+    isCheckpointDay: dow === 1,
+    checkpoint: dow === 1 ? {
+      tasks: [
+        "Aç karnına tartıl",
+        "3 fotoğraf (ön, yan, arka)",
+        weekNumber % 2 === 1 ? "Ölçüm al (bel, göğüs, kol)" : null,
+        "Haftalık değerlendirme yap"
+      ].filter(Boolean)
+    } : null,
+    eating: {
+      mode: dayPlan?.eating,
+      label: isFastDay ? "ORUÇ" : freeMeal ? "CHEAT MEAL" : isTrainingFuelDay ? "SPLIT MEAL" : isLowDay ? "DÜŞÜK KALORİ" : "OMAD",
+      freeMeal,
+      window: isFastDay ? null : {
+        start: isTrainingFuelDay ? "13:00" : "18:00",
+        end: isTrainingFuelDay ? "22:00" : "19:00"
+      },
+      targets
+    },
+    training,
+    waterLiters: isFastDay ? 3.0 : 2.5,
+    supplements: {
+      morning: ["D3+K2", "Omega-3 (vegan)"],
+      evening: ["Magnesium", "B12"],
+      note: "Oruç günlerinde de supplement al"
+    },
+    session
+  };
+};
 
 function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   const fields = [
@@ -221,52 +262,10 @@ function CommandCard({ readiness, day, leftKg, journeyPct }) {
   );
 }
 
-function ScheduleFocus({ day, currentIdx, isToday }) {
-  const start = isToday ? Math.max(0, currentIdx) : 0;
-  const current = isToday && currentIdx >= 0 ? day.schedule[currentIdx] : null;
-  const nextItems = day.schedule.slice(current ? currentIdx + 1 : start, current ? currentIdx + 3 : start + 2);
-  const rows = [current && { ...current, state: "now" }, ...nextItems.map((item) => ({ ...item, state: "next" }))].filter(Boolean);
-  if (!rows.length) return null;
-  return (
-    <AccentCard accent={current ? "#ff9f0a" : "#64d2ff"} className="p-3" contentClassName="pl-2">
-      <div className="flex items-center justify-between mb-2">
-        <div className="card-title">{current ? "now / next" : "first blocks"}</div>
-        <a href="#schedule" className="mono text-[.58rem] text-mute uppercase tracking-[.14em] hover:text-ink">full</a>
-      </div>
-      <div className="grid gap-1 overflow-hidden">
-        {rows.map((item, idx) => {
-          const style = CAT_STYLE[item.category] || CAT_STYLE.routine;
-          const active = item.state === "now";
-          return (
-            <div
-              key={`${item.time}-${idx}`}
-              className={`soft-band px-2 py-2 grid grid-cols-[2.35rem_minmax(0,1fr)_2.15rem] items-start gap-2 overflow-hidden ${active ? "border-amber/60 bg-amber/[.06]" : ""}`}
-            >
-              <div className={`mono text-[.6rem] tabular-nums shrink-0 ${active ? "text-amber" : "text-ink2"}`}>{item.time}</div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[.76rem] text-ink leading-snug break-words" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                  {item.action}
-                </div>
-                <div className="mono text-[.54rem] text-mute uppercase tracking-[.08em] leading-snug mt-[2px] break-words" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                  {item.details}
-                </div>
-              </div>
-              <div className="mono text-[.48rem] uppercase tracking-[.06em] text-right leading-tight min-w-0 truncate" style={{ color: style.dot }}>
-                {active ? "now" : style.label}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </AccentCard>
-  );
-}
-
 export default function Today() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [date, setDate] = useState(todayStr());
-  const now = nowHHMM();
   const [waterMl, setWaterMl] = useState(0);
   const [coffeeMl, setCoffeeMl] = useState(0);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -307,13 +306,7 @@ export default function Today() {
       .catch(() => {});
   }, []);
 
-  const day = useMemo(() => {
-    const hit = FULL_SCHEDULE.days.find((d) => d.date === date);
-    if (hit) return hit;
-    // Pre-start: show Day 1 as preview so page isn't empty
-    if (date < PLAN.startDate) return FULL_SCHEDULE.days[0];
-    return null;
-  }, [date]);
+  const day = useMemo(() => buildTodayDay(date, session), [date, session]);
   const preStart = date < PLAN.startDate;
   const readiness = day ? dailyReadiness({ day, recovery, mealsTotals, session }) : null;
   const recoveryNote = recoverySaved ? recoveryCoachNote(recovery, !day?.eating?.window) : null;
@@ -417,13 +410,6 @@ export default function Today() {
     );
   }
 
-  // Current-time indicator index
-  let currentIdx = -1;
-  for (let i = 0; i < day.schedule.length; i++) {
-    if (day.schedule[i].time <= now) currentIdx = i;
-    else break;
-  }
-
   return (
     <div className="page page-today">
       {preStart && (
@@ -461,8 +447,6 @@ export default function Today() {
       )}
 
       <CommandCard readiness={readiness} day={day} leftKg={leftKg} journeyPct={journeyPct} />
-
-      <ScheduleFocus day={day} currentIdx={currentIdx} isToday={date === todayStr()} />
 
       <RecoveryCheck
         value={recovery}
@@ -644,7 +628,7 @@ export default function Today() {
                 {day.training.label}
               </div>
               <div className="mono text-[.6rem] text-mute uppercase tracking-[.14em] mt-1">
-                {day.training.timeSlot} · {day.training.exercises.length} exercises
+                {day.training.timeSlot}
               </div>
             </div>
             <div className="text-right shrink-0 pl-2">
@@ -675,47 +659,6 @@ export default function Today() {
         </AccentCard>
       )}
 
-      {/* Timeline */}
-      <div id="schedule" className="section-label">Schedule</div>
-      <div className="flex flex-col gap-1">
-        {day.schedule.map((item, i) => {
-          const style = CAT_STYLE[item.category] || CAT_STYLE.routine;
-          const isCurrent = i === currentIdx && date === todayStr();
-          const isPast = i < currentIdx && date === todayStr();
-          return (
-            <AccentCard
-              key={`${item.time}-${i}`}
-              accent={isCurrent ? "#ff9f0a" : style.dot}
-              className={`py-2 ${isCurrent ? "shadow-[0_0_0_1px_rgba(255,159,10,.15)]" : ""} ${isPast ? "opacity-50" : ""}`}
-            >
-              <div className="flex items-start gap-2">
-                <div className="mono text-[.7rem] text-ink tabular-nums w-11 shrink-0 pt-[2px]">
-                  {item.time}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div className="mono text-xs text-ink truncate">{item.action}</div>
-                    {item.duration && (
-                      <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] shrink-0">
-                        {item.duration}
-                      </div>
-                    )}
-                  </div>
-                  <div className="mono text-[.64rem] text-mute leading-tight mt-[2px]">
-                    {item.details}
-                  </div>
-                </div>
-                <div
-                  className="mono text-[.54rem] uppercase tracking-[.18em] shrink-0 pt-[3px]"
-                  style={{ color: style.dot }}
-                >
-                  {style.label}
-                </div>
-              </div>
-            </AccentCard>
-          );
-        })}
-      </div>
 
       {/* Supplements footer */}
       {day.supplements && (

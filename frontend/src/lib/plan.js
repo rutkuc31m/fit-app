@@ -78,58 +78,6 @@ export const PLAN = {
       allowed: ["water", "black_coffee", "green_tea"],
       optional: ["whey_isolate_1_scoop"]
     }
-  },
-
-  // Training split — Phase 1 has back-safe substitutions (see protocols.js)
-  training: {
-    A: {
-      nameKey: "day_a",
-      exercises: [
-        { id: "bp", name: "Bench Press",     sets: 3, reps: 10,
-          phase1Alt: { name: "Chest Press Machine", reason: "guided_stability" } },
-        { id: "dr", name: "Dumbbell Row",    sets: 3, reps: 10,
-          phase1Alt: { name: "Seated Cable Row", reason: "guided_stability" } },
-        { id: "op", name: "Overhead Press",  sets: 3, reps: 8,
-          phase1Alt: { name: "Seated Shoulder Press (machine)", reason: "back_safe" } },
-        { id: "lp", name: "Lat Pulldown",    sets: 3, reps: 10 },
-        { id: "fp", name: "Face Pull",       sets: 3, reps: 15 },
-        { id: "bc", name: "Bicep Curl",      sets: 3, reps: 12 },
-        { id: "tp", name: "Tricep Pushdown", sets: 3, reps: 12 },
-        { id: "db", name: "Dead Bug",        sets: 2, reps: 10, unit: "each",
-          coreFinisher: true, reason: "core_stability" }
-      ]
-    },
-    B: {
-      nameKey: "day_b",
-      exercises: [
-        { id: "sq", name: "Squat / Leg Press",  sets: 3, reps: 10,
-          phase1Alt: { name: "Leg Press (machine only)", reason: "back_safe" } },
-        { id: "rd", name: "Romanian Deadlift",  sets: 3, reps: 10,
-          phase1Alt: { name: "Seated Leg Curl", reason: "back_safe" } },
-        { id: "lc", name: "Leg Curl",           sets: 3, reps: 12 },
-        { id: "le", name: "Leg Extension",      sets: 3, reps: 12 },
-        { id: "cr", name: "Calf Raise",         sets: 3, reps: 15 },
-        { id: "pl", name: "Plank",              sets: 3, reps: 45, unit: "s",
-          coreFinisher: true, reason: "core_stability" },
-        { id: "gb", name: "Glute Bridge",       sets: 2, reps: 15,
-          coreFinisher: true, reason: "posterior_chain_stability" }
-      ]
-    },
-    C: {
-      nameKey: "day_c",
-      exercises: [
-        { id: "dl", name: "Deadlift (light)",    sets: 3, reps: 8,
-          phase1Alt: { name: "Hip Thrust (machine or barbell)", reason: "back_safe" } },
-        { id: "ip", name: "Incline DB Press",    sets: 3, reps: 10 },
-        { id: "cw", name: "Cable Row",           sets: 3, reps: 10 },
-        { id: "gs", name: "Goblet Squat",        sets: 3, reps: 12,
-          phase1Alt: { name: "Leg Press (light)", reason: "back_safe" } },
-        { id: "lr", name: "Lateral Raise",       sets: 3, reps: 15 },
-        { id: "bd", name: "Bird Dog",            sets: 2, reps: 10, unit: "each",
-          coreFinisher: true, reason: "core_stability" },
-        { id: "cd", name: "Cardio (incline walk)", sets: 1, reps: 20, unit: "min" }
-      ]
-    }
   }
 };
 
@@ -159,18 +107,3 @@ export const getDayPlan = (dateStr = todayStr()) => {
 };
 
 export const getEatingTarget = (eating) => PLAN.eatingTargets[eating] || PLAN.eatingTargets.LOW;
-
-export const getExercisesForDay = (dayType, weekNum = getWeekNum()) => {
-  const day = PLAN.training[dayType];
-  if (!day) return null;
-  const inPhase1 = weekNum >= PLAN.phases[0].weeks[0] && weekNum <= PLAN.phases[0].weeks[1];
-  const exercises = day.exercises
-    .filter((ex) => inPhase1 || !ex.phase1Only)
-    .map((ex) => {
-      if (inPhase1 && ex.phase1Alt) {
-        return { ...ex, name: ex.phase1Alt.name, substituted: true, substituteReason: ex.phase1Alt.reason };
-      }
-      return ex;
-    });
-  return { ...day, exercises };
-};
