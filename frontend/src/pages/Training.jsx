@@ -26,16 +26,6 @@ const STUDIO_CODES = new Set(RAW_STUDIO_CODES.map(resolveCode).filter(Boolean));
 
 const STUDIO_MACHINES = GYM80_MACHINES.filter((machine) => STUDIO_CODES.has(machine.code));
 
-function buildDoneMap(sets = []) {
-  const map = new Map();
-  sets.forEach((set) => {
-    if (!set.exercise_id) return;
-    if (!map.has(set.exercise_id)) map.set(set.exercise_id, []);
-    map.get(set.exercise_id).push(set.id);
-  });
-  return map;
-}
-
 function pickMachine(visibleMachines, usedIds, candidateCodes) {
   for (const code of candidateCodes) {
     const machine = visibleMachines.find((item) => item.code === code && !usedIds.has(item.id));
@@ -99,11 +89,64 @@ function buildPlan(visibleMachines) {
         const machine = pickMachine(visibleMachines, usedIds, slot.codes);
         if (!machine) return null;
         usedIds.add(machine.id);
-        return { ...slot, machine };
+        return {
+          ...slot,
+          entryId: `${section.day}|${slot.label}|${machine.id}`,
+          machine,
+          day: section.day
+        };
       })
       .filter(Boolean);
     return { ...section, machines };
   });
+}
+
+function buildEntryIndex(planDays) {
+  const entries = [];
+  const byEntryId = new Map();
+  const byMachineId = new Map();
+
+  planDays.forEach((day) => {
+    day.machines.forEach((entry) => {
+      entries.push(entry);
+      byEntryId.set(entry.entryId, entry);
+      const key = String(entry.machine.id);
+      if (!byMachineId.has(key)) byMachineId.set(key, []);
+      byMachineId.get(key).push(entry);
+    });
+  });
+
+  return { entries, byEntryId, byMachineId };
+}
+
+function buildDoneMap(sets = [], planDays = []) {
+  const { entries, byEntryId, byMachineId } = buildEntryIndex(planDays);
+  const map = new Map();
+
+  const queueSet = (entryId, setId) => {
+    if (!map.has(entryId)) map.set(entryId, []);
+    map.get(entryId).push(setId);
+  };
+
+  sets.forEach((set) => {
+    if (!set.exercise_id) return;
+    const exerciseId = String(set.exercise_id);
+    if (byEntryId.has(exerciseId)) {
+      queueSet(exerciseId, set.id);
+      return;
+    }
+  });
+
+  sets.forEach((set) => {
+    if (!set.exercise_id) return;
+    const exerciseId = String(set.exercise_id);
+    if (byEntryId.has(exerciseId)) return;
+    const candidates = byMachineId.get(exerciseId) || [];
+    const target = candidates.find((entry) => !map.has(entry.entryId));
+    if (target) queueSet(target.entryId, set.id);
+  });
+
+  return { map, entries };
 }
 
 export default function Training() {
@@ -122,29 +165,32 @@ export default function Training() {
 
   const studioMachines = STUDIO_MACHINES;
 
-  const doneSetIdsByMachine = useMemo(() => buildDoneMap(session?.sets || []), [session]);
-  const doneIds = useMemo(() => new Set([...doneSetIdsByMachine.keys()]), [doneSetIdsByMachine]);
+  const planDays = useMemo(() => buildPlan(studioMachines), [studioMachines]);
+  const { map: doneSetIdsByEntry, entries: planEntries } = useMemo(
+    () => buildDoneMap(session?.sets || [], planDays),
+    [session, planDays]
+  );
+  const doneIds = useMemo(() => new Set([...doneSetIdsByEntry.keys()]), [doneSetIdsByEntry]);
   const sessionSetIds = useMemo(() => (session?.sets || []).map((set) => set.id), [session]);
 
   const doneMachines = useMemo(
-    () => studioMachines.filter((machine) => doneIds.has(machine.id)),
-    [studioMachines, doneIds]
+    () => planEntries.filter((entry) => doneIds.has(entry.entryId)),
+    [planEntries, doneIds]
   );
 
-  const planDays = useMemo(() => buildPlan(studioMachines), [studioMachines]);
-  const allDaysDone = planDays.length > 0 && planDays.every((day) => day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)));
+  const allDaysDone = planDays.length > 0 && planDays.every((day) => day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)));
 
-  const toggleMachine = async (machine) => {
+  const toggleMachine = async (entry) => {
     if (!session) return;
-    const existingIds = doneSetIdsByMachine.get(machine.id) || [];
+    const existingIds = doneSetIdsByEntry.get(entry.entryId) || [];
     if (existingIds.length > 0) {
       await Promise.all(existingIds.map((id) => api.del(`/training/set/${id}`)));
       load();
       return;
     }
     await api.post(`/training/session/${session.id}/set`, {
-      exercise_id: machine.id,
-      exercise_name: `${machine.code} ${machine.name}`,
+      exercise_id: entry.entryId,
+      exercise_name: `${entry.day} ${entry.machine.code} ${entry.machine.name}`,
       set_number: 1,
       weight_kg: null,
       reps: null
@@ -154,17 +200,17 @@ export default function Training() {
 
   const toggleDay = async (day) => {
     if (!session || day.machines.length === 0) return;
-    const complete = day.machines.every(({ machine }) => doneIds.has(machine.id));
-    const relevantSetIds = day.machines.flatMap(({ machine }) => doneSetIdsByMachine.get(machine.id) || []);
+    const complete = day.machines.every(({ entryId }) => doneIds.has(entryId));
+    const relevantSetIds = day.machines.flatMap(({ entryId }) => doneSetIdsByEntry.get(entryId) || []);
     if (complete) {
       await Promise.all(relevantSetIds.map((id) => api.del(`/training/set/${id}`)));
       load();
       return;
     }
-    const missing = day.machines.filter(({ machine }) => !doneIds.has(machine.id));
-    await Promise.all(missing.map(({ machine }) => api.post(`/training/session/${session.id}/set`, {
-      exercise_id: machine.id,
-      exercise_name: `${machine.code} ${machine.name}`,
+    const missing = day.machines.filter(({ entryId }) => !doneIds.has(entryId));
+    await Promise.all(missing.map((entry) => api.post(`/training/session/${session.id}/set`, {
+      exercise_id: entry.entryId,
+      exercise_name: `${entry.day} ${entry.machine.code} ${entry.machine.name}`,
       set_number: 1,
       weight_kg: null,
       reps: null
@@ -191,31 +237,31 @@ export default function Training() {
           {planDays.map((day) => (
             <div
               key={day.day}
-              className={`rounded-lg border p-3 transition ${day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)) ? "border-lime/60 bg-lime/10" : "border-line bg-bg2/70"}`}
+              className={`rounded-lg border p-3 transition ${day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)) ? "border-lime/60 bg-lime/10" : "border-line bg-bg2/70"}`}
             >
               <button type="button" className="w-full text-left" onClick={() => toggleDay(day)}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em]">{day.day}</div>
-                  <Icon.check size={12} className={day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)) ? "text-lime" : "text-mute opacity-30"} />
+                  <Icon.check size={12} className={day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)) ? "text-lime" : "text-mute opacity-30"} />
                 </div>
               </button>
               <div className="mt-3 flex flex-col gap-1.5">
-                {day.machines.map(({ machine, move }) => (
+                {day.machines.map((entry) => (
                   <button
-                    key={`${day.day}-${machine.id}`}
+                    key={entry.entryId}
                     type="button"
-                    onClick={() => toggleMachine(machine)}
-                    className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-left transition ${doneIds.has(machine.id) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
+                    onClick={() => toggleMachine(entry)}
+                    className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-left transition ${doneIds.has(entry.entryId) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
                   >
                     <div className="min-w-0">
                       <div className="text-[.62rem] text-ink text-left truncate">
-                        {machine.code} · {machine.name}
+                        {entry.machine.code} · {entry.machine.name}
                       </div>
                       <div className="mono text-[.53rem] text-mute uppercase tracking-[.12em] truncate mt-[1px]">
-                        {move}
+                        {entry.move}
                       </div>
                     </div>
-                    <Icon.check size={12} className={doneIds.has(machine.id) ? "text-lime shrink-0" : "text-mute opacity-25 shrink-0"} />
+                    <Icon.check size={12} className={doneIds.has(entry.entryId) ? "text-lime shrink-0" : "text-mute opacity-25 shrink-0"} />
                   </button>
                 ))}
               </div>
@@ -236,14 +282,14 @@ export default function Training() {
       {doneMachines.length > 0 && (
         <AccentCard accent="#30d158" className="p-3" contentClassName="pl-2">
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {doneMachines.map((machine) => (
+            {doneMachines.map((entry) => (
               <button
-                key={machine.id}
+                key={entry.entryId}
                 type="button"
                 className="chip chip-muscle shrink-0"
-                onClick={() => toggleMachine(machine)}
+                onClick={() => toggleMachine(entry)}
               >
-                <Icon.check size={12} /> {machine.code}
+                <Icon.check size={12} /> {entry.day} {entry.machine.code}
               </button>
             ))}
           </div>
