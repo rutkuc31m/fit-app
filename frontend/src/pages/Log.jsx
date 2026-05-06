@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import { api } from "../lib/api";
-import { getDayPlan, getEatingTarget, todayStr } from "../lib/plan";
+import { todayStr } from "../lib/plan";
+import { findFoodChoice, readTodayCallPrefs } from "../lib/todayCall";
 import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
 import { eatenPct, effectiveMacros, sumMealMacros } from "../lib/nutrition";
 import BarcodeScanner from "../components/BarcodeScanner";
@@ -16,11 +17,10 @@ const isQuickEntry = (item) =>
   Number(item?.protein_g || 0) === 0 &&
   Number(item?.carbs_g || 0) === 0 &&
   Number(item?.fat_g || 0) === 0;
-const isSunday = (dateStr) => new Date(`${dateStr}T12:00:00`).getDay() === 0;
 const getFoodTarget = (dateStr) => {
-  const plan = getDayPlan(dateStr);
-  const target = getEatingTarget(plan.eating);
-  return plan.eating === "LOW" && isSunday(dateStr) ? { ...target, kcal: 2000, protein: 130, carbs: 160, fat: 80 } : target;
+  const prefs = readTodayCallPrefs(dateStr);
+  const choice = findFoodChoice(prefs.foodId);
+  return { kcal: choice.kcal, protein: choice.protein, carbs: choice.carbs, fat: choice.fat };
 };
 
 function FoodShortcutRow({ title, items, onAdd, onRemove, limit = 12 }) {

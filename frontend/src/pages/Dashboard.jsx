@@ -3,8 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth.jsx";
-import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, getEatingTarget, daysBetween } from "../lib/plan";
+import { PLAN, todayStr, getDayPlan, getWeekNum, getPhase, daysBetween } from "../lib/plan";
 import { effectiveMacro, sumMealMacros } from "../lib/nutrition";
+import { findFoodChoice, findGymChoice, readTodayCallPrefs } from "../lib/todayCall";
 import { AccentCard, Ring, Empty, Icon, PhaseStrip, DayGlyph, MiniRing } from "../components/ui";
 
 export default function Dashboard() {
@@ -17,16 +18,21 @@ export default function Dashboard() {
   const [savedFlash, setSavedFlash] = useState(false);
 
   const dayPlan = getDayPlan(date);
+  const callPrefs = readTodayCallPrefs(date);
+  const foodChoice = findFoodChoice(callPrefs.foodId);
+  const gymChoice = findGymChoice(callPrefs.gymId);
   const dateParts = date.split("-").map(Number);
-  const isFreeMealDay = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).getDay() === 0 && dayPlan.eating === "LOW";
   const week = getWeekNum(date);
   const phase = getPhase(week);
   const dayIdx = daysBetween(PLAN.startDate, date) + 1;
   const phaseStartDay = (phase.weeks[0] - 1) * 7 + 1;
   const isPhaseFirstDay = dayIdx === phaseStartDay;
-  const target = isFreeMealDay
-    ? { ...getEatingTarget(dayPlan.eating), kcal: 2000, carbs: 160, fat: 80 }
-    : getEatingTarget(dayPlan.eating);
+  const target = {
+    kcal: foodChoice.kcal,
+    protein: foodChoice.protein,
+    carbs: foodChoice.carbs,
+    fat: foodChoice.fat
+  };
   const macros = sumMealMacros(meals);
 
   const load = async () => {
@@ -43,7 +49,7 @@ export default function Dashboard() {
   const saveWeight = async () => {
     const v = parseFloat(quickWt);
     if (!v) return;
-    const l = await api.put(`/logs/${date}`, { weight_kg: v, fasting_type: dayPlan.eating });
+    const l = await api.put(`/logs/${date}`, { weight_kg: v, fasting_type: foodChoice.id });
     setLog(l);
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 600);
@@ -61,9 +67,9 @@ export default function Dashboard() {
   const daysLeft = Math.max(0, daysBetween(date, PLAN.endDate));
 
   const dayLabelKey =
-    dayPlan.eating === "FAST" ? "dashboard.fast_day" :
-    dayPlan.type !== "rest"   ? "dashboard.training_day" : "dashboard.rest_day";
-  const eatingLabel = isFreeMealDay ? "CHEAT MEAL" : dayPlan.eating === "TRAINING" ? "SPLIT MEAL" : dayPlan.eating;
+    foodChoice.id === "FAST" ? "dashboard.fast_day" :
+    gymChoice.id !== "REST"   ? "dashboard.training_day" : "dashboard.rest_day";
+  const eatingLabel = foodChoice.label;
 
   return (
     <div className="page page-dashboard">

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { PLAN, todayStr, getWeekNum } from "../lib/plan";
+import { FOOD_CHOICES, findFoodChoice, readTodayCallPrefs } from "../lib/todayCall";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const addDays = (dateStr, days) => {
@@ -195,23 +196,26 @@ function WeeklyScoreCard({ review }) {
   );
 }
 
-function NutritionCockpit({ review }) {
+function NutritionCockpit({ review, foodChoice }) {
   const items = [
     ["protein avg", review ? `${fmt(review.avg_protein_g, 0)}g` : "--"],
     ["protein days", review ? `${review.protein_days ?? 0}/5` : "--"],
     ["kcal avg", review ? fmt(review.avg_kcal, 0) : "--"],
     ["meal days", review ? `${review.meal_days ?? 0}/7` : "--"]
   ];
-  const targets = [
-    ["GYM", `${PLAN.eatingTargets.TRAINING.kcal} kcal`, `${PLAN.eatingTargets.TRAINING.protein}g protein`],
-    ["LOW", `${PLAN.eatingTargets.LOW.kcal} kcal`, `${PLAN.eatingTargets.LOW.protein}g protein`],
-    ["FAST", "0 kcal", "water · coffee · tea"]
-  ];
+  const targets = FOOD_CHOICES.map((choice) => [
+    choice.label,
+    `${choice.kcal} kcal`,
+    `${choice.protein}g protein`
+  ]);
 
   return (
     <AccentCard accent="#ff9f0a" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
       <div>
         <div className="section-label mt-0 mb-1">nutrition cockpit</div>
+        <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em]">
+          selected · {foodChoice.label}
+        </div>
       </div>
       <div className="grid grid-cols-2 min-[460px]:grid-cols-4 gap-2">
         {items.map(([label, value]) => (
@@ -296,6 +300,7 @@ export default function Progress() {
   const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [review, setReview] = useState(null);
+  const [foodChoice, setFoodChoice] = useState(findFoodChoice(readTodayCallPrefs(todayStr()).foodId));
 
   const load = async () => {
     const to = todayStr();
@@ -306,7 +311,11 @@ export default function Progress() {
     ]);
     setLogs(l); setReview(r);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const prefs = readTodayCallPrefs(todayStr());
+    setFoodChoice(findFoodChoice(prefs.foodId));
+  }, []);
 
   const latestWeight = [...logs].reverse().find((l) => l.weight_kg != null)?.weight_kg ?? null;
   const lost = latestWeight != null ? Math.max(0, PLAN.startWeight - latestWeight) : 0;
@@ -339,7 +348,7 @@ export default function Progress() {
       <WeeklyReviewCard review={review} />
       <WeeklyScoreCard review={review} />
       <AdherenceCard review={review} />
-      <NutritionCockpit review={review} />
+      <NutritionCockpit review={review} foodChoice={foodChoice} />
       <SixMonthOverview />
 
       <div className="section-label">{t("progress.weight_chart")}</div>

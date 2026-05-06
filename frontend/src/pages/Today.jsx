@@ -6,6 +6,7 @@ import { useAuth } from "../lib/auth.jsx";
 import { api } from "../lib/api";
 import { dailyReadiness, recoveryCoachNote } from "../lib/coaching";
 import { effectiveMacro } from "../lib/nutrition";
+import { FOOD_CHOICES, GYM_CHOICES, findFoodChoice, findGymChoice, readTodayCallPrefs, writeTodayCallPrefs } from "../lib/todayCall";
 import { AccentCard, Icon, Empty } from "../components/ui";
 
 const hhmmToMin = (s) => {
@@ -49,23 +50,6 @@ const windowState = (eating) => {
 };
 
 const fastGuardrails = ["water", "coffee", "easy walk", "sleep"];
-const TODAY_CALL_KEY = "fitapp:today-call";
-
-const FOOD_CHOICES = [
-  { id: "FAST", label: "FAST", kcal: 0, protein: 0, window: null, tone: "#64d2ff", hint: "water / coffee" },
-  { id: "LOW", label: "LOW", kcal: 1300, protein: 130, window: { start: "18:00", end: "19:00" }, tone: "#ff9f0a", hint: "omad low" },
-  { id: "OMAD", label: "OMAD", kcal: 1800, protein: 150, window: { start: "19:30", end: "20:45" }, tone: "#30d158", hint: "one meal" },
-  { id: "TRAIN", label: "TRAIN", kcal: 1800, protein: 150, window: { start: "13:00", end: "22:00" }, tone: "#30d158", hint: "split meal" },
-  { id: "CHEAT", label: "CHEAT", kcal: 2200, protein: 140, window: { start: "18:00", end: "21:00" }, tone: "#ff453a", hint: "free meal" }
-];
-
-const GYM_CHOICES = [
-  { id: "REST", label: "REST", hint: "walk only", tone: "#64d2ff" },
-  { id: "GYM", label: "GYM", hint: "full session", tone: "#30d158" },
-  { id: "LIGHT", label: "LIGHT", hint: "pump / mobility", tone: "#ff9f0a" },
-  { id: "CARDIO", label: "CARDIO", hint: "walk / bike", tone: "#bf5af2" },
-  { id: "CUSTOM", label: "CUSTOM", hint: "your call", tone: "#64d2ff" }
-];
 
 const recoverySnapshotKey = (value = {}) => JSON.stringify({
   energy: value.energy === "" || value.energy == null ? null : Number(value.energy),
@@ -75,32 +59,6 @@ const recoverySnapshotKey = (value = {}) => JSON.stringify({
 
 const hasRecoveryValue = (value = {}) =>
   ["energy", "hunger", "headache"].some((field) => value[field] !== "" && value[field] != null);
-
-const todayCallKey = (date) => `${TODAY_CALL_KEY}:${date}`;
-
-const readTodayCallPrefs = (date, fallback = {}) => {
-  try {
-    const raw = JSON.parse(localStorage.getItem(todayCallKey(date)) || "{}");
-    return {
-      foodId: raw.foodId || fallback.foodId || "TRAIN",
-      gymId: raw.gymId || fallback.gymId || "GYM"
-    };
-  } catch {
-    return {
-      foodId: fallback.foodId || "TRAIN",
-      gymId: fallback.gymId || "GYM"
-    };
-  }
-};
-
-const writeTodayCallPrefs = (date, prefs) => {
-  try {
-    localStorage.setItem(todayCallKey(date), JSON.stringify(prefs));
-  } catch {}
-};
-
-const findFoodChoice = (id) => FOOD_CHOICES.find((choice) => choice.id === id) || FOOD_CHOICES[3];
-const findGymChoice = (id) => GYM_CHOICES.find((choice) => choice.id === id) || GYM_CHOICES[1];
 
 const buildEffectiveDay = (day, foodChoice, gymChoice) => ({
   ...day,
@@ -654,12 +612,12 @@ export default function Today() {
               </div>
             </div>
             {kcalTarget === 0 ? (
-              <div className="mono text-[.7rem] text-cyan text-center py-2">fast day · 0 kcal</div>
+              <div className="mono text-[.7rem] text-cyan text-center py-2">{foodChoice.label} · 0 kcal</div>
             ) : (
               <>
-                {day.eating.freeMeal && (
+                {foodChoice.id === "CHEAT" && (
                   <div className="soft-band px-3 py-2 mb-3 text-center">
-                    <div className="mono text-[.58rem] text-amber uppercase tracking-[.16em]">{day.eating.freeMeal.label}</div>
+                    <div className="mono text-[.58rem] text-amber uppercase tracking-[.16em]">free meal</div>
                   </div>
                 )}
                 <div className="flex justify-around">
