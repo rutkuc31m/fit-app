@@ -51,10 +51,10 @@ function buildPlan(visibleMachines) {
       title: "Push A",
       focus: "chest / shoulders / triceps / core",
       slots: [
-        { label: "chest", codes: ["3041", "3016", "4329N", "5014", "5901", "3014"] },
-        { label: "shoulders", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
-        { label: "triceps", codes: ["3011", "4379", "5006", "3036", "5904", "5104"] },
-        { label: "core", codes: ["5012", "3037", "3008", "4342N", "4119"] }
+        { label: "chest", move: "chest press / butterfly", codes: ["3041", "3016", "4329N", "5014", "5901", "3014"] },
+        { label: "shoulders", move: "shoulder press / lateral raise", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
+        { label: "triceps", move: "triceps dip / extension", codes: ["3011", "4379", "5006", "3036", "5904", "5104"] },
+        { label: "core", move: "ab crunch", codes: ["5012", "3037", "3008", "4342N", "4119"] }
       ]
     },
     {
@@ -62,10 +62,10 @@ function buildPlan(visibleMachines) {
       title: "Pull A",
       focus: "back / biceps / glute support / core",
       slots: [
-        { label: "lat", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
-        { label: "row", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
-        { label: "biceps", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
-        { label: "support", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "lat", move: "lat pulldown", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
+        { label: "row", move: "seated row / t-bar row", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
+        { label: "biceps", move: "biceps curl", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
+        { label: "support", move: "back extension", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
       ]
     },
     {
@@ -73,10 +73,10 @@ function buildPlan(visibleMachines) {
       title: "Upper B",
       focus: "chest / back / shoulders / arms",
       slots: [
-        { label: "chest", codes: ["4329N", "3041", "3016", "5014", "3014", "3097"] },
-        { label: "back", codes: ["4319", "3044", "3040", "4018", "4383", "4340"] },
-        { label: "shoulders", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
-        { label: "arms", codes: ["3011", "4379", "4366", "4355", "5006", "5104"] }
+        { label: "chest", move: "incline chest press / chest press", codes: ["4329N", "3041", "3016", "5014", "3014", "3097"] },
+        { label: "back", move: "row / lat pulldown", codes: ["4319", "3044", "3040", "4018", "4383", "4340"] },
+        { label: "shoulders", move: "shoulder press / lateral raise", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
+        { label: "arms", move: "biceps + triceps", codes: ["3011", "4379", "4366", "4355", "5006", "5104"] }
       ]
     },
     {
@@ -84,10 +84,10 @@ function buildPlan(visibleMachines) {
       title: "Pull B",
       focus: "back / shoulders / glute support / core",
       slots: [
-        { label: "back", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
-        { label: "delts", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
-        { label: "touch", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
-        { label: "support", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "back", move: "row / lat pulldown", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
+        { label: "delts", move: "reverse butterfly / lateral raise", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
+        { label: "touch", move: "dip / triceps extension", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
+        { label: "support", move: "back extension", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
       ]
     }
   ];
@@ -200,7 +200,7 @@ export default function Training() {
                 </div>
               </button>
               <div className="mt-3 flex flex-col gap-1.5">
-                {day.machines.map(({ machine }) => (
+                {day.machines.map(({ machine, move }) => (
                   <button
                     key={`${day.day}-${machine.id}`}
                     type="button"
@@ -210,6 +210,9 @@ export default function Training() {
                     <div className="min-w-0">
                       <div className="text-[.62rem] text-ink text-left truncate">
                         {machine.code} · {machine.name}
+                      </div>
+                      <div className="mono text-[.53rem] text-mute uppercase tracking-[.12em] truncate mt-[1px]">
+                        {move}
                       </div>
                     </div>
                     <Icon.check size={12} className={doneIds.has(machine.id) ? "text-lime shrink-0" : "text-mute opacity-25 shrink-0"} />
