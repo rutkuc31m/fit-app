@@ -206,7 +206,7 @@ export default function Log() {
   const [favoriteItems, setFavoriteItems] = useState([]);
   const quickTextRef = useRef("");
   const recognitionRef = useRef(null);
-  const quickAutoSubmitRef = useRef(false);
+  const quickListenTimerRef = useRef(null);
 
   const shiftDate = (delta) => {
     const d = new Date(date);
@@ -361,7 +361,10 @@ export default function Log() {
   const openPiece = () => { setShowAddMenu(false); setEditingItemId(null); setMode("piece"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setDraft({ ...emptyItem }); };
   const openManual = () => { setShowAddMenu(false); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setDraft({ ...emptyItem }); };
   const closeQuick = () => {
-    quickAutoSubmitRef.current = false;
+    if (quickListenTimerRef.current) {
+      clearTimeout(quickListenTimerRef.current);
+      quickListenTimerRef.current = null;
+    }
     setQuickOpen(false);
     setQuickText("");
     setQuickBusy(false);
@@ -375,6 +378,10 @@ export default function Log() {
     setQuickError("");
     setQuickText("");
     setQuickOpen(true);
+  };
+  const openQuickVoice = () => {
+    openQuick();
+    startListening();
   };
   const openEdit = (item) => {
     const quick = isQuickEntry(item);
@@ -472,12 +479,17 @@ export default function Log() {
     if (!Ctor || quickListening || quickBusy) return;
     setQuickError("");
     setQuickListening(true);
-    quickAutoSubmitRef.current = true;
     const recognition = new Ctor();
     recognition.lang = lang === "de" ? "de-DE" : "tr-TR";
-    recognition.interimResults = true;
+    recognition.interimResults = false;
     recognition.continuous = false;
     recognitionRef.current = recognition;
+    if (quickListenTimerRef.current) clearTimeout(quickListenTimerRef.current);
+    quickListenTimerRef.current = setTimeout(() => {
+      try { recognitionRef.current?.stop?.(); } catch {}
+      setQuickListening(false);
+      setQuickError("mikrofon zaman asimi");
+    }, 12000);
     recognition.onresult = (event) => {
       const transcript = Array.from(event.results || [])
         .map((result) => result?.[0]?.transcript || "")
@@ -489,21 +501,27 @@ export default function Log() {
       }
     };
     recognition.onerror = () => {
+      if (quickListenTimerRef.current) {
+        clearTimeout(quickListenTimerRef.current);
+        quickListenTimerRef.current = null;
+      }
       setQuickListening(false);
-      quickAutoSubmitRef.current = false;
       setQuickError("mikrofon okunamadi");
     };
     recognition.onend = () => {
-      setQuickListening(false);
-      const transcript = quickTextRef.current.trim();
-      if (quickAutoSubmitRef.current && transcript) {
-        void submitQuickAdd(transcript);
+      if (quickListenTimerRef.current) {
+        clearTimeout(quickListenTimerRef.current);
+        quickListenTimerRef.current = null;
       }
-      quickAutoSubmitRef.current = false;
+      setQuickListening(false);
     };
     try {
       recognition.start();
     } catch {
+      if (quickListenTimerRef.current) {
+        clearTimeout(quickListenTimerRef.current);
+        quickListenTimerRef.current = null;
+      }
       setQuickListening(false);
       setQuickError("mikrofon baslatilamadi");
     }
@@ -583,13 +601,6 @@ export default function Log() {
                     <div className="mono text-[.58rem] text-mute">Yumurta, ekmek, meyve…</div>
                   </div>
                 </button>
-                <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openQuick}>
-                  <Icon.mic size={16} className="text-signal shrink-0" />
-                  <div>
-                    <div className="mono text-sm text-ink">Ses / Hızlı</div>
-                    <div className="mono text-[.58rem] text-mute">“200 gr more protein wraps”</div>
-                  </div>
-                </button>
                 <button className="w-full text-left px-4 py-3 hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openManual}>
                   <Icon.plus size={16} className="text-signal shrink-0" />
                   <div>
@@ -600,6 +611,14 @@ export default function Log() {
             </>
           )}
         </div>
+        <button
+          type="button"
+          className={`btn-icon h-[44px] w-[44px] ${quickListening ? "text-signal border-signal/50" : ""}`}
+          onClick={openQuickVoice}
+          aria-label="quick voice add"
+        >
+          <Icon.mic size={16} />
+        </button>
       </div>
 
       <FoodShortcutRow title="Favoriten" items={favoriteItems} onAdd={addFoodItem} onRemove={removeFavorite} />
