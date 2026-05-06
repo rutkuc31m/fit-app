@@ -106,18 +106,6 @@ function buildPlan(visibleMachines) {
   });
 }
 
-function focusLine(doneMachines) {
-  if (doneMachines.length === 0) return "Bugün ilk üst vücut makinesini seç.";
-  const counts = doneMachines.reduce((acc, machine) => {
-    if (machine.area === "upper") acc.upper += 1;
-    if (machine.area === "core" || (machine.muscles || []).includes("lower_back")) acc.support += 1;
-    return acc;
-  }, { upper: 0, support: 0 });
-  if (counts.upper >= 4) return "Upper hacmi iyi; bir sonraki seans açı değiştir.";
-  if (counts.support >= 2) return "Core ve support da doluyor; denge iyi.";
-  return "Chest, back, shoulders ve arms dengesini koru.";
-}
-
 export default function Training() {
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
@@ -145,18 +133,6 @@ export default function Training() {
 
   const planDays = useMemo(() => buildPlan(studioMachines), [studioMachines]);
   const allDaysDone = planDays.length > 0 && planDays.every((day) => day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)));
-
-  const areaCounts = useMemo(() => {
-    const counts = { upper: 0, core: 0, support: 0 };
-    doneMachines.forEach((machine) => {
-      if (machine.area === "upper") counts.upper += 1;
-      if (machine.area === "core") counts.core += 1;
-      if (machine.area === "core" || (machine.muscles || []).includes("glutes") || (machine.muscles || []).includes("lower_back")) {
-        counts.support += 1;
-      }
-    });
-    return counts;
-  }, [doneMachines]);
 
   const toggleMachine = async (machine) => {
     if (!session) return;
@@ -208,20 +184,9 @@ export default function Training() {
         accent="#30d158"
         kicker="gym80 logbook"
         title="Gym plan"
-        sub={focusLine(doneMachines)}
-        metrics={[
-          { label: "done", value: doneMachines.length, className: "text-lime" },
-          { label: "upper", value: areaCounts.upper || 0, className: "text-cyan" },
-          { label: "core", value: areaCounts.core || 0, className: "text-amber" },
-          { label: "gym", value: studioMachines.length, className: "text-amber" }
-        ]}
       />
 
       <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
-        <div className="section-label mt-0 mb-0">4-day upper rotation</div>
-        <div className="mono text-[.58rem] text-mute uppercase tracking-[.12em]">
-          chest / back / shoulders / arms x2, glute + core support
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {planDays.map((day) => (
             <div
@@ -231,27 +196,19 @@ export default function Training() {
               <button type="button" className="w-full text-left" onClick={() => toggleDay(day)}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em]">{day.day}</div>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="mono text-[.55rem] text-mute uppercase tracking-[.12em] truncate">{day.title}</div>
-                    <Icon.check size={12} className={day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)) ? "text-lime" : "text-mute opacity-30"} />
-                  </div>
-                </div>
-                <div className="text-xs text-ink2 mt-1">{day.focus}</div>
-                <div className="mono text-[.54rem] text-mute uppercase tracking-[.12em] mt-1">
-                  {day.machines.filter(({ machine }) => doneIds.has(machine.id)).length}/{day.machines.length} checked
+                  <Icon.check size={12} className={day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)) ? "text-lime" : "text-mute opacity-30"} />
                 </div>
               </button>
               <div className="mt-3 flex flex-col gap-1.5">
-                {day.machines.map(({ label, machine }) => (
+                {day.machines.map(({ machine }) => (
                   <button
-                    key={`${day.day}-${label}-${machine.id}`}
+                    key={`${day.day}-${machine.id}`}
                     type="button"
                     onClick={() => toggleMachine(machine)}
                     className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-left transition ${doneIds.has(machine.id) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
                   >
                     <div className="min-w-0">
-                      <div className="mono text-[.55rem] uppercase tracking-[.12em] text-mute shrink-0">{label}</div>
-                      <div className="text-[.62rem] text-ink text-left truncate" title={`${machine.code} ${machine.name}`}>
+                      <div className="text-[.62rem] text-ink text-left truncate">
                         {machine.code} · {machine.name}
                       </div>
                     </div>
@@ -266,10 +223,7 @@ export default function Training() {
 
       {allDaysDone && (
         <AccentCard accent="#30d158" className="p-3" contentClassName="pl-2 flex items-center justify-between gap-3">
-          <div>
-            <div className="section-label mt-0 mb-1">all done</div>
-            <div className="mono text-[.62rem] text-mute uppercase tracking-[.12em]">hepsi yeşil. reset ile yeniden seçebilirsin.</div>
-          </div>
+          <div className="section-label mt-0 mb-0">all done</div>
           <button className="btn-primary shrink-0" type="button" onClick={resetAll}>
             Reset
           </button>
@@ -278,7 +232,6 @@ export default function Training() {
 
       {doneMachines.length > 0 && (
         <AccentCard accent="#30d158" className="p-3" contentClassName="pl-2">
-          <div className="section-label mt-0 mb-2">today</div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {doneMachines.map((machine) => (
               <button
