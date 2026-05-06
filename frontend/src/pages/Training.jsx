@@ -136,6 +136,7 @@ export default function Training() {
 
   const doneSetIdsByMachine = useMemo(() => buildDoneMap(session?.sets || []), [session]);
   const doneIds = useMemo(() => new Set([...doneSetIdsByMachine.keys()]), [doneSetIdsByMachine]);
+  const sessionSetIds = useMemo(() => (session?.sets || []).map((set) => set.id), [session]);
 
   const doneMachines = useMemo(
     () => studioMachines.filter((machine) => doneIds.has(machine.id)),
@@ -143,6 +144,7 @@ export default function Training() {
   );
 
   const planDays = useMemo(() => buildPlan(studioMachines), [studioMachines]);
+  const allDaysDone = planDays.length > 0 && planDays.every((day) => day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)));
 
   const areaCounts = useMemo(() => {
     const counts = { upper: 0, core: 0, support: 0 };
@@ -174,6 +176,32 @@ export default function Training() {
     load();
   };
 
+  const toggleDay = async (day) => {
+    if (!session || day.machines.length === 0) return;
+    const complete = day.machines.every(({ machine }) => doneIds.has(machine.id));
+    const relevantSetIds = day.machines.flatMap(({ machine }) => doneSetIdsByMachine.get(machine.id) || []);
+    if (complete) {
+      await Promise.all(relevantSetIds.map((id) => api.del(`/training/set/${id}`)));
+      load();
+      return;
+    }
+    const missing = day.machines.filter(({ machine }) => !doneIds.has(machine.id));
+    await Promise.all(missing.map(({ machine }) => api.post(`/training/session/${session.id}/set`, {
+      exercise_id: machine.id,
+      exercise_name: `${machine.code} ${machine.name}`,
+      set_number: 1,
+      weight_kg: null,
+      reps: null
+    })));
+    load();
+  };
+
+  const resetAll = async () => {
+    if (!session) return;
+    await Promise.all(sessionSetIds.map((id) => api.del(`/training/set/${id}`)));
+    load();
+  };
+
   return (
     <div className="page page-training">
       <PageCommand
@@ -196,26 +224,57 @@ export default function Training() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {planDays.map((day) => (
-            <div key={day.day} className="rounded-lg border border-line bg-bg2/70 p-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em]">{day.day}</div>
-                <div className="mono text-[.55rem] text-mute uppercase tracking-[.12em] truncate">{day.title}</div>
-              </div>
-              <div className="text-xs text-ink2 mt-1">{day.focus}</div>
+            <div
+              key={day.day}
+              className={`rounded-lg border p-3 transition ${day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)) ? "border-lime/60 bg-lime/10" : "border-line bg-bg2/70"}`}
+            >
+              <button type="button" className="w-full text-left" onClick={() => toggleDay(day)}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em]">{day.day}</div>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="mono text-[.55rem] text-mute uppercase tracking-[.12em] truncate">{day.title}</div>
+                    <Icon.check size={12} className={day.machines.length > 0 && day.machines.every(({ machine }) => doneIds.has(machine.id)) ? "text-lime" : "text-mute opacity-30"} />
+                  </div>
+                </div>
+                <div className="text-xs text-ink2 mt-1">{day.focus}</div>
+                <div className="mono text-[.54rem] text-mute uppercase tracking-[.12em] mt-1">
+                  {day.machines.filter(({ machine }) => doneIds.has(machine.id)).length}/{day.machines.length} checked
+                </div>
+              </button>
               <div className="mt-3 flex flex-col gap-1.5">
                 {day.machines.map(({ label, machine }) => (
-                  <div key={`${day.day}-${label}-${machine.id}`} className="flex items-center justify-between gap-2 rounded-md border border-line/80 bg-bg/60 px-2 py-1.5">
-                    <div className="mono text-[.55rem] uppercase tracking-[.12em] text-mute shrink-0">{label}</div>
-                    <div className="text-[.62rem] text-ink text-right truncate" title={`${machine.code} ${machine.name}`}>
-                      {machine.code} · {machine.name}
+                  <button
+                    key={`${day.day}-${label}-${machine.id}`}
+                    type="button"
+                    onClick={() => toggleMachine(machine)}
+                    className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-left transition ${doneIds.has(machine.id) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
+                  >
+                    <div className="min-w-0">
+                      <div className="mono text-[.55rem] uppercase tracking-[.12em] text-mute shrink-0">{label}</div>
+                      <div className="text-[.62rem] text-ink text-left truncate" title={`${machine.code} ${machine.name}`}>
+                        {machine.code} · {machine.name}
+                      </div>
                     </div>
-                  </div>
+                    <Icon.check size={12} className={doneIds.has(machine.id) ? "text-lime shrink-0" : "text-mute opacity-25 shrink-0"} />
+                  </button>
                 ))}
               </div>
             </div>
           ))}
         </div>
       </AccentCard>
+
+      {allDaysDone && (
+        <AccentCard accent="#30d158" className="p-3" contentClassName="pl-2 flex items-center justify-between gap-3">
+          <div>
+            <div className="section-label mt-0 mb-1">all done</div>
+            <div className="mono text-[.62rem] text-mute uppercase tracking-[.12em]">hepsi yeşil. reset ile yeniden seçebilirsin.</div>
+          </div>
+          <button className="btn-primary shrink-0" type="button" onClick={resetAll}>
+            Reset
+          </button>
+        </AccentCard>
+      )}
 
       {doneMachines.length > 0 && (
         <AccentCard accent="#30d158" className="p-3" contentClassName="pl-2">
