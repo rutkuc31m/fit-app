@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import { api } from "../lib/api";
 import { todayStr } from "../lib/plan";
 import { findFoodChoice, readTodayCallPrefs } from "../lib/todayCall";
 import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
+import { normalizeQuickText, parseQuickFoodEntry, pickBestFoodMatch } from "../lib/quickFoodEntry";
 import { eatenPct, effectiveMacros, sumMealMacros } from "../lib/nutrition";
 import BarcodeScanner from "../components/BarcodeScanner";
 import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
@@ -21,6 +22,68 @@ const getFoodTarget = (dateStr) => {
   const prefs = readTodayCallPrefs(dateStr);
   const choice = findFoodChoice(prefs.foodId);
   return { kcal: choice.kcal, protein: choice.protein, carbs: choice.carbs, fat: choice.fat };
+};
+
+const getSpeechRecognitionCtor = () =>
+  (typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition)) || null;
+
+const foodName = (food, lang) => food?.name?.[lang] || food?.name?.en || food?.name?.de || "";
+
+const findCommonFoodMatch = (query, lang) => {
+  const q = normalizeQuickText(query);
+  if (!q) return null;
+  const aliases = {
+    egg_m: ["yumurta", "egg"],
+    egg_l: ["yumurta", "egg"],
+    banana: ["muz", "banana"],
+    apple: ["elma", "apple"],
+    pear: ["armut", "pear"],
+    orange: ["portakal", "orange"],
+    mandarin: ["mandalina", "mandarin"],
+    kiwi: ["kivi", "kiwi"],
+    avocado: ["avokado", "avocado"],
+    lemon: ["limon", "lemon"],
+    strawberries: ["cilek", "çilek", "strawberry"],
+    tomato: ["domates", "tomato"],
+    tomato_small: ["cherry tomato", "cocktail tomato", "cherrytomate"],
+    cucumber: ["salatalik", "salatalık", "cucumber", "gurke"],
+    cucumber_small: ["kucuk salatalik", "kleine gurke", "small cucumber"],
+    bell_pepper: ["paprika", "bell pepper"],
+    spitz_paprika: ["spitz paprika", "spitzpaprika"],
+    onion: ["sogan", "soğan", "zwiebel", "onion"],
+    garlic_clove: ["sarımsak", "sarimsak", "knoblauch", "garlic"],
+    carrot: ["havuc", "havuç", "karotte", "carrot"],
+    zucchini: ["kabak", "zucchini"],
+    corn_cob_small: ["misir", "mısır", "mais", "corn"],
+    sweet_potato: ["tatli patates", "süßkartoffel", "sweet potato"],
+    potato: ["patates", "kartoffel", "potato"],
+    walnut_half: ["ceviz", "walnut"],
+    almond: ["badem", "mandel", "almond"],
+    nuts_handful: ["kuruyemis", "kuruyemiş", "nuts"],
+    whey_scoop: ["whey", "protein powder", "protein tozu"],
+    tuna_can: ["ton balik", "ton balığı", "tuna"],
+    sardine_can: ["sardalya", "sardine"],
+    chocolate_square_dark: ["bitter cikolata", "bitter çikolata", "dark chocolate"],
+    olive: ["zeytin", "olive"]
+  };
+  const items = COMMON_FOODS.map((food) => ({
+    food,
+    label: normalizeQuickText(foodName(food, lang)),
+    alt: normalizeQuickText(foodName(food, lang === "de" ? "en" : "de")),
+    aliases: aliases[food.id] || []
+  }));
+  const exact = items.find(({ label, alt, aliases: foodAliases }) =>
+    label === q || alt === q || foodAliases.some((alias) => q === normalizeQuickText(alias))
+  );
+  if (exact) return exact.food;
+  const contains = items.find(({ label, alt, aliases: foodAliases }) =>
+    label.includes(q) || alt.includes(q) || q.includes(label) || q.includes(alt) ||
+    foodAliases.some((alias) => {
+      const a = normalizeQuickText(alias);
+      return a && (q.includes(a) || a.includes(q));
+    })
+  );
+  return contains?.food || null;
 };
 
 function FoodShortcutRow({ title, items, onAdd, onRemove, limit = 12 }) {
@@ -134,8 +197,16 @@ export default function Log() {
   const [pieces, setPieces] = useState(1);
   const [editingItemId, setEditingItemId] = useState(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quickText, setQuickText] = useState("");
+  const [quickBusy, setQuickBusy] = useState(false);
+  const [quickError, setQuickError] = useState("");
+  const [quickListening, setQuickListening] = useState(false);
   const [recentItems, setRecentItems] = useState([]);
   const [favoriteItems, setFavoriteItems] = useState([]);
+  const quickTextRef = useRef("");
+  const recognitionRef = useRef(null);
+  const quickAutoSubmitRef = useRef(false);
 
   const shiftDate = (delta) => {
     const d = new Date(date);
@@ -165,6 +236,10 @@ export default function Log() {
     await Promise.all([loadMeals(), loadLibrary()]);
   };
   useEffect(() => { load(); }, [date]);
+  useEffect(() => { quickTextRef.current = quickText; }, [quickText]);
+  useEffect(() => () => {
+    try { recognitionRef.current?.abort?.(); } catch {}
+  }, []);
 
   // Ensure a meal exists for the day, return its id
   const ensureMeal = async () => {
@@ -285,6 +360,22 @@ export default function Log() {
   const openCamera = () => { setShowAddMenu(false); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setScanOpen(true); };
   const openPiece = () => { setShowAddMenu(false); setEditingItemId(null); setMode("piece"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setDraft({ ...emptyItem }); };
   const openManual = () => { setShowAddMenu(false); setEditingItemId(null); setMode("gram"); setPieceFood(null); setPieces(1); setSuppressSearchFor(""); setDraft({ ...emptyItem }); };
+  const closeQuick = () => {
+    quickAutoSubmitRef.current = false;
+    setQuickOpen(false);
+    setQuickText("");
+    setQuickBusy(false);
+    setQuickError("");
+    setQuickListening(false);
+    try { recognitionRef.current?.abort?.(); } catch {}
+    recognitionRef.current = null;
+  };
+  const openQuick = () => {
+    setShowAddMenu(false);
+    setQuickError("");
+    setQuickText("");
+    setQuickOpen(true);
+  };
   const openEdit = (item) => {
     const quick = isQuickEntry(item);
     const amount = quick ? 100 : (Number(item.amount_g) || 100);
@@ -303,6 +394,119 @@ export default function Log() {
     setPieceFood(null);
     setPieces(1);
     setSuppressSearchFor(item.name || "");
+  };
+
+  const submitQuickAdd = async (rawText) => {
+    const parsed = parseQuickFoodEntry(rawText);
+    const text = parsed?.query || "";
+    if (!text) {
+      setQuickError("metin okunamadı");
+      return;
+    }
+
+    setQuickBusy(true);
+    setQuickError("");
+    try {
+      const explicitMassUnit = /\b(?:g|gr|gram|gramm|kg|kgs?|kilo)\b/.test(normalizeQuickText(rawText));
+      const commonFood = findCommonFoodMatch(text, lang);
+      if (commonFood && parsed.amount != null && (parsed.unit === "piece" || !explicitMassUnit)) {
+        const amount = parsed.amount;
+        const scaled = scaleByPieces(commonFood, amount);
+        const item = {
+          name: foodName(commonFood, lang),
+          amount_g: scaled.amount_g,
+          kcal: scaled.kcal,
+          protein_g: scaled.protein_g,
+          carbs_g: scaled.carbs_g,
+          fat_g: scaled.fat_g,
+          barcode: null
+        };
+        await addFoodItem(item);
+        closeQuick();
+        return;
+      }
+
+      const searchResults = await api.get(`/foods/search?q=${encodeURIComponent(text)}`).catch(() => []);
+      let best = pickBestFoodMatch(searchResults, text);
+
+      if ((!best || best.kcal_100g == null || best.protein_100g == null || best.carbs_100g == null || best.fat_100g == null) && text.length > 1) {
+        try {
+          const fallback = await api.post("/foods/lookup-name", { name: text, brand: best?.brand || null });
+          if (fallback) best = { ...(best || {}), ...fallback };
+        } catch {}
+      }
+
+      if (!best) {
+        setQuickError("ürün bulunamadı");
+        return;
+      }
+
+      const amount_g = parsed?.amount != null
+        ? parsed.unit === "kg"
+          ? parsed.amount * 1000
+          : parsed.amount
+        : 100;
+      const factor = amount_g / 100;
+      const name = [best.brand, best.name].filter(Boolean).join(" — ") || text;
+      const item = {
+        name,
+        barcode: best.barcode || null,
+        amount_g,
+        kcal: +((Number(best.kcal_100g) || 0) * factor).toFixed(1),
+        protein_g: +((Number(best.protein_100g) || 0) * factor).toFixed(1),
+        carbs_g: +((Number(best.carbs_100g) || 0) * factor).toFixed(1),
+        fat_g: +((Number(best.fat_100g) || 0) * factor).toFixed(1)
+      };
+      await addFoodItem(item);
+      closeQuick();
+    } catch (err) {
+      setQuickError(String(err?.message || err || "quick_add_failed"));
+    } finally {
+      setQuickBusy(false);
+      setQuickListening(false);
+    }
+  };
+
+  const startListening = () => {
+    const Ctor = getSpeechRecognitionCtor();
+    if (!Ctor || quickListening || quickBusy) return;
+    setQuickError("");
+    setQuickListening(true);
+    quickAutoSubmitRef.current = true;
+    const recognition = new Ctor();
+    recognition.lang = lang === "de" ? "de-DE" : "tr-TR";
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    recognitionRef.current = recognition;
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results || [])
+        .map((result) => result?.[0]?.transcript || "")
+        .join(" ")
+        .trim();
+      if (transcript) {
+        quickTextRef.current = transcript;
+        setQuickText(transcript);
+      }
+    };
+    recognition.onerror = () => {
+      setQuickListening(false);
+      quickAutoSubmitRef.current = false;
+      setQuickError("mikrofon okunamadi");
+    };
+    recognition.onend = () => {
+      setQuickListening(false);
+      const transcript = quickTextRef.current.trim();
+      if (quickAutoSubmitRef.current && transcript) {
+        void submitQuickAdd(transcript);
+      }
+      quickAutoSubmitRef.current = false;
+    };
+    try {
+      recognition.start();
+    } catch {
+      setQuickListening(false);
+      setQuickError("mikrofon baslatilamadi");
+    }
   };
 
   const saveDraft = async () => {
@@ -377,6 +581,13 @@ export default function Log() {
                   <div>
                     <div className="mono text-sm text-ink">Stückwahl</div>
                     <div className="mono text-[.58rem] text-mute">Yumurta, ekmek, meyve…</div>
+                  </div>
+                </button>
+                <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openQuick}>
+                  <Icon.mic size={16} className="text-signal shrink-0" />
+                  <div>
+                    <div className="mono text-sm text-ink">Ses / Hızlı</div>
+                    <div className="mono text-[.58rem] text-mute">“200 gr more protein wraps”</div>
                   </div>
                 </button>
                 <button className="w-full text-left px-4 py-3 hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openManual}>
@@ -486,6 +697,69 @@ export default function Log() {
           setDraft((d) => ({ ...(d || emptyItem), name: `err: ${msg}`, _analyzing: false }));
         }}
         onClose={() => setScanOpen(false)} />}
+
+      {/* Quick add modal */}
+      {quickOpen && (
+        <div className="modal-shell" onClick={closeQuick}>
+          <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="section-label mt-0 mb-0 flex-1">Ses / Hızlı ekle</div>
+              <button className="btn-icon" type="button" onClick={closeQuick} aria-label="close">
+                <Icon.close size={15} />
+              </button>
+            </div>
+
+            <div className="soft-band px-3 py-3">
+              <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mb-2">
+                örnek
+              </div>
+              <div className="text-sm text-ink leading-snug">200 gr more protein wraps</div>
+            </div>
+
+            <div className="flex items-stretch gap-2">
+              <input
+                className="input flex-1"
+                placeholder="200 gr more protein wraps"
+                value={quickText}
+                onChange={(e) => setQuickText(e.target.value)}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void submitQuickAdd(quickText);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className={`btn-icon ${quickListening ? "text-signal" : ""}`}
+                onClick={startListening}
+                aria-label="mic"
+                disabled={quickBusy || !getSpeechRecognitionCtor()}
+              >
+                <Icon.mic size={16} />
+              </button>
+            </div>
+
+            {quickError && (
+              <div className="mono text-[.62rem] text-warn uppercase tracking-[.14em] bg-warn/10 border border-warn/40 rounded-lg px-3 py-2">
+                {quickError}
+              </div>
+            )}
+
+            <div className="modal-actions">
+              <button className="btn flex-1" onClick={closeQuick}>{t("log.cancel")}</button>
+              <button
+                className="btn-primary flex-1"
+                onClick={() => void submitQuickAdd(quickText)}
+                disabled={quickBusy || !quickText.trim()}
+              >
+                {quickBusy ? "..." : "Ekle"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add item modal */}
       {draft && (
