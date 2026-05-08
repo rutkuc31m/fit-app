@@ -127,14 +127,19 @@ r.delete("/set/:id", (req, res) => {
 
 // PR history for an exercise
 r.get("/exercise/:exId/history", (req, res) => {
+  const exId = String(req.params.exId || "").trim();
+  if (!exId) return res.json([]);
   const rows = db.prepare(
     `SELECT s.date, ts.weight_kg, ts.reps, ts.set_number
      FROM training_sets ts
      JOIN training_sessions s ON s.id = ts.session_id
-     WHERE s.user_id = ? AND ts.exercise_id = ?
+     WHERE s.user_id = ? AND (
+       ts.exercise_id = ?
+       OR ts.exercise_id LIKE ?
+     )
      ORDER BY s.date DESC, ts.set_number ASC
      LIMIT 60`
-  ).all(req.user.id, req.params.exId);
+  ).all(req.user.id, exId, `%|%|${exId}`);
   res.json(rows);
 });
 

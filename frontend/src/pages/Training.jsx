@@ -41,10 +41,10 @@ function buildPlan(visibleMachines) {
       title: "Push A",
       focus: "chest / shoulders / triceps / core",
       slots: [
-        { label: "chest", move: "chest press / butterfly", codes: ["3041", "3016", "4329N", "5014", "5901", "3014"] },
-        { label: "shoulders", move: "shoulder press / lateral raise", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
-        { label: "triceps", move: "triceps dip / extension", codes: ["3011", "4379", "5006", "3036", "5904", "5104"] },
-        { label: "core", move: "ab crunch", codes: ["5012", "3037", "3008", "4342N", "4119"] }
+        { label: "chest", move: "chest press / butterfly", target: "3x10", codes: ["3041", "3016", "4329N", "5014", "5901", "3014"] },
+        { label: "shoulders", move: "shoulder press / lateral raise", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
+        { label: "triceps", move: "triceps dip / extension", target: "3x10", codes: ["3011", "4379", "5006", "3036", "5904", "5104"] },
+        { label: "core", move: "ab crunch", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"] }
       ]
     },
     {
@@ -52,10 +52,10 @@ function buildPlan(visibleMachines) {
       title: "Pull A",
       focus: "back / biceps / glute support / core",
       slots: [
-        { label: "lat", move: "lat pulldown", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
-        { label: "row", move: "seated row / t-bar row", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
-        { label: "biceps", move: "biceps curl", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
-        { label: "support", move: "back extension", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "lat", move: "lat pulldown", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
+        { label: "row", move: "seated row / t-bar row", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
+        { label: "biceps", move: "biceps curl", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
+        { label: "support", move: "back extension", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
       ]
     },
     {
@@ -63,10 +63,10 @@ function buildPlan(visibleMachines) {
       title: "Upper B",
       focus: "chest / back / shoulders / arms",
       slots: [
-        { label: "chest", move: "incline chest press / chest press", codes: ["4329N", "3041", "3016", "5014", "3014", "3097"] },
-        { label: "back", move: "row / lat pulldown", codes: ["4319", "3044", "3040", "4018", "4383", "4340"] },
-        { label: "shoulders", move: "shoulder press / lateral raise", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
-        { label: "arms", move: "biceps + triceps", codes: ["3011", "4379", "4366", "4355", "5006", "5104"] }
+        { label: "chest", move: "incline chest press / chest press", target: "3x10", codes: ["4329N", "3041", "3016", "5014", "3014", "3097"] },
+        { label: "back", move: "row / lat pulldown", target: "3x10", codes: ["4319", "3044", "3040", "4018", "4383", "4340"] },
+        { label: "shoulders", move: "shoulder press / lateral raise", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
+        { label: "arms", move: "biceps + triceps", target: "3x10", codes: ["3011", "4379", "4366", "4355", "5006", "5104"] }
       ]
     },
     {
@@ -74,10 +74,10 @@ function buildPlan(visibleMachines) {
       title: "Pull B",
       focus: "back / shoulders / glute support / core",
       slots: [
-        { label: "back", move: "row / lat pulldown", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
-        { label: "delts", move: "reverse butterfly / lateral raise", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
-        { label: "touch", move: "dip / triceps extension", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
-        { label: "support", move: "back extension", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "back", move: "row / lat pulldown", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
+        { label: "delts", move: "reverse butterfly / lateral raise", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
+        { label: "touch", move: "dip / triceps extension", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
+        { label: "support", move: "back extension", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
       ]
     }
   ];
@@ -149,10 +149,28 @@ function buildDoneMap(sets = [], planDays = []) {
   return { map, entries };
 }
 
+const TARGET_REPS = 10;
+const WEIGHT_MIN = 0;
+const WEIGHT_MAX = 100;
+const WEIGHT_STEP = 2.5;
+
+const clampWeight = (value) => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  return Math.min(WEIGHT_MAX, Math.max(WEIGHT_MIN, Math.round(n * 2) / 2));
+};
+
+const formatWeight = (value) => {
+  if (!Number.isFinite(value)) return "—";
+  return value % 1 === 0 ? `${value.toFixed(0)} kg` : `${value.toFixed(1)} kg`;
+};
+
 export default function Training() {
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
   const [session, setSession] = useState(null);
+  const [historyByMachine, setHistoryByMachine] = useState({});
+  const [weightDrafts, setWeightDrafts] = useState({});
 
   const load = async () => {
     const s = await api.get(`/training/session?date=${date}&day_type=GYM80`);
@@ -172,6 +190,10 @@ export default function Training() {
   );
   const doneIds = useMemo(() => new Set([...doneSetIdsByEntry.keys()]), [doneSetIdsByEntry]);
   const sessionSetIds = useMemo(() => (session?.sets || []).map((set) => set.id), [session]);
+  const machineIds = useMemo(
+    () => [...new Set(planEntries.map((entry) => String(entry.machine.id)))],
+    [planEntries]
+  );
 
   const doneMachines = useMemo(
     () => planEntries.filter((entry) => doneIds.has(entry.entryId)),
@@ -179,6 +201,35 @@ export default function Training() {
   );
 
   const allDaysDone = planDays.length > 0 && planDays.every((day) => day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)));
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadHistory = async () => {
+      const pairs = await Promise.all(machineIds.map(async (machineId) => {
+        try {
+          const rows = await api.get(`/training/exercise/${machineId}/history`);
+          const latest = (rows || []).find((row) => row.weight_kg != null);
+          return [machineId, latest?.weight_kg ?? null];
+        } catch {
+          return [machineId, null];
+        }
+      }));
+      if (cancelled) return;
+      const nextHistory = Object.fromEntries(pairs);
+      setHistoryByMachine(nextHistory);
+      setWeightDrafts((prev) => {
+        const next = { ...prev };
+        planEntries.forEach((entry) => {
+          const machineKey = String(entry.machine.id);
+          const fallback = nextHistory[machineKey];
+          if (next[entry.entryId] == null && fallback != null) next[entry.entryId] = fallback;
+        });
+        return next;
+      });
+    };
+    if (machineIds.length > 0) loadHistory();
+    return () => { cancelled = true; };
+  }, [machineIds, planEntries]);
 
   const toggleMachine = async (entry) => {
     if (!session) return;
@@ -196,6 +247,34 @@ export default function Training() {
       reps: null
     });
     load();
+  };
+
+  const saveWeight = async (entry, nextWeight) => {
+    if (!session) return;
+    const clean = clampWeight(nextWeight);
+    if (clean == null) return;
+    const existingIds = doneSetIdsByEntry.get(entry.entryId) || [];
+    if (existingIds.length > 0) {
+      await api.put(`/training/set/${existingIds[0]}`, {
+        weight_kg: clean,
+        reps: TARGET_REPS
+      });
+    } else {
+      await api.post(`/training/session/${session.id}/set`, {
+        exercise_id: entry.entryId,
+        exercise_name: `${entry.day} ${entry.machine.code} ${entry.machine.name}`,
+        set_number: 1,
+        weight_kg: clean,
+        reps: TARGET_REPS
+      });
+    }
+    setWeightDrafts((prev) => ({ ...prev, [entry.entryId]: clean }));
+    load();
+  };
+
+  const stepWeight = async (entry, delta) => {
+    const current = weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? 0;
+    await saveWeight(entry, current + delta);
   };
 
   const toggleDay = async (day) => {
@@ -247,22 +326,52 @@ export default function Training() {
               </button>
               <div className="mt-3 flex flex-col gap-1.5">
                 {day.machines.map((entry) => (
-                  <button
+                  <div
                     key={entry.entryId}
-                    type="button"
-                    onClick={() => toggleMachine(entry)}
-                    className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-left transition ${doneIds.has(entry.entryId) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
+                    className={`flex items-stretch justify-between gap-2 rounded-md border px-2 py-1.5 text-left transition ${doneIds.has(entry.entryId) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
                   >
-                    <div className="min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => toggleMachine(entry)}
+                      className="min-w-0 flex-1 text-left"
+                    >
                       <div className="text-[.62rem] text-ink text-left truncate">
                         {entry.machine.code} · {entry.machine.name}
                       </div>
                       <div className="mono text-[.53rem] text-mute uppercase tracking-[.12em] truncate mt-[1px]">
-                        {entry.move}
+                        {entry.move} · {entry.target}
                       </div>
+                      <div className="mono text-[.53rem] text-lime uppercase tracking-[.12em] truncate mt-[1px]">
+                        {formatWeight(weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? NaN)}
+                      </div>
+                    </button>
+                    <div className="shrink-0 flex items-center gap-1 self-center">
+                      <button
+                        type="button"
+                        className="h-7 w-7 rounded-md border border-line/70 bg-bg/80 text-mute text-sm leading-none"
+                        onClick={() => stepWeight(entry, -WEIGHT_STEP)}
+                        aria-label="decrease weight"
+                      >
+                        −
+                      </button>
+                      <button
+                        type="button"
+                        className="min-w-[3.9rem] rounded-md border border-line/70 bg-bg/80 px-2 py-1 mono text-[.62rem] text-ink tabular-nums"
+                        onClick={() => toggleMachine(entry)}
+                      >
+                        {formatWeight(weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? NaN)}
+                      </button>
+                      <button
+                        type="button"
+                        className="h-7 w-7 rounded-md border border-line/70 bg-bg/80 text-mute text-sm leading-none"
+                        onClick={() => stepWeight(entry, WEIGHT_STEP)}
+                        aria-label="increase weight"
+                      >
+                        +
+                      </button>
+                      <Icon.check size={12} className={doneIds.has(entry.entryId) ? "text-lime shrink-0 ml-1" : "text-mute opacity-25 shrink-0 ml-1"} />
                     </div>
-                    <Icon.check size={12} className={doneIds.has(entry.entryId) ? "text-lime shrink-0" : "text-mute opacity-25 shrink-0"} />
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
