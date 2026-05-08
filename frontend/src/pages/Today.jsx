@@ -80,7 +80,12 @@ const buildEffectiveDay = (day, foodChoice, gymChoice) => ({
         type: gymChoice.id,
         label: gymChoice.label,
         timeSlot: day.training?.timeSlot || "18:30 – 19:30"
-      }
+  }
+});
+
+const buildCallHeadline = (foodChoice, gymChoice) => ({
+  label: `${foodChoice.label} · ${gymChoice.label}`,
+  detail: `${foodChoice.hint} · ${gymChoice.hint}`
 });
 
 const buildTodayDay = (date, session) => {
@@ -204,7 +209,7 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   );
 }
 
-function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice, onFoodChange, onGymChange }) {
+function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice, headline, onFoodChange, onGymChange }) {
   if (!readiness) return null;
   const fastDay = !foodChoice?.window;
   const timing = windowState(foodChoice);
@@ -219,9 +224,9 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
           </div>
           <div className="font-display text-[1.65rem] leading-none text-ink mt-1"
             style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-            {readiness.label}
+            {headline.label}
           </div>
-          <div className="mono text-[.7rem] text-ink2 leading-snug mt-2">{readiness.action}</div>
+          <div className="mono text-[.7rem] text-ink2 leading-snug mt-2">{headline.detail}</div>
           <div className="mono text-[.62rem] text-mute leading-snug mt-1">{readiness.detail}</div>
         </div>
       </div>
@@ -375,6 +380,7 @@ export default function Today() {
   const day = useMemo(() => buildTodayDay(date, session), [date, session]);
   const foodChoice = useMemo(() => findFoodChoice(callPrefs.foodId), [callPrefs.foodId]);
   const gymChoice = useMemo(() => findGymChoice(callPrefs.gymId), [callPrefs.gymId]);
+  const callHeadline = useMemo(() => buildCallHeadline(foodChoice, gymChoice), [foodChoice, gymChoice]);
   const effectiveDay = useMemo(() => buildEffectiveDay(day, foodChoice, gymChoice), [day, foodChoice, gymChoice]);
   const preStart = date < PLAN.startDate;
   const readiness = effectiveDay ? dailyReadiness({ day: effectiveDay, recovery, mealsTotals, session }) : null;
@@ -530,6 +536,7 @@ export default function Today() {
         journeyPct={journeyPct}
         foodChoice={foodChoice}
         gymChoice={gymChoice}
+        headline={callHeadline}
         onFoodChange={(foodId) => setCallPrefs((prev) => ({ ...prev, foodId }))}
         onGymChange={(gymId) => setCallPrefs((prev) => ({ ...prev, gymId }))}
       />
@@ -726,7 +733,7 @@ export default function Today() {
       ) : (
         <AccentCard accent="#64d2ff">
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">training</div>
-          <div className="mono text-[.7rem] text-ink2 mt-1">rest day · recovery</div>
+          <div className="mono text-[.7rem] text-ink2 mt-1">{gymChoice.label} · {gymChoice.hint}</div>
         </AccentCard>
       )}
 
