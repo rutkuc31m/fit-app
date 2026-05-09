@@ -34,6 +34,16 @@ function pickMachine(visibleMachines, usedIds, candidateCodes) {
   return null;
 }
 
+function pickAlternatives(visibleMachines, usedIds, candidateCodes, limit = 3) {
+  const found = [];
+  for (const code of candidateCodes) {
+    const machine = visibleMachines.find((item) => item.code === code && !usedIds.has(item.id) && !found.some((m) => m.id === item.id));
+    if (machine) found.push(machine);
+    if (found.length >= limit) break;
+  }
+  return found;
+}
+
 function buildPlan(visibleMachines) {
   const sections = [
     {
@@ -89,11 +99,13 @@ function buildPlan(visibleMachines) {
         const machine = pickMachine(visibleMachines, usedIds, slot.codes);
         if (!machine) return null;
         usedIds.add(machine.id);
+        const alternatives = pickAlternatives(visibleMachines, usedIds, slot.codes.filter((code) => code !== machine.code), 2);
         return {
           ...slot,
           entryId: `${section.day}|${slot.label}|${machine.id}`,
           machine,
-          day: section.day
+          day: section.day,
+          alternatives
         };
       })
       .filter(Boolean);
@@ -353,6 +365,11 @@ export default function Training() {
                       <div className="mono text-[.53rem] text-lime uppercase tracking-[.12em] truncate mt-[1px]">
                         {formatWeight(weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? NaN)}
                       </div>
+                      {entry.alternatives?.length > 0 && (
+                        <div className="mono text-[.5rem] text-mute uppercase tracking-[.1em] truncate mt-[1px]">
+                          alt: {entry.alternatives.map((machine) => machine.code).join(" · ")}
+                        </div>
+                      )}
                     </button>
                     <div className="shrink-0 flex items-center gap-1 self-center">
                       <button
