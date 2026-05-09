@@ -64,7 +64,7 @@ function buildPlan(visibleMachines) {
       focus: "chest / back / shoulders / arms",
       slots: [
         { label: "chest", move: "incline chest press / chest press", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"] },
-        { label: "back", move: "row / lat pulldown", target: "3x10", codes: ["4319", "3044", "3040", "4018", "4383", "4340"] },
+        { label: "back", move: "row / lat pulldown", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"] },
         { label: "shoulders", move: "shoulder press / lateral raise", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
         { label: "arms", move: "biceps + triceps", target: "3x10", codes: ["3011", "4379", "4366", "4355", "5006", "5104"] }
       ]
@@ -152,12 +152,13 @@ function buildDoneMap(sets = [], planDays = []) {
 const TARGET_REPS = 10;
 const WEIGHT_MIN = 0;
 const WEIGHT_MAX = 100;
-const WEIGHT_STEP = 2.5;
+const WEIGHT_STEP = 5;
+const WEIGHT_START = 20;
 
 const clampWeight = (value) => {
   const n = Number(value);
   if (!Number.isFinite(n)) return null;
-  return Math.min(WEIGHT_MAX, Math.max(WEIGHT_MIN, Math.round(n * 2) / 2));
+  return Math.min(WEIGHT_MAX, Math.max(WEIGHT_MIN, Math.round(n / WEIGHT_STEP) * WEIGHT_STEP));
 };
 
 const formatWeight = (value) => {
@@ -279,8 +280,10 @@ export default function Training() {
   };
 
   const stepWeight = async (entry, delta) => {
-    const current = weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? 0;
-    await saveWeight(entry, current + delta);
+    const raw = weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? null;
+    const current = raw == null ? WEIGHT_START : Number(raw);
+    const next = raw == null && delta > 0 ? WEIGHT_START : current + delta;
+    await saveWeight(entry, next);
   };
 
   const toggleDay = async (day) => {
