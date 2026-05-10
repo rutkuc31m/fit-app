@@ -161,6 +161,14 @@ function buildDoneMap(sets = [], planDays = []) {
   return { map, entries };
 }
 
+function sessionProgress(session, planDays) {
+  if (!session?.sets?.length) return { done: 0, total: 0, complete: false };
+  const { map, entries } = buildDoneMap(session.sets, planDays);
+  const total = entries.length;
+  const done = [...map.keys()].length;
+  return { done, total, complete: total > 0 && done >= total };
+}
+
 const TARGET_REPS = 10;
 const WEIGHT_MIN = 0;
 const WEIGHT_MAX = 100;
@@ -182,17 +190,8 @@ export default function Training() {
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
   const [session, setSession] = useState(null);
-  const [historyByMachine, setHistoryByMachine] = useState({});
+  const [historyByExercise, setHistoryByExercise] = useState({});
   const [weightDrafts, setWeightDrafts] = useState({});
-
-  const load = async () => {
-    const s = await api.get(`/training/session?date=${date}&day_type=GYM80`);
-    setSession(s || null);
-  };
-
-  useEffect(() => {
-    load();
-  }, [date]);
 
   const studioMachines = STUDIO_MACHINES;
 
@@ -203,10 +202,39 @@ export default function Training() {
   );
   const doneIds = useMemo(() => new Set([...doneSetIdsByEntry.keys()]), [doneSetIdsByEntry]);
   const sessionSetIds = useMemo(() => (session?.sets || []).map((set) => set.id), [session]);
-  const machineIds = useMemo(
-    () => [...new Set(planEntries.map((entry) => String(entry.machine.id)))],
+  const sessionWeightByEntry = useMemo(() => {
+    const next = {};
+    (session?.sets || []).forEach((set) => {
+      if (set.exercise_id && set.weight_kg != null) next[String(set.exercise_id)] = set.weight_kg;
+    });
+    return next;
+  }, [session]);
+  const exerciseIds = useMemo(
+    () => [...new Set(planEntries.map((entry) => entry.entryId))],
     [planEntries]
   );
+
+  const load = async () => {
+    const recent = await api.get(`/training/sessions?date=${date}&day_type=GYM80&until=${date}&limit=14`);
+    const open = (recent || [])
+      .map((item) => ({ item, progress: sessionProgress(item, planDays) }))
+      .filter(({ progress }) => progress.done > 0 && !progress.complete)
+      .sort((a, b) => (b.progress.done - a.progress.done) || String(b.item.date).localeCompare(String(a.item.date)) || (b.item.id - a.item.id));
+    if (open[0]?.item) {
+      setSession(open[0].item);
+      return;
+    }
+    const s = await api.get(`/training/session?date=${date}&day_type=GYM80`);
+    setSession(s || null);
+  };
+
+  useEffect(() => {
+    load();
+  }, [date, planDays]);
+
+  useEffect(() => {
+    setWeightDrafts({});
+  }, [session?.id]);
 
   const doneMachines = useMemo(
     () => planEntries.filter((entry) => doneIds.has(entry.entryId)),
@@ -218,31 +246,22 @@ export default function Training() {
   useEffect(() => {
     let cancelled = false;
     const loadHistory = async () => {
-      const pairs = await Promise.all(machineIds.map(async (machineId) => {
+      const pairs = await Promise.all(exerciseIds.map(async (exerciseId) => {
         try {
-          const rows = await api.get(`/training/exercise/${machineId}/history`);
+          const rows = await api.get(`/training/exercise/${encodeURIComponent(exerciseId)}/history`);
           const latest = (rows || []).find((row) => row.weight_kg != null);
-          return [machineId, latest?.weight_kg ?? null];
+          return [exerciseId, latest?.weight_kg ?? null];
         } catch {
-          return [machineId, null];
+          return [exerciseId, null];
         }
       }));
       if (cancelled) return;
       const nextHistory = Object.fromEntries(pairs);
-      setHistoryByMachine(nextHistory);
-      setWeightDrafts((prev) => {
-        const next = { ...prev };
-        planEntries.forEach((entry) => {
-          const machineKey = String(entry.machine.id);
-          const fallback = nextHistory[machineKey];
-          if (next[entry.entryId] == null && fallback != null) next[entry.entryId] = fallback;
-        });
-        return next;
-      });
+      setHistoryByExercise(nextHistory);
     };
-    if (machineIds.length > 0) loadHistory();
+    if (exerciseIds.length > 0) loadHistory();
     return () => { cancelled = true; };
-  }, [machineIds, planEntries]);
+  }, [exerciseIds, planEntries]);
 
   const toggleMachine = async (entry) => {
     if (!session) return;
@@ -252,7 +271,7 @@ export default function Training() {
       load();
       return;
     }
-    const currentWeight = weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? null;
+    const currentWeight = getEntryWeight(entry);
     await api.post(`/training/session/${session.id}/set`, {
       exercise_id: entry.entryId,
       exercise_name: `${entry.day} ${entry.machine.code} ${entry.machine.name}`,
@@ -269,10 +288,10 @@ export default function Training() {
     if (clean == null) return;
     const existingIds = doneSetIdsByEntry.get(entry.entryId) || [];
     if (existingIds.length > 0) {
-      await api.put(`/training/set/${existingIds[0]}`, {
+      await Promise.all(existingIds.map((id) => api.put(`/training/set/${id}`, {
         weight_kg: clean,
         reps: TARGET_REPS
-      });
+      })));
     } else {
       await api.post(`/training/session/${session.id}/set`, {
         exercise_id: entry.entryId,
@@ -287,12 +306,11 @@ export default function Training() {
   };
 
   const getEntryWeight = (entry) => {
-    const machineKey = String(entry.machine.id);
-    return weightDrafts[entry.entryId] ?? historyByMachine[machineKey] ?? null;
+    return weightDrafts[entry.entryId] ?? sessionWeightByEntry[entry.entryId] ?? historyByExercise[entry.entryId] ?? null;
   };
 
   const stepWeight = async (entry, delta) => {
-    const raw = weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? null;
+    const raw = getEntryWeight(entry);
     const current = raw == null ? WEIGHT_START : Number(raw);
     const next = raw == null && delta > 0 ? WEIGHT_START : current + delta;
     await saveWeight(entry, next);
@@ -363,7 +381,7 @@ export default function Training() {
                         {entry.move} · {entry.target}
                       </div>
                       <div className="mono text-[.53rem] text-lime uppercase tracking-[.12em] truncate mt-[1px]">
-                        {formatWeight(weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? NaN)}
+                        {formatWeight(getEntryWeight(entry) ?? NaN)}
                       </div>
                       {entry.alternatives?.length > 0 && (
                         <div className="mono text-[.5rem] text-mute uppercase tracking-[.1em] truncate mt-[1px]">
@@ -385,7 +403,7 @@ export default function Training() {
                         className="min-w-[3.9rem] rounded-md border border-line/70 bg-bg/80 px-2 py-1 mono text-[.62rem] text-ink tabular-nums"
                         onClick={() => toggleMachine(entry)}
                       >
-                        {formatWeight(weightDrafts[entry.entryId] ?? historyByMachine[String(entry.machine.id)] ?? NaN)}
+                        {formatWeight(getEntryWeight(entry) ?? NaN)}
                       </button>
                       <button
                         type="button"

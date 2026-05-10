@@ -28,6 +28,43 @@ r.get("/session", (req, res) => {
   res.json({ ...sess, sets });
 });
 
+r.get("/sessions", (req, res) => {
+  const { day_type, until, limit } = req.query;
+  const maxRows = Math.min(Math.max(Number(limit) || 14, 1), 60);
+  const rows = day_type
+    ? db.prepare(`
+        SELECT *
+        FROM training_sessions
+        WHERE user_id = ? AND day_type = ? AND date <= COALESCE(?, date)
+        ORDER BY date DESC, id DESC
+        LIMIT ?
+      `).all(req.user.id, day_type, until || null, maxRows)
+    : db.prepare(`
+        SELECT *
+        FROM training_sessions
+        WHERE user_id = ? AND date <= COALESCE(?, date)
+        ORDER BY date DESC, id DESC
+        LIMIT ?
+      `).all(req.user.id, until || null, maxRows);
+
+  const setsBySession = new Map();
+  if (rows.length > 0) {
+    const placeholders = rows.map(() => "?").join(",");
+    const sets = db.prepare(`
+      SELECT *
+      FROM training_sets
+      WHERE session_id IN (${placeholders})
+      ORDER BY id ASC
+    `).all(...rows.map((row) => row.id));
+    sets.forEach((set) => {
+      if (!setsBySession.has(set.session_id)) setsBySession.set(set.session_id, []);
+      setsBySession.get(set.session_id).push(set);
+    });
+  }
+
+  res.json(rows.map((row) => ({ ...row, sets: setsBySession.get(row.id) || [] })));
+});
+
 r.get("/favorite-machines", (req, res) => {
   const rows = db.prepare(`
     SELECT machine_id, code, name, series, area, muscles, created_at, updated_at
@@ -137,7 +174,7 @@ r.get("/exercise/:exId/history", (req, res) => {
        ts.exercise_id = ?
        OR ts.exercise_id LIKE ?
      )
-     ORDER BY s.date DESC, ts.set_number ASC
+     ORDER BY s.date DESC, ts.id DESC
      LIMIT 60`
   ).all(req.user.id, exId, `%|%|${exId}`);
   res.json(rows);
