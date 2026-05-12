@@ -51,10 +51,10 @@ function buildPlan(visibleMachines) {
       title: "Push A",
       focus: "chest / shoulders / triceps / core",
       slots: [
-        { label: "chest", move: "chest press / butterfly", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"] },
-        { label: "shoulders", move: "shoulder press / lateral raise", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
-        { label: "triceps", move: "rope pushdown / triceps extension", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"] },
-        { label: "core", move: "ab crunch", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"] }
+        { label: "chest", move: "chest press / butterfly", area: "mid chest / pecs", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"] },
+        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
+        { label: "triceps", move: "rope pushdown / triceps extension", area: "triceps", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"] },
+        { label: "core", move: "ab crunch", area: "upper abs", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"] }
       ]
     },
     {
@@ -62,10 +62,10 @@ function buildPlan(visibleMachines) {
       title: "Pull A",
       focus: "back / biceps / glute support / core",
       slots: [
-        { label: "lat", move: "lat pulldown", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
-        { label: "row", move: "seated row / t-bar row", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
-        { label: "biceps", move: "biceps curl", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
-        { label: "support", move: "back extension", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "lat", move: "lat pulldown", area: "lats / upper back width", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
+        { label: "row", move: "seated row / t-bar row", area: "mid back / traps", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
+        { label: "biceps", move: "biceps curl", area: "biceps", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
+        { label: "support", move: "back extension", area: "lower back / glutes", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
       ]
     },
     {
@@ -73,10 +73,10 @@ function buildPlan(visibleMachines) {
       title: "Upper B",
       focus: "chest / back / shoulders / arms",
       slots: [
-        { label: "chest", move: "incline chest press / chest press", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"] },
-        { label: "back", move: "row / lat pulldown", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"] },
-        { label: "shoulders", move: "shoulder press / lateral raise", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
-        { label: "arms", move: "rope pushdown / biceps curl", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"] }
+        { label: "chest", move: "incline chest press / chest press", area: "upper chest / pecs", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"] },
+        { label: "back", move: "row / lat pulldown", area: "lats + mid back", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"] },
+        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
+        { label: "arms", move: "rope pushdown / biceps curl", area: "triceps / biceps", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"] }
       ]
     },
     {
@@ -84,10 +84,10 @@ function buildPlan(visibleMachines) {
       title: "Pull B",
       focus: "back / shoulders / glute support / core",
       slots: [
-        { label: "back", move: "row / lat pulldown", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
-        { label: "delts", move: "reverse butterfly / lateral raise", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
-        { label: "touch", move: "dip / triceps extension", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
-        { label: "support", move: "back extension", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "back", move: "row / lat pulldown", area: "lats + mid back", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
+        { label: "delts", move: "reverse butterfly / lateral raise", area: "rear + side delts", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
+        { label: "touch", move: "dip / triceps extension", area: "lower chest / triceps", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
+        { label: "support", move: "back extension", area: "lower back / glutes", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
       ]
     }
   ];
@@ -383,7 +383,7 @@ export default function Training() {
                         {entry.machine.code} · {entry.machine.name}
                       </div>
                       <div className="mono text-[.53rem] text-mute uppercase tracking-[.12em] truncate mt-[1px]">
-                        {entry.move} · {entry.target}
+                        {entry.move} · {entry.area} · {entry.target}
                       </div>
                       <div className="mono text-[.53rem] text-lime uppercase tracking-[.12em] truncate mt-[1px]">
                         {formatWeight(getEntryWeight(entry) ?? NaN)}
