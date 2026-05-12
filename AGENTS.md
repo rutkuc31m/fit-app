@@ -68,6 +68,22 @@ The smoke script may show brief `curl: connection refused` lines during restart.
 - Recovery signal uses `energy`, `hunger`, and `headache` on `daily_logs`.
 - Weekly review lives at `/api/stats/weekly-review`.
 
+## Frontend Rules for Fit App
+
+- Preserve the current compact dark PWA visual language unless the user explicitly asks for a redesign.
+- Do not add explanatory helper copy inside the app unless the user asks; the UI should stay direct and quiet.
+- Prefer dense, tappable controls over large marketing-style sections. This app is a daily tool, not a landing page.
+- Use the existing component system in `frontend/src/components/ui.jsx` and existing CSS tokens before adding new patterns.
+- Use `lucide-react` icons already exposed through the local `Icon` helper when an icon button is needed.
+- Keep text inside compact cards short enough for mobile. Avoid oversized headings inside cards.
+- Do not use nested cards. Use cards only for real repeated items, tools, or compact panels.
+- Avoid visible instructions like "choose this" or "how to use"; if the flow is unclear, improve the control itself.
+- Avoid `transition-all`; animate only `transform`, `opacity`, color, or border/background where needed.
+- Keep repeated controls stable in size so check states, weight values, and labels do not shift layout.
+- If changing layout or navigation, verify on mobile width and desktop width before deploy.
+- If a screenshot comparison is needed, run the Vite app locally or inspect the deployed PWA. This repo does not use the Windows `serve.mjs` / `screenshot.mjs` workflow.
+- If `brand_assets/` is ever added, check it before creating new colors, logos, or visual assets.
+
 ## Operating Style
 
 - Keep changes small, testable, and deployable.
