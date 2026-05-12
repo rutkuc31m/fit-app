@@ -53,7 +53,7 @@ function buildPlan(visibleMachines) {
       slots: [
         { label: "chest", move: "chest press / butterfly", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"] },
         { label: "shoulders", move: "shoulder press / lateral raise", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
-        { label: "triceps", move: "triceps dip / extension", target: "3x10", codes: ["3011", "4379", "5006", "3036", "5904", "5104"] },
+        { label: "triceps", move: "rope pushdown / triceps extension", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"] },
         { label: "core", move: "ab crunch", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"] }
       ]
     },
@@ -76,7 +76,7 @@ function buildPlan(visibleMachines) {
         { label: "chest", move: "incline chest press / chest press", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"] },
         { label: "back", move: "row / lat pulldown", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"] },
         { label: "shoulders", move: "shoulder press / lateral raise", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
-        { label: "arms", move: "biceps + triceps", target: "3x10", codes: ["3011", "4379", "4366", "4355", "5006", "5104"] }
+        { label: "arms", move: "rope pushdown / biceps curl", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"] }
       ]
     },
     {
