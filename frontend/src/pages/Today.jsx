@@ -84,8 +84,7 @@ const buildEffectiveDay = (day, foodChoice, gymChoice) => ({
 });
 
 const buildCallHeadline = (foodChoice, gymChoice) => ({
-  label: `${foodChoice.label} · ${gymChoice.label}`,
-  detail: `${foodChoice.hint} · ${gymChoice.hint}`
+  label: `${foodChoice.label} · ${gymChoice.label}`
 });
 
 const buildTodayDay = (date, session) => {
@@ -226,8 +225,6 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
             style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
             {headline.label}
           </div>
-          <div className="mono text-[.7rem] text-ink2 leading-snug mt-2">{headline.detail}</div>
-          <div className="mono text-[.62rem] text-mute leading-snug mt-1">{readiness.detail}</div>
         </div>
       </div>
 
@@ -319,7 +316,7 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
         </div>
         <div className="h-[4px] bg-bg2 rounded-full overflow-hidden border border-line/50">
           <div
-            className="h-full transition-all duration-700"
+            className="h-full transition-[width] duration-700"
             style={{
               width: `${journeyPct}%`,
               background: `linear-gradient(90deg, #ff9f0a 0%, ${accent} 100%)`,
@@ -518,16 +515,6 @@ export default function Today() {
           <Icon.chev size={14} />
         </button>
       </div>
-
-      {/* Phase transition celebration */}
-      {isPhaseFirstDay && (
-        <AccentCard accent={phase.color} className="text-center">
-          <div className="mono text-[.62rem] uppercase tracking-[.22em] font-bold animate-pulse"
-            style={{ color: phase.color, textShadow: `0 0 10px ${phase.color}99` }}>
-            ★ phase {phase.id} unlocked
-          </div>
-        </AccentCard>
-      )}
 
       <CommandCard
         readiness={readiness}
@@ -737,33 +724,6 @@ export default function Today() {
         </AccentCard>
       )}
 
-      {/* Checkpoint banner */}
-      {day.isCheckpointDay && day.checkpoint && (
-        <AccentCard as={Link} to="/checkin" accent="#64d2ff" className="block hover:brightness-110">
-          <div className="mono text-[.62rem] text-cyan uppercase tracking-[.14em] mb-1">
-            {t("checkin.title")}
-          </div>
-          <div className="mono text-xs text-ink2">{day.checkpoint.tasks.join(" · ")}</div>
-        </AccentCard>
-      )}
-
-
-      {/* Supplements footer */}
-      {day.supplements && (
-        <AccentCard accent="#bf5af2">
-          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mb-1">Supplements</div>
-          <div className="grid min-[420px]:grid-cols-2 gap-2">
-            <div className="soft-band px-2 py-2">
-              <div className="mono text-[.52rem] text-mute uppercase tracking-[.14em]">AM</div>
-              <div className="mono text-[.66rem] text-ink2 mt-1">{day.supplements.morning.join(", ")}</div>
-            </div>
-            <div className="soft-band px-2 py-2">
-              <div className="mono text-[.52rem] text-mute uppercase tracking-[.14em]">PM</div>
-              <div className="mono text-[.66rem] text-ink2 mt-1">{day.supplements.evening.join(", ")}</div>
-            </div>
-          </div>
-        </AccentCard>
-      )}
     </div>
   );
 }

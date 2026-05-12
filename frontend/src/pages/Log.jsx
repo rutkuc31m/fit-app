@@ -550,7 +550,7 @@ export default function Log() {
       <PageCommand
         accent="#ff9f0a"
         kicker="nutrition control"
-        title="Log fast. Stay honest."
+        title="Essen"
         metrics={[
           { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
           { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
@@ -598,7 +598,6 @@ export default function Log() {
                   <Icon.cart size={16} className="text-signal shrink-0" />
                   <div>
                     <div className="mono text-sm text-ink">Stückwahl</div>
-                    <div className="mono text-[.58rem] text-mute">Yumurta, ekmek, meyve…</div>
                   </div>
                 </button>
                 <button className="w-full text-left px-4 py-3 hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openManual}>
@@ -652,7 +651,7 @@ export default function Log() {
                   </div>
                   <div className="mono text-[.62rem] text-mute tabular-nums mt-[2px]">
                     {isQuickEntry(it)
-                      ? t("log.quick_kcal_hint")
+                      ? t("log.mode_quick")
                       : <><span>{it.amount_g}g</span> · <span className="text-lime">P</span>{Math.round(eff.protein_g)} <span className="text-amber">C</span>{Math.round(eff.carbs_g)} <span className="text-ink2">F</span>{Math.round(eff.fat_g)}</>}
                   </div>
                 </button>
@@ -726,13 +725,6 @@ export default function Log() {
               <button className="btn-icon" type="button" onClick={closeQuick} aria-label="close">
                 <Icon.close size={15} />
               </button>
-            </div>
-
-            <div className="soft-band px-3 py-3">
-              <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] mb-2">
-                örnek
-              </div>
-              <div className="text-sm text-ink leading-snug">200 gr more protein wraps</div>
             </div>
 
             <div className="flex items-stretch gap-2">
@@ -816,7 +808,7 @@ export default function Log() {
                       className="w-full text-left px-3 py-2 border-b border-line last:border-0 hover:bg-bg2">
                       <div className="text-sm text-ink truncate">{r.name}</div>
                       <div className="mono text-[.62rem] text-mute truncate">
-                        {r.brand || "—"} {r.kcal_100g ? `· ${Math.round(r.kcal_100g)} kcal/100g` : "· no macros (AI fallback)"}
+                        {r.brand || "—"} {r.kcal_100g ? `· ${Math.round(r.kcal_100g)} kcal/100g` : ""}
                       </div>
                     </button>
                   ))}
@@ -858,12 +850,6 @@ export default function Log() {
                   </div>
                 )}
               </>
-            )}
-
-            {mode === "quick" && (
-              <div className="soft-band px-3 py-3">
-                <div className="mono text-[.62rem] text-amber uppercase tracking-[.14em]">{t("log.quick_kcal")}</div>
-              </div>
             )}
 
             {/* Macro inputs */}
