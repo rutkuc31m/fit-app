@@ -42,8 +42,8 @@ const dayPlan = (date) => {
 };
 
 const eatingTarget = (mode) => ({
-  TRAINING: { kcal: 1800, protein_g: 150 },
-  OMAD: { kcal: 1800, protein_g: 150 },
+  TRAINING: { kcal: 1700, protein_g: 170 },
+  OMAD: { kcal: 1700, protein_g: 170 },
   LOW: { kcal: 1300, protein_g: 130 },
   FAST: { kcal: 0, protein_g: 0 }
 }[mode] || { kcal: 0, protein_g: 0 });

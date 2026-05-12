@@ -37,22 +37,22 @@ export const PLAN = {
   // Eating windows & targets
   eatingTargets: {
     TRAINING: {
-      kcal: 1800,
-      protein: 150,
-      carbs: 115,
-      fat: 75,
+      kcal: 1700,
+      protein: 170,
+      carbs: 105,
+      fat: 65,
       windowStart: "13:00",
       windowEnd:   "22:00",
       mealSplit: {
-        mainMeal: { time: "13:00", kcal: 1000, note: "protein + clean carbs before evening gym" },
-        postWorkout: { time: "20:45", kcal: 500, protein: 55, note: "whey + skyr, light enough before sleep" }
+        mainMeal: { time: "13:00", kcal: 1050, note: "protein + clean carbs before evening gym" },
+        postWorkout: { time: "20:45", kcal: 400, protein: 45, note: "whey + skyr, light enough before sleep" }
       }
     },
     OMAD: {
-      kcal: 1800,
-      protein: 150,
-      carbs: 115,
-      fat: 75,
+      kcal: 1700,
+      protein: 170,
+      carbs: 105,
+      fat: 65,
       windowStart: "19:30",
       windowEnd:   "20:45",
       preShake: {
