@@ -224,6 +224,11 @@ export default function Training() {
       setSession(open[0].item);
       return;
     }
+    const todayExisting = (recent || []).find((item) => item.date === date);
+    if (todayExisting) {
+      setSession(todayExisting);
+      return;
+    }
     const s = await api.get(`/training/session?date=${date}&day_type=GYM80`);
     setSession(s || null);
   };
