@@ -216,17 +216,17 @@ export default function Training() {
 
   const load = async () => {
     const recent = await api.get(`/training/sessions?date=${date}&day_type=GYM80&until=${date}&limit=14`);
+    const todayExisting = (recent || []).find((item) => item.date === date);
+    if (todayExisting) {
+      setSession(todayExisting);
+      return;
+    }
     const open = (recent || [])
       .map((item) => ({ item, progress: sessionProgress(item, planDays) }))
       .filter(({ progress }) => progress.done > 0 && !progress.complete)
       .sort((a, b) => (b.progress.done - a.progress.done) || String(b.item.date).localeCompare(String(a.item.date)) || (b.item.id - a.item.id));
     if (open[0]?.item) {
       setSession(open[0].item);
-      return;
-    }
-    const todayExisting = (recent || []).find((item) => item.date === date);
-    if (todayExisting) {
-      setSession(todayExisting);
       return;
     }
     const s = await api.get(`/training/session?date=${date}&day_type=GYM80`);
