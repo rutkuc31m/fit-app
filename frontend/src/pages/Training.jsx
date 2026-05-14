@@ -117,22 +117,24 @@ function buildEntryIndex(planDays) {
   const entries = [];
   const byEntryId = new Map();
   const byMachineId = new Map();
+  const byDaySlot = new Map();
 
   planDays.forEach((day) => {
     day.machines.forEach((entry) => {
       entries.push(entry);
       byEntryId.set(entry.entryId, entry);
+      byDaySlot.set(`${entry.day}|${entry.label}`, entry);
       const key = String(entry.machine.id);
       if (!byMachineId.has(key)) byMachineId.set(key, []);
       byMachineId.get(key).push(entry);
     });
   });
 
-  return { entries, byEntryId, byMachineId };
+  return { entries, byEntryId, byMachineId, byDaySlot };
 }
 
 function buildDoneMap(sets = [], planDays = []) {
-  const { entries, byEntryId, byMachineId } = buildEntryIndex(planDays);
+  const { entries, byEntryId, byMachineId, byDaySlot } = buildEntryIndex(planDays);
   const map = new Map();
 
   const queueSet = (entryId, setId) => {
@@ -153,6 +155,12 @@ function buildDoneMap(sets = [], planDays = []) {
     if (!set.exercise_id) return;
     const exerciseId = String(set.exercise_id);
     if (byEntryId.has(exerciseId)) return;
+    const [day, slot] = exerciseId.split("|");
+    const daySlotTarget = byDaySlot.get(`${day}|${slot}`);
+    if (daySlotTarget && !map.has(daySlotTarget.entryId)) {
+      queueSet(daySlotTarget.entryId, set.id);
+      return;
+    }
     const candidates = byMachineId.get(exerciseId) || [];
     const target = candidates.find((entry) => !map.has(entry.entryId));
     if (target) queueSet(target.entryId, set.id);
@@ -224,7 +232,7 @@ export default function Training() {
     const open = (recent || [])
       .map((item) => ({ item, progress: sessionProgress(item, planDays) }))
       .filter(({ progress }) => progress.done > 0 && !progress.complete)
-      .sort((a, b) => (b.progress.done - a.progress.done) || String(b.item.date).localeCompare(String(a.item.date)) || (b.item.id - a.item.id));
+      .sort((a, b) => String(b.item.date).localeCompare(String(a.item.date)) || (b.item.id - a.item.id));
     if (open[0]?.item) {
       setSession(open[0].item);
       return;
