@@ -224,13 +224,20 @@ export default function Training() {
 
   const load = async () => {
     const recent = await api.get(`/training/sessions?date=${date}&day_type=GYM80&until=${date}&limit=14`);
+    const recentWithProgress = (recent || []).map((item) => ({ item, progress: sessionProgress(item, planDays) }));
     const todayExisting = (recent || []).find((item) => item.date === date);
     if (todayExisting) {
       setSession(todayExisting);
       return;
     }
-    const open = (recent || [])
-      .map((item) => ({ item, progress: sessionProgress(item, planDays) }))
+    const latestComplete = recentWithProgress.find(({ progress }) => progress.complete);
+    const candidates = latestComplete
+      ? recentWithProgress.filter(({ item }) =>
+          String(item.date).localeCompare(String(latestComplete.item.date)) > 0 ||
+          (item.date === latestComplete.item.date && item.id > latestComplete.item.id)
+        )
+      : recentWithProgress;
+    const open = candidates
       .filter(({ progress }) => progress.done > 0 && !progress.complete)
       .sort((a, b) => String(b.item.date).localeCompare(String(a.item.date)) || (b.item.id - a.item.id));
     if (open[0]?.item) {
