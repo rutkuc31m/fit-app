@@ -51,10 +51,10 @@ function buildPlan(visibleMachines) {
       title: "Push A",
       focus: "chest / shoulders / triceps / core",
       slots: [
-        { label: "chest", move: "chest press / butterfly", area: "mid chest / pecs", info: "main goal: press or fly for the middle chest. If the press is busy, butterfly/cable fly is fine.", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"] },
-        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts", info: "main goal: shoulder cap. Press hits front delts, lateral raise hits side delts.", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
-        { label: "triceps", move: "rope pushdown / triceps extension", area: "triceps", info: "main goal: back arm. On 4012 use high cable rope pushdown, elbows close to the body.", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"] },
-        { label: "core", move: "ab crunch", area: "upper abs", info: "main goal: controlled crunch for upper abs. Keep hips quiet and curl the rib cage down.", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"] }
+        { label: "chest", move: "chest press / butterfly", area: "mid chest / pecs / orta göğüs", info: "main goal: press or fly for the middle chest. If the press is busy, butterfly/cable fly is fine.", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"] },
+        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", info: "main goal: shoulder cap. Press hits front delts, lateral raise hits side delts.", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
+        { label: "triceps", move: "rope pushdown / triceps extension", area: "triceps / arka kol", info: "main goal: back arm. On 4012 use high cable rope pushdown, elbows close to the body.", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"] },
+        { label: "core", move: "ab crunch", area: "upper abs / üst karın", info: "main goal: controlled crunch for upper abs. Keep hips quiet and curl the rib cage down.", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"] }
       ]
     },
     {
@@ -62,10 +62,10 @@ function buildPlan(visibleMachines) {
       title: "Pull A",
       focus: "back / biceps / glute support / core",
       slots: [
-        { label: "lat", move: "lat pulldown", area: "lats / upper back width", info: "main goal: wing width. Pull elbows down, do not turn it into a biceps curl.", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
-        { label: "row", move: "seated row / t-bar row", area: "mid back / traps", info: "main goal: middle back thickness. Pull elbows back and squeeze shoulder blades.", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
-        { label: "biceps", move: "biceps curl", area: "biceps", info: "main goal: front arm. Optional lighter finisher if biceps are already tired from back work.", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
-        { label: "support", move: "back extension", area: "lower back / glutes", info: "main goal: lower back and hip support. Controlled hinge, no swinging.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "lat", move: "lat pulldown", area: "lats / kanat / sırt genişliği", info: "main goal: wing width. Pull elbows down, do not turn it into a biceps curl.", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
+        { label: "row", move: "seated row / t-bar row", area: "mid back / traps / orta sırt", info: "main goal: middle back thickness. Pull elbows back and squeeze shoulder blades.", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
+        { label: "biceps", move: "biceps curl", area: "biceps / ön kol", info: "main goal: front arm. Optional lighter finisher if biceps are already tired from back work.", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
+        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", info: "main goal: lower back and hip support. Controlled hinge, no swinging.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
       ]
     },
     {
@@ -73,10 +73,10 @@ function buildPlan(visibleMachines) {
       title: "Upper B",
       focus: "chest / back / shoulders / arms",
       slots: [
-        { label: "chest", move: "incline chest press / chest press", area: "upper chest / pecs", info: "main goal: upper chest line. Incline press preferred; normal chest press is okay if needed.", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"] },
-        { label: "back", move: "row / lat pulldown", area: "lats + mid back", info: "main goal: back balance. Use pulldown for width or row for thickness when gym is busy.", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"] },
-        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts", info: "main goal: shoulder cap. 3050/lateral raise is a good substitute when press machines are busy.", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
-        { label: "arms", move: "rope pushdown / biceps curl", area: "triceps / biceps", info: "main goal: arm finisher. On 4012 use high cable for triceps, low cable for biceps.", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"] }
+        { label: "chest", move: "incline chest press / chest press", area: "upper chest / üst göğüs", info: "main goal: upper chest line. Incline press preferred; normal chest press is okay if needed.", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"] },
+        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", info: "main goal: back balance. Use pulldown for width or row for thickness when gym is busy.", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"] },
+        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", info: "main goal: shoulder cap. 3050/lateral raise is a good substitute when press machines are busy.", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
+        { label: "arms", move: "rope pushdown / biceps curl", area: "triceps / biceps / arka kol + ön kol", info: "main goal: arm finisher. On 4012 use high cable for triceps, low cable for biceps.", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"] }
       ]
     },
     {
@@ -84,10 +84,10 @@ function buildPlan(visibleMachines) {
       title: "Pull B",
       focus: "back / shoulders / glute support / core",
       slots: [
-        { label: "back", move: "row / lat pulldown", area: "lats + mid back", info: "main goal: back width or thickness. Pick the free pull machine and feel the back, not only arms.", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
-        { label: "delts", move: "reverse butterfly / lateral raise", area: "rear + side delts", info: "main goal: rear and side shoulder. Reverse butterfly for rear delts, lateral raise for side delts.", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
-        { label: "touch", move: "dip / triceps extension", area: "lower chest / triceps", info: "main goal: dip pattern. 3017 is best here; chest and triceps should both work.", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
-        { label: "support", move: "back extension", area: "lower back / glutes", info: "main goal: lower back and hip support. Smooth reps, stop before form breaks.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", info: "main goal: back width or thickness. Pick the free pull machine and feel the back, not only arms.", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
+        { label: "delts", move: "reverse butterfly / lateral raise", area: "rear + side delts / arka + yan omuz", info: "main goal: rear and side shoulder. Reverse butterfly for rear delts, lateral raise for side delts.", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
+        { label: "touch", move: "dip / triceps extension", area: "lower chest / triceps / alt göğüs + arka kol", info: "main goal: dip pattern. 3017 is best here; chest and triceps should both work.", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
+        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", info: "main goal: lower back and hip support. Smooth reps, stop before form breaks.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
       ]
     }
   ];
