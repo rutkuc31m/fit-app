@@ -13,7 +13,7 @@ const items = [
 export default function NavBar() {
   const { t } = useTranslation();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-bg/94 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
+    <nav className="app-nav fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-bg/94 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
       <div className="absolute top-0 left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-line2 to-transparent" />
       <div className="max-w-[760px] mx-auto grid grid-cols-5 px-1">
         {items.map(({ to, k, i: Ic }) => (
