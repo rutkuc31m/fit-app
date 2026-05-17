@@ -12,6 +12,14 @@ const addDays = (dateStr, days) => {
   dt.setDate(dt.getDate() + days);
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 };
+const shiftSundayMondayToTuesday = (dateStr) => {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(y, m - 1, d, 12);
+  const dow = dt.getDay();
+  if (dow === 0) dt.setDate(dt.getDate() + 2);
+  if (dow === 1) dt.setDate(dt.getDate() + 1);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+};
 const fmt = (value, digits = 1) => value == null ? "--" : Number(value).toFixed(digits);
 const monthDay = (dateStr) => dateStr.slice(5).split("-").reverse().join(".");
 
@@ -24,11 +32,11 @@ const PHASE_FOCUS = {
 
 const WEIGHT_ROUTE = [
   ["20.04", 93.0], ["27.04", 89.7], ["04.05", 88.8], ["11.05", 88.0],
-  ["18.05", 87.0], ["25.05", 86.0], ["01.06", 85.0], ["08.06", 84.0],
+  ["19.05", 87.0], ["25.05", 86.0], ["01.06", 85.0], ["08.06", 84.0],
   ["15.06", 83.0], ["22.06", 82.0], ["29.06", 81.0], ["06.07", 80.0],
-  ["13.07", 79.2], ["20.07", 78.5], ["27.07", 77.8], ["03.08", 77.0],
+  ["14.07", 79.2], ["20.07", 78.5], ["27.07", 77.8], ["03.08", 77.0],
   ["10.08", 76.4], ["17.08", 75.8], ["24.08", 75.3], ["31.08", 75.0],
-  ["07.09", 74.6], ["14.09", 74.2], ["21.09", 73.9], ["28.09", 73.6],
+  ["08.09", 74.6], ["14.09", 74.2], ["21.09", 73.9], ["28.09", 73.6],
   ["05.10", 73.3], ["12.10", 73.0], ["19.10", 73.0]
 ];
 
@@ -241,8 +249,9 @@ function NutritionCockpit({ review, foodChoice }) {
 function SixMonthOverview() {
   const currentWeek = getWeekNum(todayStr());
   const phaseRows = PLAN.phases.map((p) => {
-    const start = addDays(PLAN.startDate, (p.weeks[0] - 1) * 7);
-    const end = addDays(PLAN.startDate, p.weeks[1] * 7 - 1);
+    const rawStart = addDays(PLAN.startDate, (p.weeks[0] - 1) * 7);
+    const start = p.id === 1 ? rawStart : shiftSundayMondayToTuesday(rawStart);
+    const end = shiftSundayMondayToTuesday(addDays(PLAN.startDate, p.weeks[1] * 7 - 1));
     return { ...p, start, end, duration: p.weeks[1] - p.weeks[0] + 1, focus: PHASE_FOCUS[p.id] };
   });
   const routeStart = Math.max(0, currentWeek - 1);

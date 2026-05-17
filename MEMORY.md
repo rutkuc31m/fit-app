@@ -111,6 +111,7 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - `86.5 kg`, waist `99.5 cm`, neck `40.5 cm`.
   - 2026-05-12 after fasting: `85.3 kg`, waist `96 cm`, neck `40 cm`.
 - User tracks weekly Tuesday morning fasted measurements as the cleanest trend.
+- Phase checkpoint/end dates should align with Tuesday morning fasted measurements. If a phase boundary/end is displayed as Sunday or Monday, shift the displayed checkpoint date to Tuesday.
 - User cares more about waist trend and strength than daily scale noise.
 - Waist goal eventually: around `76-78 cm` or as close as realistically sustainable.
 
@@ -139,6 +140,7 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
 - `meals` and `meal_items` are used for food entries.
 - Confirm the date. If user says "bugün", use Europe/Berlin current date.
 - Do not add foods only discussed hypothetically. Add when user says "ekle", "yaz", "yedim", or similar.
+- If the user's sentence contains "ekle" anywhere before/after a food list, treat it as an explicit instruction to write that food to the production DB unless the user clearly says not to. The user often asks hypothetical nutrition questions too; do not write those unless an add/write cue is present.
 - User likes conservative/high estimates for buffet/restaurant meals.
 - For buffet/restaurant meals, if uncertain, estimate high rather than low.
 - Recent example 2026-05-13 after correction:
@@ -342,4 +344,3 @@ Turkish area translations user asked for:
 - Photo/body composition analysis.
 - Phase/weight/waist forecast.
 - Deploy/build/debug requests from phone-native SSH context.
-
