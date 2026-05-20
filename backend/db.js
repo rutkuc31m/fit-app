@@ -162,6 +162,19 @@ CREATE TABLE IF NOT EXISTS training_sets (
 CREATE INDEX IF NOT EXISTS idx_sets_session ON training_sets(session_id);
 CREATE INDEX IF NOT EXISTS idx_sets_exercise ON training_sets(exercise_id);
 
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date       TEXT NOT NULL,
+  type       TEXT NOT NULL,
+  minutes    INTEGER DEFAULT 0,
+  kcal       REAL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(user_id, date, type)
+);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_user_date ON activity_logs(user_id, date);
+
 CREATE TABLE IF NOT EXISTS measurements (
   id       INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

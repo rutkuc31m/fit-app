@@ -115,6 +115,53 @@ r.delete("/favorite-machines/:machineId", (req, res) => {
   res.json({ ok: true });
 });
 
+const normalizeActivityType = (type) => {
+  const value = String(type || "").trim().toLowerCase();
+  return value === "football" ? value : null;
+};
+
+r.get("/activity", (req, res) => {
+  const { date } = req.query;
+  const type = normalizeActivityType(req.query.type);
+  if (!date) return res.status(400).json({ error: "date_required" });
+  if (!type) return res.status(400).json({ error: "type_invalid" });
+
+  const row = db.prepare(`
+    SELECT id, date, type, minutes, kcal, created_at, updated_at
+    FROM activity_logs
+    WHERE user_id = ? AND date = ? AND type = ?
+  `).get(req.user.id, date, type);
+
+  res.json(row || null);
+});
+
+r.put("/activity", (req, res) => {
+  const { date } = req.body || {};
+  const type = normalizeActivityType(req.body?.type);
+  const minutes = Math.max(0, Math.min(600, Math.round(Number(req.body?.minutes) || 0)));
+  const kcal = Math.max(0, Math.min(5000, Math.round(Number(req.body?.kcal) || 0)));
+
+  if (!date) return res.status(400).json({ error: "date_required" });
+  if (!type) return res.status(400).json({ error: "type_invalid" });
+
+  db.prepare(`
+    INSERT INTO activity_logs (user_id, date, type, minutes, kcal, updated_at)
+    VALUES (?, ?, ?, ?, ?, datetime('now'))
+    ON CONFLICT(user_id, date, type) DO UPDATE SET
+      minutes = excluded.minutes,
+      kcal = excluded.kcal,
+      updated_at = datetime('now')
+  `).run(req.user.id, date, type, minutes, kcal);
+
+  const row = db.prepare(`
+    SELECT id, date, type, minutes, kcal, created_at, updated_at
+    FROM activity_logs
+    WHERE user_id = ? AND date = ? AND type = ?
+  `).get(req.user.id, date, type);
+
+  res.json(row);
+});
+
 r.put("/session/:id", (req, res) => {
   const { completed, cardio_min, notes, day_type } = req.body || {};
   db.prepare(`UPDATE training_sessions SET
