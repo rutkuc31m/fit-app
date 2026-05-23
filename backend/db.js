@@ -157,7 +157,9 @@ CREATE TABLE IF NOT EXISTS training_sets (
   exercise_name TEXT,
   set_number    INTEGER,
   weight_kg     REAL,
-  reps          INTEGER
+  reps          INTEGER,
+  logged_date   TEXT,
+  logged_at     TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_sets_session ON training_sets(session_id);
 CREATE INDEX IF NOT EXISTS idx_sets_exercise ON training_sets(exercise_id);
@@ -271,6 +273,29 @@ addCol("photo_front", "TEXT");
 addCol("photo_side", "TEXT");
 addCol("photo_back", "TEXT");
 addCol("photo_legs", "TEXT");
+
+// ─── ALTER training_sets to retain the real tap/log date (idempotent) ───
+const trainingSetCols = db.prepare("PRAGMA table_info(training_sets)").all().map((c) => c.name);
+const addTrainingSetCol = (col, def) => {
+  if (!trainingSetCols.includes(col)) {
+    try { db.exec(`ALTER TABLE training_sets ADD COLUMN ${col} ${def};`); } catch {}
+  }
+};
+addTrainingSetCol("logged_date", "TEXT");
+addTrainingSetCol("logged_at", "TEXT");
+try {
+  db.exec(`
+    UPDATE training_sets
+    SET logged_date = (
+      SELECT date FROM training_sessions WHERE training_sessions.id = training_sets.session_id
+    )
+    WHERE logged_date IS NULL;
+
+    UPDATE training_sets
+    SET logged_at = datetime('now')
+    WHERE logged_at IS NULL;
+  `);
+} catch {}
 
 // daily_logs sync metadata for iOS Shortcut / automation debugging.
 const dailyLogCols = db.prepare("PRAGMA table_info(daily_logs)").all().map((c) => c.name);

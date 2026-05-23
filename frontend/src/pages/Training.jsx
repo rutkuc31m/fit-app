@@ -313,7 +313,8 @@ export default function Training() {
       exercise_name: `${entry.day} ${entry.machine.code} ${entry.machine.name}`,
       set_number: 1,
       weight_kg: currentWeight,
-      reps: TARGET_REPS
+      reps: TARGET_REPS,
+      logged_date: date
     });
     load();
   };
@@ -334,7 +335,8 @@ export default function Training() {
         exercise_name: `${entry.day} ${entry.machine.code} ${entry.machine.name}`,
         set_number: 1,
         weight_kg: clean,
-        reps: TARGET_REPS
+        reps: TARGET_REPS,
+        logged_date: date
       });
     }
     setWeightDrafts((prev) => ({ ...prev, [entry.entryId]: clean }));
@@ -367,7 +369,8 @@ export default function Training() {
       exercise_name: `${entry.day} ${entry.machine.code} ${entry.machine.name}`,
       set_number: 1,
       weight_kg: getEntryWeight(entry),
-      reps: TARGET_REPS
+      reps: TARGET_REPS,
+      logged_date: date
     })));
     load();
   };

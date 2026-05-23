@@ -175,12 +175,13 @@ r.put("/session/:id", (req, res) => {
 });
 
 r.post("/session/:id/set", (req, res) => {
-  const sess = db.prepare("SELECT id FROM training_sessions WHERE id = ? AND user_id = ?").get(req.params.id, req.user.id);
+  const sess = db.prepare("SELECT id, date FROM training_sessions WHERE id = ? AND user_id = ?").get(req.params.id, req.user.id);
   if (!sess) return res.status(404).json({ error: "not_found" });
-  const { exercise_id, exercise_name, set_number, weight_kg, reps } = req.body || {};
+  const { exercise_id, exercise_name, set_number, weight_kg, reps, logged_date } = req.body || {};
+  const logDate = String(logged_date || sess.date || "").slice(0, 10) || sess.date;
   const info = db.prepare(
-    "INSERT INTO training_sets (session_id, exercise_id, exercise_name, set_number, weight_kg, reps) VALUES (?, ?, ?, ?, ?, ?)"
-  ).run(sess.id, exercise_id, exercise_name, set_number, weight_kg, reps);
+    "INSERT INTO training_sets (session_id, exercise_id, exercise_name, set_number, weight_kg, reps, logged_date, logged_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))"
+  ).run(sess.id, exercise_id, exercise_name, set_number, weight_kg, reps, logDate);
   res.json(db.prepare("SELECT * FROM training_sets WHERE id = ?").get(info.lastInsertRowid));
 });
 
