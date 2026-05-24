@@ -107,17 +107,17 @@ export const MEAL_TEMPLATES = [
     ]
   }),
   withTotals({
-    id: "wrap_tuna",
-    title: "Wrap + Thunfisch",
-    type: "wrap",
-    accent: "#64d2ff",
+    id: "rice_chicken",
+    title: "Reis + Tavuk",
+    type: "rice",
+    accent: "#30d158",
     items: [
-      item("Ja! Vollkorn Wraps", 124, 380, 12, 64, 9),
-      item("Thunfisch", 260, 302, 67.6, 0, 2.6),
+      item("Reis gekocht aus 80g roh", 240, 280, 6, 62, 0.6),
+      item("Hähnchenbrust", 350, 395.5, 82.3, 0, 6.3),
       item("Fitline Körniger Frischkäse", 200, 164, 25, 6, 4),
       item("Paprika / Zwiebel / Salat", 250, 70, 3, 12, 0.5),
-      item("Senf + Zero Ketchup", 20, 14, 0.5, 1.8, 0.4),
-      item("Skyr natur", 400, 256, 44, 16, 0.8),
+      item("Olivenöl", 10, 90, 0, 0, 10),
+      item("Skyr natur", 300, 192, 33, 12, 0.6),
       item("ON Whey Isolate", 30, 108, 25, 1.2, 0.4),
       item("Zero Mandelmilch", 200, 27, 0.8, 0.2, 2.2),
       item("Beerenmix TK", 150, 75, 1.2, 15, 0.8)

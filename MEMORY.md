@@ -110,7 +110,8 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - `potato_tuna`: Kartoffeln + Thunfisch + Körniger + Skyr/Whey
   - `wrap_chicken`: Ja Vollkorn Wraps + Hähnchen + Körniger + Skyr/Whey
   - `wrap_rinderhack`: Ja Vollkorn Wraps + REWE Bio Rinderhack + Skyr Sauce + Whey
-  - `wrap_tuna`: Ja Vollkorn Wraps + Thunfisch + Körniger + Skyr/Whey
+  - `rice_chicken`: Reis + Hähnchen + Körniger + Skyr/Whey
+- Current weekly meal template split is 3 chicken, 1 tuna, 1 salmon, 1 lean beef, plus 1 fasting day. The second tuna template was replaced because the user preferred less weekly fish.
 - Photo upload is general: user uploads progress photos without body-part sections. Photos should save to backend but not show as gallery in app for now.
 - Food photos can be uploaded for later analysis; user may ask agent to inspect backend photos.
 - Hydration tracks water and coffee separately, but total hydration is `water_ml + coffee_ml`.
