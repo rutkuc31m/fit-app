@@ -278,6 +278,8 @@ export default function Training() {
   );
 
   const allDaysDone = planDays.length > 0 && planDays.every((day) => day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)));
+  const progressDone = doneIds.size;
+  const progressTotal = planEntries.length;
 
   useEffect(() => {
     let cancelled = false;
@@ -405,8 +407,13 @@ export default function Training() {
     <div className="page page-training">
       <PageCommand
         accent="#30d158"
-        kicker="gym80 logbook"
-        title="Gym plan"
+        kicker="gym80"
+        title="Training"
+        metrics={[
+          { label: "done", value: `${progressDone}/${progressTotal}`, className: "text-lime" },
+          { label: "cycle", value: allDaysDone ? "done" : "open", className: allDaysDone ? "text-lime" : "text-amber" },
+          { label: "football", value: football ? `${football.minutes || 0}m` : "--", className: "text-amber" }
+        ]}
       />
 
       <AccentCard accent="#ff9f0a" className="p-3" contentClassName="pl-2">
@@ -458,19 +465,22 @@ export default function Training() {
           {planDays.map((day) => (
             <div
               key={day.day}
-              className={`rounded-lg border p-3 transition ${day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)) ? "border-lime/60 bg-lime/10" : "border-line bg-bg2/70"}`}
+              className={`rounded-lg border p-2.5 transition-colors duration-200 ${day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)) ? "border-lime/60 bg-lime/10" : "border-line bg-bg2/70"}`}
             >
               <button type="button" className="w-full text-left" onClick={() => toggleDay(day)}>
                 <div className="flex items-center justify-between gap-2">
-                  <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em]">{day.day}</div>
+                  <div>
+                    <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em]">{day.day} · {day.title}</div>
+                    <div className="mono text-[.54rem] text-mute uppercase tracking-[.1em] mt-[2px]">{day.machines.filter(({ entryId }) => doneIds.has(entryId)).length}/{day.machines.length}</div>
+                  </div>
                   <Icon.check size={12} className={day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)) ? "text-lime" : "text-mute opacity-30"} />
                 </div>
               </button>
-              <div className="mt-3 flex flex-col gap-2">
+              <div className="mt-2 flex flex-col gap-1.5">
                 {day.machines.map((entry) => (
                   <div
                     key={entry.entryId}
-                    className={`flex items-stretch justify-between gap-2 rounded-md border px-2.5 py-2 text-left transition ${doneIds.has(entry.entryId) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
+                    className={`flex items-stretch justify-between gap-2 rounded-md border px-2.5 py-2 text-left transition-colors duration-200 ${doneIds.has(entry.entryId) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
                   >
                     <button
                       type="button"
@@ -480,21 +490,18 @@ export default function Training() {
                       <div className="text-[.68rem] text-ink text-left leading-snug">
                         {entry.machine.code} · {entry.machine.name}
                       </div>
-                      <div className="mono text-[.56rem] text-lime uppercase tracking-[.1em] leading-snug mt-1">
-                        {entry.area} · {entry.target}
-                      </div>
-                      <div className="mono text-[.55rem] text-ink2 uppercase tracking-[.08em] leading-snug mt-[2px]">
+                      <div className="mono text-[.55rem] text-ink2 uppercase tracking-[.08em] leading-snug mt-1">
                         {entry.move}
                       </div>
-                      <div className="text-[.61rem] text-mute leading-snug mt-[3px]">
-                        {entry.info}
+                      <div className="mono text-[.54rem] text-lime uppercase tracking-[.1em] leading-snug mt-[2px]">
+                        {entry.area} · {entry.target}
                       </div>
-                      <div className="mono text-[.55rem] text-lime uppercase tracking-[.1em] leading-snug mt-1">
+                      <div className="mono text-[.55rem] text-lime uppercase tracking-[.1em] leading-snug mt-[2px]">
                         {formatWeight(getEntryWeight(entry) ?? NaN)}
                       </div>
                       {entry.alternatives?.length > 0 && (
-                        <div className="mono text-[.52rem] text-mute uppercase tracking-[.08em] leading-snug mt-[2px]">
-                          alt: {entry.alternatives.map((machine) => `${machine.code} ${machine.name}`).join(" · ")}
+                        <div className="mono text-[.5rem] text-mute uppercase tracking-[.08em] leading-snug mt-[2px] truncate">
+                          alt: {entry.alternatives.map((machine) => machine.code).join(" · ")}
                         </div>
                       )}
                     </button>

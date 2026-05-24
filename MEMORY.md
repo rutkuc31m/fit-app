@@ -29,6 +29,8 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - Settings moved to the top bar icon.
   - Supplement copy reflects current stack: D3+K2, magnesium, seasonal loratadine; no B12/Omega default.
   - Visual system moved toward tighter premium dark PWA surfaces with slimmer cards/nav.
+  - Progress page was slimmed to core signals: top metrics, photos link, weekly review/adherence, chart, phase list.
+  - Training plan rows were made denser by removing long inline explanation text and showing compact day progress.
 - Do not start from scratch if session context is lost. The core product and user preferences are captured here.
 
 ## Current Project

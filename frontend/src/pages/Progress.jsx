@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
-import { PLAN, todayStr, getWeekNum } from "../lib/plan";
-import { FOOD_CHOICES, findFoodChoice, readTodayCallPrefs } from "../lib/todayCall";
+import { PLAN, todayStr } from "../lib/plan";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const addDays = (dateStr, days) => {
@@ -12,16 +11,7 @@ const addDays = (dateStr, days) => {
   dt.setDate(dt.getDate() + days);
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 };
-const shiftSundayMondayToTuesday = (dateStr) => {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const dt = new Date(y, m - 1, d, 12);
-  const dow = dt.getDay();
-  if (dow === 0) dt.setDate(dt.getDate() + 2);
-  if (dow === 1) dt.setDate(dt.getDate() + 1);
-  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
-};
 const fmt = (value, digits = 1) => value == null ? "--" : Number(value).toFixed(digits);
-const monthDay = (dateStr) => dateStr.slice(5).split("-").reverse().join(".");
 
 const PHASE_FOCUS = {
   1: "routine, fasting tolerance, core/back-safe form",
@@ -29,16 +19,6 @@ const PHASE_FOCUS = {
   3: "shape, conditioning, tighter execution",
   4: "stabilize, keep habits, land near target"
 };
-
-const WEIGHT_ROUTE = [
-  ["20.04", 93.0], ["27.04", 89.7], ["04.05", 88.8], ["11.05", 88.0],
-  ["19.05", 87.0], ["25.05", 86.0], ["01.06", 85.0], ["08.06", 84.0],
-  ["15.06", 83.0], ["22.06", 82.0], ["29.06", 81.0], ["06.07", 80.0],
-  ["14.07", 79.2], ["20.07", 78.5], ["27.07", 77.8], ["03.08", 77.0],
-  ["10.08", 76.4], ["17.08", 75.8], ["24.08", 75.3], ["31.08", 75.0],
-  ["08.09", 74.6], ["14.09", 74.2], ["21.09", 73.9], ["28.09", 73.6],
-  ["05.10", 73.3], ["12.10", 73.0], ["19.10", 73.0]
-];
 
 function WeightChart({ logs }) {
   const data = logs.filter((l) => l.weight_kg != null).map((l) => ({ date: l.date, w: l.weight_kg }));
@@ -175,141 +155,10 @@ function WeeklyReviewCard({ review }) {
   );
 }
 
-function WeeklyScoreCard({ review }) {
-  if (!review) return null;
-  const trainingPlanned = review.training_planned || 0;
-  const trainingPct = trainingPlanned ? Math.round(((review.training_done || 0) / trainingPlanned) * 100) : 0;
-  const proteinPct = Math.round(((review.protein_days || 0) / 5) * 100);
-  const fastPct = Math.round(((review.fast_clean_days || 0) / 2) * 100);
-  const weeklyScore = Math.round(((review.adherence_pct || 0) + proteinPct + fastPct + trainingPct) / 4);
-  const items = [
-    ["score", `${weeklyScore}%`, "text-lime"],
-    ["protein", `${review.protein_days ?? 0}/5`, "text-lime"],
-    ["gym", `${review.training_done || 0}/${trainingPlanned}`, "text-amber"],
-    ["fast", `${review.fast_clean_days ?? 0}/2`, "text-cyan"]
-  ];
-
-  return (
-    <AccentCard accent="#30d158" className="p-4" contentClassName="pl-2">
-      <div className="section-label mt-0 mb-2">weekly score</div>
-      <div className="grid grid-cols-4 gap-2">
-        {items.map(([label, value, cls]) => (
-          <div key={label} className="metric-tile text-center px-2 py-2">
-            <div className="metric-label">{label}</div>
-            <div className={`metric-value text-[.9rem] ${cls}`}>{value}</div>
-          </div>
-        ))}
-      </div>
-    </AccentCard>
-  );
-}
-
-function NutritionCockpit({ review, foodChoice }) {
-  const items = [
-    ["protein avg", review ? `${fmt(review.avg_protein_g, 0)}g` : "--"],
-    ["protein days", review ? `${review.protein_days ?? 0}/5` : "--"],
-    ["kcal avg", review ? fmt(review.avg_kcal, 0) : "--"],
-    ["meal days", review ? `${review.meal_days ?? 0}/7` : "--"]
-  ];
-  const targets = FOOD_CHOICES.map((choice) => [
-    choice.label,
-    `${choice.kcal} kcal`,
-    `${choice.protein}g protein`
-  ]);
-
-  return (
-    <AccentCard accent="#ff9f0a" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
-      <div>
-        <div className="section-label mt-0 mb-1">nutrition cockpit</div>
-        <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em]">
-          selected · {foodChoice.label}
-        </div>
-      </div>
-      <div className="grid grid-cols-2 min-[460px]:grid-cols-4 gap-2">
-        {items.map(([label, value]) => (
-          <div key={label} className="metric-tile">
-            <div className="metric-label">{label}</div>
-            <div className="metric-value text-[.9rem]">{value}</div>
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {targets.map(([label, kcal, protein]) => (
-          <div key={label} className="metric-tile px-2 py-2">
-            <div className="metric-label">{label}</div>
-            <div className="metric-value text-[.78rem]">{kcal}</div>
-            <div className="mono text-[.55rem] text-mute mt-[2px] truncate">{protein}</div>
-          </div>
-        ))}
-      </div>
-    </AccentCard>
-  );
-}
-
-function SixMonthOverview() {
-  const currentWeek = getWeekNum(todayStr());
-  const phaseRows = PLAN.phases.map((p) => {
-    const rawStart = addDays(PLAN.startDate, (p.weeks[0] - 1) * 7);
-    const start = p.id === 1 ? rawStart : shiftSundayMondayToTuesday(rawStart);
-    const end = shiftSundayMondayToTuesday(addDays(PLAN.startDate, p.weeks[1] * 7 - 1));
-    return { ...p, start, end, duration: p.weeks[1] - p.weeks[0] + 1, focus: PHASE_FOCUS[p.id] };
-  });
-  const routeStart = Math.max(0, currentWeek - 1);
-  const routeEnd = Math.min(WEIGHT_ROUTE.length, routeStart + 8);
-  const routeEntries = WEIGHT_ROUTE.slice(routeStart, routeEnd);
-  const routeChunks = [
-    routeEntries.slice(0, 4),
-    routeEntries.slice(4)
-  ].filter((chunk) => chunk.length);
-
-  return (
-    <AccentCard accent="#30d158" className="p-4" contentClassName="pl-2 flex flex-col gap-4">
-      <div>
-        <div className="section-label mt-0 mb-1">6-month overview</div>
-      </div>
-
-      <div className="grid grid-cols-2 min-[520px]:grid-cols-4 gap-2">
-        {phaseRows.map((p) => (
-          <div key={p.id} className="metric-tile text-left">
-            <div className="metric-label" style={{ color: p.color }}>P{p.id} · {p.duration}w</div>
-            <div className="metric-value text-[.86rem]">{p.from}→{p.to}kg</div>
-            <div className="mono text-[.56rem] text-mute tabular-nums mt-[2px]">{monthDay(p.start)}-{monthDay(p.end)}</div>
-            <div className="mono text-[.58rem] text-ink2 leading-snug mt-2">{p.focus}</div>
-          </div>
-        ))}
-      </div>
-
-      <div>
-        <div className="mono text-[.58rem] text-mute uppercase tracking-[.18em] mb-2">weekly weight route</div>
-        <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mb-2">
-          current week · W{currentWeek}
-        </div>
-        <div className="grid grid-cols-1 min-[520px]:grid-cols-2 gap-x-3 gap-y-1">
-          {routeChunks.map((chunk, idx) => (
-            <div key={idx} className="flex flex-col gap-1">
-              {chunk.map(([date, kg], i) => {
-                const week = routeStart + idx * 4 + i + 1;
-                const isCurrent = week === currentWeek;
-                return (
-                  <div key={`${date}-${kg}`} className="flex items-center justify-between gap-2 mono text-[.62rem] tabular-nums">
-                    <span className="text-mute">W{week} · {date}</span>
-                    <span className={isCurrent ? "text-lime font-bold" : "text-ink2"}>{kg.toFixed(1)}kg</span>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      </div>
-    </AccentCard>
-  );
-}
-
 export default function Progress() {
   const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [review, setReview] = useState(null);
-  const [foodChoice, setFoodChoice] = useState(findFoodChoice(readTodayCallPrefs(todayStr()).foodId));
 
   const load = async () => {
     const to = todayStr();
@@ -322,8 +171,6 @@ export default function Progress() {
   };
   useEffect(() => {
     load();
-    const prefs = readTodayCallPrefs(todayStr());
-    setFoodChoice(findFoodChoice(prefs.foodId));
   }, []);
 
   const latestWeight = [...logs].reverse().find((l) => l.weight_kg != null)?.weight_kg ?? null;
@@ -355,10 +202,7 @@ export default function Progress() {
       </AccentCard>
 
       <WeeklyReviewCard review={review} />
-      <WeeklyScoreCard review={review} />
       <AdherenceCard review={review} />
-      <NutritionCockpit review={review} foodChoice={foodChoice} />
-      <SixMonthOverview />
 
       <div className="section-label">{t("progress.weight_chart")}</div>
       <AccentCard accent="#64d2ff" className="p-4"><WeightChart logs={logs} /></AccentCard>
