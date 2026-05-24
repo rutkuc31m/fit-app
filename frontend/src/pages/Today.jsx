@@ -149,37 +149,31 @@ const buildTodayDay = (date, session) => {
 
 function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   const fields = [
-    { id: "energy", label: "energy", low: "flat", high: "sharp", color: "#30d158" },
-    { id: "hunger", label: "hunger", low: "quiet", high: "loud", color: "#ff9f0a" },
-    { id: "headache", label: "headache", low: "none", high: "hard", color: "#64d2ff" }
+    { id: "energy", label: "energy", color: "#30d158" },
+    { id: "hunger", label: "hunger", color: "#ff9f0a" },
+    { id: "headache", label: "headache", color: "#64d2ff" }
   ];
   return (
     <AccentCard accent="#64d2ff">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-3">
         <div>
           <div className="card-title">Recovery signal</div>
-          <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] mt-[2px]">
-            fasting · sleep · training readiness
-          </div>
         </div>
         <button className="btn-ghost shrink-0" onClick={onSave} disabled={saving || saved}>
           {saving ? "..." : saved ? "saved" : "save"}
         </button>
       </div>
-      <div className="grid gap-3">
+      <div className="grid gap-2">
         {fields.map((f) => (
-          <div key={f.id}>
-            <div className="flex justify-between mono text-[.56rem] uppercase tracking-[.14em] mb-1">
-              <span className="text-mute">{f.label}</span>
-              <span className="text-ink2">{value[f.id] || "--"}/5</span>
-            </div>
+          <div key={f.id} className="grid grid-cols-[74px_1fr_32px] items-center gap-2">
+            <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em]">{f.label}</div>
             <div className="grid grid-cols-5 gap-1">
               {[1, 2, 3, 4, 5].map((n) => {
                 const active = Number(value[f.id]) === n;
                 return (
                   <button
                     key={n}
-                    className="h-8 rounded-md border mono text-xs transition"
+                    className="h-8 rounded-md border mono text-xs transition-colors duration-200"
                     style={{
                       borderColor: active ? f.color : "rgba(72,72,74,.75)",
                       background: active ? f.color : "rgba(28,28,30,.65)",
@@ -193,9 +187,7 @@ function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
                 );
               })}
             </div>
-            <div className="flex justify-between mono text-[.5rem] text-mute uppercase tracking-[.14em] mt-1">
-              <span>{f.low}</span><span>{f.high}</span>
-            </div>
+            <div className="mono text-[.56rem] text-ink2 tabular-nums text-right">{value[f.id] || "--"}/5</div>
           </div>
         ))}
       </div>
@@ -221,14 +213,14 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
           <div className="mono text-[.58rem] uppercase tracking-[.18em]" style={{ color: accent }}>
             today's call
           </div>
-          <div className="font-display text-[1.65rem] leading-none text-ink mt-1"
+          <div className="font-display text-[1.25rem] leading-tight text-ink mt-1"
             style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
             {headline.label}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mt-4 pl-2">
+      <div className="grid grid-cols-4 gap-2 mt-3 pl-2">
         <div className="command-metric">
           <div className="metric-label">food</div>
           <div className="metric-value text-[.78rem]" style={{ color: foodChoice.tone }}>{foodChoice.label}</div>
@@ -240,6 +232,10 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
         <div className="command-metric">
           <div className="metric-label">gym</div>
           <div className="metric-value text-[.78rem]" style={{ color: gymChoice.tone }}>{gymChoice.label}</div>
+        </div>
+        <div className="command-metric">
+          <div className="metric-label">left</div>
+          <div className="metric-value text-[.78rem] text-lime">-{leftKg.toFixed(1)}</div>
         </div>
       </div>
 
@@ -310,9 +306,9 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
       </div>
 
       <div className="mt-3 pl-2">
-        <div className="flex items-center justify-between mono text-[.56rem] uppercase tracking-[.14em] mb-1">
+        <div className="flex items-center justify-between mono text-[.54rem] uppercase tracking-[.14em] mb-1">
           <span className="text-mute">journey</span>
-          <span className="text-lime tabular-nums">-{leftKg.toFixed(1)}kg left</span>
+          <span className="text-lime tabular-nums">{journeyPct}%</span>
         </div>
         <div className="h-[4px] bg-bg2 rounded-full overflow-hidden border border-line/50">
           <div
@@ -623,6 +619,10 @@ export default function Today() {
                     <div className="metric-label">kcal left</div>
                     <div className="metric-value text-[.86rem] text-amber">{Math.max(0, Math.round(kcalTarget - mealsTotals.kcal))}</div>
                   </div>
+                  <div className="metric-tile px-2 py-2 text-center">
+                    <div className="metric-label">protein left</div>
+                    <div className="metric-value text-[.86rem] text-lime">{Math.max(0, Math.round(protTarget - mealsTotals.protein))}g</div>
+                  </div>
                 </div>
               </>
             )}
@@ -645,7 +645,7 @@ export default function Today() {
               <div className="mono text-[.62rem] text-ink2 tabular-nums">{(value / 1000).toFixed(2)}L</div>
             </div>
             <button
-              className="h-10 w-10 rounded-md bg-bg2 hover:bg-surface3 border border-line text-lg leading-none text-mute transition grid place-items-center shrink-0"
+              className="h-10 w-10 rounded-md bg-bg2 hover:bg-surface2 border border-line text-lg leading-none text-mute transition-colors duration-200 grid place-items-center shrink-0"
               onClick={onMinus}
               disabled={value <= 0}
               title={`-250ml ${label}`}
@@ -654,7 +654,7 @@ export default function Today() {
               −
             </button>
             <button
-              className={`h-10 w-10 rounded-md bg-bg2 hover:bg-surface3 border border-line text-lg leading-none transition grid place-items-center shrink-0 ${colorClass}`}
+              className={`h-10 w-10 rounded-md bg-bg2 hover:bg-surface2 border border-line text-lg leading-none transition-colors duration-200 grid place-items-center shrink-0 ${colorClass}`}
               onClick={onPlus}
               title={`+250ml ${label}`}
               type="button"

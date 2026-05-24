@@ -378,6 +378,13 @@ Turkish area translations user asked for:
 
 ## Recent Important Commits
 
+- `0f00b66 Fix quick food measure parsing`
+- `8cbe78a Adjust weekly meal template protein split`
+- `15066e8 Split meal templates into meal parts`
+- `5dcac98 Add sauce to chicken meal templates`
+- `1663af8 Increase template sauce portions`
+- `98e95db Slim and refresh app shell`
+- `22f71fd Simplify progress and training screens`
 - `02d0448 Add meal template picker`
 - `33241ef Track training set log dates`
 - `984273c Add football activity logging`
@@ -391,6 +398,23 @@ Turkish area translations user asked for:
 - `8c32c15 Adjust train nutrition targets`
 - `866f30a Refine app UI copy and flow`
 - `95f1e9f Add fit app frontend rules`
+
+## May 2026 Redesign / Nutrition Decisions
+
+- User explicitly requested a full slimmer redesign after earlier rule said preserve compact dark UI; redesign permission applies.
+- App shell now has 4 bottom tabs: Today, Essen, Training, Progress. Settings moved to topbar icon.
+- User wants app lean, direct, modern, no unused/verbose areas.
+- Nutrition plan:
+  - 6 eating days + 1 fast day.
+  - Protein split: 3 chicken, 1 tuna, 1 salmon, 1 lean beef.
+  - Meal templates are split into `Ana ogun` and `Shake`; each part logs independently.
+  - Chicken templates include 20g mustard + 20g zero ketchup in templates.
+  - Today 2026-05-24 manually logged: 500g boiled potatoes, 400g chicken breast, 200g Fitline cottage cheese, 250g paprika, 20g sauce total.
+- Supplements:
+  - D3+K2 Sunday + Wednesday.
+  - Magnesium complex in the evening, start with 1 capsule.
+  - No B12 by default, no omega by default.
+  - Loratadin seasonal allergy support; black seed oil stopped because it did not help.
 
 ## DNS / SSH
 

@@ -9,7 +9,7 @@ import { MEAL_TEMPLATES, mealTemplateMarker, mealTemplatePartMarker } from "../l
 import { normalizeQuickText, parseQuickFoodEntry, pickBestFoodMatch } from "../lib/quickFoodEntry";
 import { eatenPct, effectiveMacros, sumMealMacros } from "../lib/nutrition";
 import BarcodeScanner from "../components/BarcodeScanner";
-import { AccentCard, Empty, Icon, PageCommand } from "../components/ui";
+import { AccentCard, Empty, Icon } from "../components/ui";
 
 const emptyItem = { name: "", amount_g: 100, kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, eaten_pct: 100, barcode: null };
 const numberOrBlank = (value) => value === "" ? "" : Number(value);
@@ -298,6 +298,97 @@ function MealTemplatePicker({ templates, items, onToggle }) {
             </div>
           );
         })}
+      </div>
+    </AccentCard>
+  );
+}
+
+function LogCommand({
+  totals,
+  date,
+  dateLabel,
+  isToday,
+  onToday,
+  onShiftDate,
+  showAddMenu,
+  setShowAddMenu,
+  openCamera,
+  openPiece,
+  openManual,
+  openQuickVoice,
+  quickListening,
+  todayLabel
+}) {
+  const metrics = [
+    { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
+    { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
+    { label: "carbs", value: `${Math.round(totals.carbs)}g`, className: "text-amber" },
+    { label: "fat", value: `${Math.round(totals.fat)}g`, className: "text-ink2" }
+  ];
+
+  return (
+    <AccentCard accent="#ff9f0a" className="p-3" contentClassName="pl-2">
+      <div className="flex items-center justify-between gap-2">
+        <button className="btn-icon" aria-label="prev day" onClick={() => onShiftDate(-1)}>
+          <Icon.chev size={16} className="rotate-180" />
+        </button>
+        <div className="min-w-0 flex-1 text-center">
+          <div className="mono text-[.62rem] text-amber uppercase tracking-[.2em]">Essen</div>
+          <div className="mono text-sm text-ink font-bold tabular-nums leading-tight">{dateLabel}</div>
+          <div className="mono text-[.56rem] text-mute tabular-nums">{date}</div>
+        </div>
+        <button className="btn-icon" aria-label="next day" onClick={() => onShiftDate(1)} disabled={isToday}>
+          <Icon.chev size={16} className={isToday ? "opacity-30" : ""} />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-4 gap-1.5 my-3">
+        {metrics.map((m) => (
+          <div key={m.label} className="metric-tile px-2 py-2 text-center">
+            <div className="metric-label">{m.label}</div>
+            <div className={`metric-value text-[.82rem] ${m.className}`}>{m.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-2">
+        {!isToday && (
+          <button className="btn-ghost h-[40px] px-3" onClick={onToday}>
+            {todayLabel}
+          </button>
+        )}
+        <div className="relative flex-1">
+          <button className="btn-primary w-full h-[40px] flex items-center justify-center gap-2" onClick={() => setShowAddMenu((v) => !v)}>
+            <Icon.plus size={16} /> Ekle
+          </button>
+          {showAddMenu && (
+            <>
+              <div className="fixed inset-0 z-20" onClick={() => setShowAddMenu(false)} />
+              <div className="absolute left-0 right-0 top-full mt-2 z-30 card overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)] border border-line">
+                <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition-colors duration-200" onClick={openCamera}>
+                  <Icon.camera size={16} className="text-signal shrink-0" />
+                  <div className="mono text-sm text-ink">Kamera / Barkod</div>
+                </button>
+                <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition-colors duration-200" onClick={openPiece}>
+                  <Icon.cart size={16} className="text-signal shrink-0" />
+                  <div className="mono text-sm text-ink">Stückwahl</div>
+                </button>
+                <button className="w-full text-left px-4 py-3 hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition-colors duration-200" onClick={openManual}>
+                  <Icon.plus size={16} className="text-signal shrink-0" />
+                  <div className="mono text-sm text-ink">Manuell</div>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+        <button
+          type="button"
+          className={`btn-icon h-[40px] w-[40px] ${quickListening ? "text-signal border-signal/50" : ""}`}
+          onClick={openQuickVoice}
+          aria-label="quick voice add"
+        >
+          <Icon.mic size={16} />
+        </button>
       </div>
     </AccentCard>
   );
@@ -678,78 +769,22 @@ export default function Log() {
 
   return (
     <div className="page page-log">
-      <PageCommand
-        accent="#ff9f0a"
-        kicker="nutrition control"
-        title="Essen"
-        metrics={[
-          { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
-          { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
-          { label: "carbs", value: `${Math.round(totals.carbs)}g`, className: "text-amber" },
-          { label: "fat", value: `${Math.round(totals.fat)}g`, className: "text-ink2" }
-        ]}
+      <LogCommand
+        totals={totals}
+        date={date}
+        dateLabel={dateLabel}
+        isToday={isToday}
+        onToday={() => setDate(todayStr())}
+        onShiftDate={shiftDate}
+        showAddMenu={showAddMenu}
+        setShowAddMenu={setShowAddMenu}
+        openCamera={openCamera}
+        openPiece={openPiece}
+        openManual={openManual}
+        openQuickVoice={openQuickVoice}
+        quickListening={quickListening}
+        todayLabel={t("log.today")}
       />
-
-      {/* Date navigator */}
-      <AccentCard accent="#64d2ff" className="p-2" contentClassName="pl-2 flex items-center gap-2">
-        <button className="btn-icon" aria-label="prev day" onClick={() => shiftDate(-1)}>
-          <Icon.chev size={16} className="rotate-180" />
-        </button>
-        <div className="flex-1 text-center">
-          <div className="mono text-sm text-ink font-bold tabular-nums">{dateLabel}</div>
-          <div className="mono text-[.6rem] text-mute tabular-nums">{date}</div>
-        </div>
-        <button className="btn-icon" aria-label="next day" onClick={() => shiftDate(1)} disabled={isToday}>
-          <Icon.chev size={16} className={isToday ? "opacity-30" : ""} />
-        </button>
-        {!isToday && (
-          <button className="mono text-[.6rem] text-signal uppercase tracking-[.14em] px-2 hover:text-ink" onClick={() => setDate(todayStr())}>
-            {t("log.today")}
-          </button>
-        )}
-      </AccentCard>
-
-      {/* Action button */}
-      <div className="action-row justify-center">
-        <div className="relative flex-1 max-w-sm">
-          <button className="btn-primary w-full flex items-center justify-center gap-2 py-3" onClick={() => setShowAddMenu((v) => !v)}>
-            <Icon.plus size={16} /> Yemek Ekle
-          </button>
-          {showAddMenu && (
-            <>
-              <div className="fixed inset-0 z-20" onClick={() => setShowAddMenu(false)} />
-              <div className="absolute left-0 right-0 top-full mt-2 z-30 card overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)] border border-line">
-                <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openCamera}>
-                  <Icon.camera size={16} className="text-signal shrink-0" />
-                  <div>
-                    <div className="mono text-sm text-ink">Kamera / Barkod</div>
-                  </div>
-                </button>
-                <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openPiece}>
-                  <Icon.cart size={16} className="text-signal shrink-0" />
-                  <div>
-                    <div className="mono text-sm text-ink">Stückwahl</div>
-                  </div>
-                </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition" onClick={openManual}>
-                  <Icon.plus size={16} className="text-signal shrink-0" />
-                  <div>
-                    <div className="mono text-sm text-ink">Manuell</div>
-                  </div>
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-        <button
-          type="button"
-          className={`btn-icon h-[44px] w-[44px] ${quickListening ? "text-signal border-signal/50" : ""}`}
-          onClick={openQuickVoice}
-          aria-label="quick voice add"
-        >
-          <Icon.mic size={16} />
-        </button>
-      </div>
 
       <MealTemplatePicker templates={MEAL_TEMPLATES} items={allItems} onToggle={toggleMealTemplate} />
 
