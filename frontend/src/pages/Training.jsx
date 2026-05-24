@@ -406,7 +406,7 @@ export default function Training() {
   return (
     <div className="page page-training">
       <PageCommand
-        accent="#b8ff2c"
+        accent="#00d4aa"
         kicker="gym80"
         title="Training"
         metrics={[
@@ -416,7 +416,7 @@ export default function Training() {
         ]}
       />
 
-      <AccentCard accent="#ffb000" className="p-3" contentClassName="pl-2">
+      <AccentCard accent="#d9a441" className="p-3" contentClassName="pl-2">
         <form className="flex items-end gap-2" onSubmit={saveFootball}>
           <div className="min-w-0 flex-1">
             <div className="section-label mt-0 mb-2">football</div>
@@ -460,7 +460,7 @@ export default function Training() {
         </form>
       </AccentCard>
 
-      <AccentCard accent="#2ee9d3" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
+      <AccentCard accent="#9a9a9a" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {planDays.map((day) => (
             <div
@@ -540,7 +540,7 @@ export default function Training() {
       </AccentCard>
 
       {allDaysDone && (
-        <AccentCard accent="#b8ff2c" className="p-3" contentClassName="pl-2 flex items-center justify-between gap-3">
+        <AccentCard accent="#00d4aa" className="p-3" contentClassName="pl-2 flex items-center justify-between gap-3">
           <div className="section-label mt-0 mb-0">all done</div>
           <button className="btn-primary shrink-0" type="button" onClick={resetAll}>
             Reset
@@ -549,7 +549,7 @@ export default function Training() {
       )}
 
       {doneMachines.length > 0 && (
-        <AccentCard accent="#b8ff2c" className="p-3" contentClassName="pl-2">
+        <AccentCard accent="#00d4aa" className="p-3" contentClassName="pl-2">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {doneMachines.map((entry) => (
               <button

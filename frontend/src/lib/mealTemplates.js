@@ -48,7 +48,7 @@ export const MEAL_TEMPLATES = [
     id: "potato_chicken",
     title: "Patates + Tavuk",
     type: "potato",
-    accent: "#b8ff2c",
+    accent: "#00d4aa",
     items: [
       item("Kartoffeln gekocht aus 500g roh", 500, 390, 9, 88, 0.5),
       item("Hähnchenbrust", 350, 395.5, 82.3, 0, 6.3),
@@ -65,7 +65,7 @@ export const MEAL_TEMPLATES = [
     id: "potato_salmon_egg",
     title: "Patates + Lachs",
     type: "potato",
-    accent: "#2ee9d3",
+    accent: "#9a9a9a",
     items: [
       item("Kartoffeln gekocht aus 500g roh", 500, 390, 9, 88, 0.5),
       item("Lachsfilet", 250, 420, 50, 0, 18),
@@ -82,7 +82,7 @@ export const MEAL_TEMPLATES = [
     id: "potato_tuna",
     title: "Patates + Thunfisch",
     type: "potato",
-    accent: "#ffb000",
+    accent: "#d9a441",
     items: [
       item("Kartoffeln gekocht aus 500g roh", 500, 390, 9, 88, 0.5),
       item("Thunfisch", 260, 302, 67.6, 0, 2.6),
@@ -99,7 +99,7 @@ export const MEAL_TEMPLATES = [
     id: "wrap_chicken",
     title: "Wrap + Tavuk",
     type: "wrap",
-    accent: "#b8ff2c",
+    accent: "#00d4aa",
     items: [
       item("Ja! Vollkorn Wraps", 124, 380, 12, 64, 9),
       item("Hähnchenbrust", 350, 395.5, 82.3, 0, 6.3),
@@ -131,7 +131,7 @@ export const MEAL_TEMPLATES = [
     id: "rice_chicken",
     title: "Reis + Tavuk",
     type: "rice",
-    accent: "#b8ff2c",
+    accent: "#00d4aa",
     items: [
       item("Reis gekocht aus 80g roh", 240, 280, 6, 62, 0.6),
       item("Hähnchenbrust", 350, 395.5, 82.3, 0, 6.3),

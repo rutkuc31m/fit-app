@@ -40,10 +40,10 @@ function WeightChart({ logs }) {
       <line x1={pad} y1={targetY} x2={W - pad} y2={targetY} stroke="#248a3d" strokeDasharray="3 4" strokeWidth="1" opacity=".6" />
       <text x={W - pad} y={targetY - 4} textAnchor="end" fontSize="9" fill="#248a3d" fontFamily="'JetBrains Mono', monospace" opacity=".7">TARGET {PLAN.targetWeight}kg</text>
       <path d={d} stroke="#3a3a3c" strokeWidth="1.5" fill="none" opacity=".85" />
-      <path d={trendD} stroke="#b8ff2c" strokeWidth="2.5" fill="none" filter="drop-shadow(0 0 6px rgba(184,255,44,.5))" />
-      {data.map((p, i) => <circle key={i} cx={x(i)} cy={y(p.w)} r="2.5" fill="#b8ff2c" />)}
+      <path d={trendD} stroke="#00d4aa" strokeWidth="2.5" fill="none" />
+      {data.map((p, i) => <circle key={i} cx={x(i)} cy={y(p.w)} r="2.5" fill="#00d4aa" />)}
       <text x={pad} y={16} fontSize="9" fill="#a1a1a6" fontFamily="'JetBrains Mono', monospace">daily</text>
-      <text x={pad + 44} y={16} fontSize="9" fill="#b8ff2c" fontFamily="'JetBrains Mono', monospace">7d trend</text>
+      <text x={pad + 44} y={16} fontSize="9" fill="#00d4aa" fontFamily="'JetBrains Mono', monospace">7d trend</text>
     </svg>
   );
 }
@@ -62,12 +62,12 @@ function AdherenceCard({ review }) {
     ["water", `${review.hydration_days ?? 0}/7`]
   ];
   return (
-    <AccentCard accent="#b8ff2c" className="p-4">
+    <AccentCard accent="#00d4aa" className="p-4">
       <div className="flex items-center gap-4">
         <div className="relative w-[64px] h-[64px] shrink-0">
           <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
             <circle cx="32" cy="32" r={r} stroke="rgba(255,255,255,.08)" strokeWidth="5" fill="none" />
-            <circle cx="32" cy="32" r={r} stroke="#b8ff2c" strokeWidth="5" fill="none"
+            <circle cx="32" cy="32" r={r} stroke="#00d4aa" strokeWidth="5" fill="none"
               strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round" />
           </svg>
           <div className="absolute inset-0 grid place-items-center mono text-sm text-lime font-bold tabular-nums">{pct}%</div>
@@ -130,7 +130,7 @@ function WeeklyReviewCard({ review }) {
   ];
 
   return (
-    <AccentCard accent={review.signal === "recover" ? "#2ee9d3" : review.signal === "audit" ? "#ffb000" : "#b8ff2c"} className="p-4">
+    <AccentCard accent={review.signal === "recover" ? "#9a9a9a" : review.signal === "audit" ? "#d9a441" : "#00d4aa"} className="p-4">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <div className="section-label mt-0 mb-1">weekly review</div>
@@ -180,7 +180,7 @@ export default function Progress() {
   return (
     <div className="page page-progress">
       <PageCommand
-        accent="#2ee9d3"
+        accent="#9a9a9a"
         kicker="body data"
         title="Trend over mood."
         metrics={[
@@ -190,7 +190,7 @@ export default function Progress() {
         ]}
       />
 
-      <AccentCard as={Link} to="/checkin" accent="#2ee9d3" className="hover:border-line2" contentClassName="pl-2 flex items-center gap-3 w-full">
+      <AccentCard as={Link} to="/checkin" accent="#9a9a9a" className="hover:border-line2" contentClassName="pl-2 flex items-center gap-3 w-full">
         <div className="w-10 h-10 rounded-md border border-cyan/40 bg-cyan/[.08] grid place-items-center text-cyan shrink-0">
           <Icon.camera size={19} />
         </div>
@@ -205,7 +205,7 @@ export default function Progress() {
       <AdherenceCard review={review} />
 
       <div className="section-label">{t("progress.weight_chart")}</div>
-      <AccentCard accent="#2ee9d3" className="p-4"><WeightChart logs={logs} /></AccentCard>
+      <AccentCard accent="#9a9a9a" className="p-4"><WeightChart logs={logs} /></AccentCard>
 
       <div className="section-label">{t("progress.phases")}</div>
       <div className="flex flex-col gap-2">

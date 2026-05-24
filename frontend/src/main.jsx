@@ -13,11 +13,11 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.err) {
       return (
-        <div style={{ padding: 20, color: "#ffb000", fontFamily: "monospace", fontSize: 12, whiteSpace: "pre-wrap", background: "#080806", minHeight: "100vh" }}>
-          <div style={{ color: "#ff6b6b", fontWeight: "bold", marginBottom: 12 }}>RENDER CRASH</div>
+        <div style={{ padding: 20, color: "#d9a441", fontFamily: "monospace", fontSize: 12, whiteSpace: "pre-wrap", background: "#080806", minHeight: "100vh" }}>
+          <div style={{ color: "#ff6b9d", fontWeight: "bold", marginBottom: 12 }}>RENDER CRASH</div>
           <div>{String(this.state.err?.message || this.state.err)}</div>
           <pre style={{ marginTop: 12, opacity: .7 }}>{this.state.err?.stack}</pre>
-          <button style={{ marginTop: 16, padding: "8px 16px", background: "#b8ff2c", color: "#080806", border: "none", borderRadius: 8 }}
+          <button style={{ marginTop: 16, padding: "8px 16px", background: "#00d4aa", color: "#080806", border: "none", borderRadius: 8 }}
                   onClick={() => location.reload()}>reload</button>
         </div>
       );

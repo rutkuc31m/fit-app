@@ -149,12 +149,12 @@ const buildTodayDay = (date, session) => {
 
 function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
   const fields = [
-    { id: "energy", label: "energy", color: "#b8ff2c" },
-    { id: "hunger", label: "hunger", color: "#ffb000" },
-    { id: "headache", label: "headache", color: "#2ee9d3" }
+    { id: "energy", label: "energy", color: "#00d4aa" },
+    { id: "hunger", label: "hunger", color: "#d9a441" },
+    { id: "headache", label: "headache", color: "#9a9a9a" }
   ];
   return (
-    <AccentCard accent="#2ee9d3">
+    <AccentCard accent="#9a9a9a">
       <div className="flex items-center justify-between mb-3">
         <div>
           <div className="card-title">Recovery signal</div>
@@ -206,7 +206,7 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
   const timing = windowState(foodChoice);
   const accent = readiness.color;
   return (
-    <div className="command-card" style={{ borderColor: `${accent}60`, background: `linear-gradient(155deg, ${accent}16 0%, rgba(25,23,19,.96) 38%, rgba(12,11,9,.97) 100%)` }}>
+    <div className="command-card">
       <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: accent, boxShadow: `0 0 14px ${accent}90` }} />
       <div className="pl-2 flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -282,7 +282,7 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
 
       <div className="mt-3 pl-2">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="mono text-[.56rem] uppercase tracking-[.16em]" style={{ color: fastDay ? "#2ee9d3" : accent }}>
+          <div className="mono text-[.56rem] uppercase tracking-[.16em]" style={{ color: fastDay ? "#9a9a9a" : accent }}>
             {timing.label}
           </div>
           <div className="mono text-[.7rem] text-ink tabular-nums">{timing.value}</div>
@@ -299,7 +299,7 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
           <div className="relative h-[7px] bg-bg2 rounded-full overflow-hidden border border-line/50">
             <div className="absolute top-0 bottom-0 bg-cyan/35 border-l border-r border-cyan/70"
                  style={{ left: `${timing.startPct}%`, width: `${timing.widthPct}%` }} />
-            <div className="absolute top-[-2px] bottom-[-2px] w-[2px] bg-amber shadow-[0_0_6px_rgba(251,191,36,.8)]"
+            <div className="absolute top-[-2px] bottom-[-2px] w-[2px] bg-amber"
                  style={{ left: `${timing.nowPct}%` }} />
           </div>
         )}
@@ -315,8 +315,7 @@ function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice
             className="h-full transition-[width] duration-700"
             style={{
               width: `${journeyPct}%`,
-              background: `linear-gradient(90deg, #ffb000 0%, ${accent} 100%)`,
-              boxShadow: `0 0 8px ${accent}80`
+              background: accent
             }}
           />
         </div>
@@ -489,7 +488,7 @@ export default function Today() {
   return (
     <div className="page page-today">
       {preStart && (
-        <AccentCard accent="#ffb000" className="text-center">
+        <AccentCard accent="#d9a441" className="text-center">
           <div className="mono text-[.62rem] text-amber uppercase tracking-[.22em] font-bold">
             plan starts {PLAN.startDate} · preview of day 1
           </div>
@@ -534,7 +533,7 @@ export default function Today() {
       />
 
       {/* Weight card */}
-      <AccentCard accent="#b8ff2c">
+      <AccentCard accent="#00d4aa">
         <div className="flex items-center justify-between mb-2">
           <div>
             <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">weight</div>
@@ -594,7 +593,7 @@ export default function Today() {
           );
         };
         return (
-          <AccentCard as={Link} to="/log" accent="#ffb000" className="block hover:brightness-110">
+          <AccentCard as={Link} to="/log" accent="#d9a441" className="block hover:brightness-110">
             <div className="flex items-center justify-between mb-2">
               <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">nutrition</div>
               <div className="mono text-[.58rem] text-ink2 uppercase tracking-[.14em]">
@@ -611,8 +610,8 @@ export default function Today() {
                   </div>
                 )}
                 <div className="flex justify-around">
-                  {ring(kcalPct, "#ffb000", "kcal", Math.round(mealsTotals.kcal), kcalTarget, "")}
-                  {ring(protPct, "#b8ff2c", "protein", Math.round(mealsTotals.protein), protTarget, "g")}
+                  {ring(kcalPct, "#d9a441", "kcal", Math.round(mealsTotals.kcal), kcalTarget, "")}
+                  {ring(protPct, "#00d4aa", "protein", Math.round(mealsTotals.protein), protTarget, "g")}
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <div className="metric-tile px-2 py-2 text-center">
@@ -664,7 +663,7 @@ export default function Today() {
           </div>
         );
         return (
-          <AccentCard accent="#2ee9d3">
+          <AccentCard accent="#9a9a9a">
             <div className="flex items-start justify-between mb-2 gap-3">
               <div>
                 <div className="mono text-[.58rem] text-cyan uppercase tracking-[.2em]">hydration</div>
@@ -684,7 +683,7 @@ export default function Today() {
             </div>
             <div className="flex gap-[3px] mt-1">
               {Array.from({ length: totalGlasses }).map((_, i) => (
-                <div key={i} className={`flex-1 h-[6px] rounded-sm transition ${i < filled ? "bg-cyan shadow-[0_0_6px_rgba(46,233,211,.5)]" : "bg-bg2 border border-line/50"}`} />
+                <div key={i} className={`flex-1 h-[6px] rounded-sm transition-colors duration-150 ${i < filled ? "bg-cyan" : "bg-bg2 border border-line/50"}`} />
               ))}
             </div>
             <div className="mt-1 mono text-[.52rem] text-mute uppercase tracking-[.18em] text-right">{pct}%</div>
@@ -694,7 +693,7 @@ export default function Today() {
 
       {/* Training card */}
       {effectiveDay.training ? (
-        <AccentCard as={Link} to="/training" accent="#b8ff2c" className="block hover:brightness-110">
+        <AccentCard as={Link} to="/training" accent="#00d4aa" className="block hover:brightness-110">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <div className="mono text-[.58rem] text-lime uppercase tracking-[.2em]">training · {gymChoice.label}</div>
@@ -718,7 +717,7 @@ export default function Today() {
           </div>
         </AccentCard>
       ) : (
-        <AccentCard accent="#2ee9d3">
+        <AccentCard accent="#9a9a9a">
           <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">training</div>
           <div className="mono text-[.7rem] text-ink2 mt-1">{gymChoice.label} · {gymChoice.hint}</div>
         </AccentCard>

@@ -11,15 +11,7 @@
     color: theme(colors.ink);
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
-    --page-glow-a: rgba(184,255,44,.09);
-    --page-glow-b: rgba(255,176,0,.055);
-    background:
-      linear-gradient(115deg, transparent 0 63%, var(--page-glow-b) 63% 64%, transparent 64%),
-      radial-gradient(ellipse at 50% -18%, var(--page-glow-a), transparent 390px),
-      linear-gradient(180deg, rgba(255,248,234,.035), transparent 160px),
-      repeating-linear-gradient(90deg, rgba(255,248,234,.018) 0 1px, transparent 1px 42px),
-      repeating-linear-gradient(0deg, rgba(255,248,234,.012) 0 1px, transparent 1px 42px),
-      theme(colors.bg);
+    background: theme(colors.bg);
   }
   input, button, select, textarea { font: inherit; color: inherit; }
   /* iOS Safari zooms into any input with font-size <16px → pushes layout. Force min 16px on touch devices. */
@@ -39,44 +31,54 @@
 }
 
 @layer components {
+  [class*="uppercase"],
+  [class*="tracking-"],
+  .caps {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+  }
+  [class*="shadow-"] {
+    box-shadow: none !important;
+  }
+  [style*="drop-shadow"],
+  [filter*="drop-shadow"] {
+    filter: none !important;
+  }
+
   .mono { font-family: theme(fontFamily.mono); font-variant-numeric: tabular-nums; }
-  .caps { text-transform: uppercase; letter-spacing: .11em; font-weight: 650; }
+  .caps { font-weight: 600; }
 
   .card {
-    @apply border border-line/80 rounded-lg relative;
-    background:
-      linear-gradient(180deg, rgba(255,248,234,.075), rgba(255,248,234,.018) 28%, transparent 68%),
-      linear-gradient(180deg, rgba(25,23,19,.94), rgba(12,11,9,.96));
-    box-shadow: inset 0 1px 0 rgba(255,248,234,.09), 0 18px 48px -34px rgba(0,0,0,.9);
+    @apply border border-line rounded-lg relative bg-surface;
+    box-shadow: none;
   }
-  .card-title { @apply mono text-[.66rem] text-ink2 uppercase tracking-[.14em] font-semibold; }
+  .card-title { @apply text-sm text-ink font-semibold; }
 
   .section-label {
-    @apply mono text-[.66rem] text-mute uppercase tracking-[.16em] flex items-center gap-[10px] px-1 select-none;
+    @apply text-sm text-ink font-semibold flex items-center gap-2 px-1 select-none;
   }
-  .section-label::before { content: ""; width: 10px; height: 1px; background: theme(colors.line2); }
-  .section-label::after  { content: ""; flex: 1; height: 1px; background: theme(colors.line); }
+  .section-label::before,
+  .section-label::after { display: none; }
 
   .btn {
-    @apply mono text-xs caps px-3 py-2 rounded-lg border border-line bg-surface text-ink
-           hover:bg-surface2 hover:border-lime/45 active:scale-[.98] transition-colors duration-200 select-none;
+    @apply text-sm px-3 py-2 rounded-md border border-line bg-surface text-ink
+           hover:bg-surface2 hover:border-line2 transition-colors duration-150 select-none;
   }
   .btn-primary {
-    @apply mono text-xs caps px-3 py-2 rounded-lg bg-signal text-[#000000] font-bold
-           shadow-[0_12px_34px_-20px_theme(colors.signal)]
-           hover:brightness-110 active:scale-[.98] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed select-none;
+    @apply text-sm px-3 py-2 rounded-md bg-signal text-bg font-semibold
+           hover:bg-signald transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed select-none;
   }
   .btn-ghost {
-    @apply mono text-xs caps px-3 py-2 rounded-lg border border-line bg-bg2/75 text-ink2
-           hover:text-signal hover:border-signal/60 hover:bg-surface active:scale-[.98] transition-colors duration-200 select-none;
+    @apply text-sm px-3 py-2 rounded-md border border-line bg-transparent text-ink2
+           hover:text-ink hover:bg-surface2 transition-colors duration-150 select-none;
   }
   .btn-icon {
-    @apply w-9 h-9 rounded-lg border border-line bg-bg2/90 text-ink2 grid place-items-center
-           hover:bg-surface2 hover:text-signal hover:border-signal/50 active:scale-[.96] transition-colors duration-200 shrink-0;
+    @apply w-9 h-9 rounded-md border border-line bg-surface text-ink2 grid place-items-center
+           hover:bg-surface2 hover:text-ink transition-colors duration-150 shrink-0;
   }
   .input {
-    @apply bg-bg2/95 border border-line rounded-lg px-3 text-ink outline-none
-           focus:border-signal focus:ring-2 focus:ring-signal/20 transition;
+    @apply bg-bg2 border border-line rounded-md px-3 text-ink outline-none
+           focus:border-signal focus:ring-1 focus:ring-signal transition-colors duration-150;
     height: 44px;            /* fixed height instead of py-* — iOS Safari aligns number value to top with padding */
     line-height: 44px;       /* center value vertically across all input types incl. number */
     min-height: 44px;
@@ -91,41 +93,28 @@
   /* Multiline (textarea) doesn't want fixed height/line-height */
   textarea.input { height: auto; line-height: 1.45; padding-top: 10px; padding-bottom: 10px; }
 
-  /* Breathing pulse dot */
   .pulse-dot { position: relative; }
-  .pulse-dot::before {
-    content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-    background: theme(colors.signal); box-shadow: 0 0 8px theme(colors.signal);
-    animation: pulse 1.3s ease-in-out infinite;
-    margin-right: 6px;
-  }
-  @keyframes pulse { 0%,100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1); } }
+  .pulse-dot::before { display: none; }
 
   .page {
-    @apply relative z-10 max-w-[760px] mx-auto px-[12px] pt-3 pb-[116px] flex flex-col gap-[12px];
+    @apply relative z-10 max-w-[760px] mx-auto px-4 pt-4 pb-[112px] flex flex-col gap-3;
   }
 
   .top-shell {
-    background: linear-gradient(180deg, rgba(8,8,6,.94), rgba(8,8,6,.58), transparent);
-    backdrop-filter: blur(16px) saturate(1.1);
-    -webkit-backdrop-filter: blur(16px) saturate(1.1);
+    background: theme(colors.bg);
+    border-bottom: 1px solid theme(colors.line);
   }
   .brand-mark {
-    box-shadow: 0 0 0 1px rgba(0,0,0,.18) inset, 0 18px 34px -20px rgba(184,255,44,.85);
+    box-shadow: none;
   }
   .top-status {
-    border: 1px solid rgba(255,248,234,.11);
+    border: 1px solid theme(colors.line);
     border-radius: 8px;
-    background: rgba(17,16,13,.82);
-    box-shadow: inset 0 1px 0 rgba(255,248,234,.06), 0 16px 38px -30px rgba(0,0,0,.95);
+    background: theme(colors.surface);
+    box-shadow: none;
   }
   .top-capsule {
-    border: 1px solid rgba(255,248,234,.1);
-    border-radius: 10px;
-    background: rgba(17,16,13,.92);
-    box-shadow: inset 0 1px 0 rgba(255,248,234,.055), 0 18px 52px -36px rgba(0,0,0,.95);
-    backdrop-filter: blur(18px) saturate(1.14);
-    -webkit-backdrop-filter: blur(18px) saturate(1.14);
+    background: transparent;
   }
 
   .app-nav {
@@ -138,55 +127,50 @@
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     contain: paint;
-    background: linear-gradient(180deg, rgba(8,8,6,0), rgba(8,8,6,.96) 18%, rgba(8,8,6,1));
-    border-top: 1px solid rgba(255,248,234,.08);
-    box-shadow: 0 -18px 42px -30px rgba(0,0,0,.9);
+    background: theme(colors.bg);
+    border-top: 1px solid theme(colors.line);
+    box-shadow: none;
   }
   .nav-shell {
-    border: 1px solid rgba(255,248,234,.11);
-    border-radius: 10px;
-    background: linear-gradient(180deg, rgba(25,23,19,.96), rgba(8,8,6,.94));
-    box-shadow: 0 22px 62px -28px rgba(0,0,0,.96), inset 0 1px 0 rgba(255,248,234,.075);
-    backdrop-filter: blur(20px) saturate(1.2);
-    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid theme(colors.line);
+    border-radius: 8px;
+    background: theme(colors.surface);
+    box-shadow: none;
     overflow: hidden;
   }
 
   .metric-tile {
-    @apply rounded-lg border border-line/70 bg-bg2/80 px-3 py-2 min-w-0;
-    box-shadow: inset 0 1px 0 rgba(255,248,234,.05);
+    @apply rounded-md border border-line bg-bg2 px-3 py-2 min-w-0;
+    box-shadow: none;
   }
   .command-card {
     @apply card p-4 overflow-hidden;
-    box-shadow: 0 24px 70px -42px rgba(184,255,44,.48), inset 0 1px 0 rgba(255,248,234,.075);
+    background: theme(colors.surface) !important;
+    box-shadow: none;
   }
   .accent-card {
-    @apply card p-3 overflow-hidden transition-colors duration-200;
+    @apply card p-3 overflow-hidden transition-colors duration-150;
+    background: theme(colors.surface) !important;
+    border-color: theme(colors.line) !important;
   }
   .accent-card-rail {
-    @apply absolute left-0 top-0 bottom-0 w-[2px];
+    display: none;
   }
   .command-metric {
-    @apply rounded-lg border border-line/70 bg-bg2/75 px-2 py-[7px] min-w-0;
+    @apply rounded-md border border-line bg-bg2 px-2 py-[7px] min-w-0;
   }
   .soft-band {
-    @apply rounded-lg border border-line/70 bg-bg2/70;
-    box-shadow: inset 0 1px 0 rgba(255,248,234,.045);
+    @apply rounded-md border border-line bg-bg2;
+    box-shadow: none;
   }
-  .page-hero-kicker {
-    @apply mono text-[.58rem] text-signal uppercase tracking-[.18em] font-medium;
+  .page-title {
+    @apply text-lg text-ink font-semibold leading-tight;
   }
-  .page-hero-title {
-    @apply font-display text-[1.45rem] min-[420px]:text-[1.75rem] text-ink leading-none mt-1;
-    letter-spacing: 0;
-    line-height: 1.03;
-    font-weight: 600;
-  }
-  .page-hero-sub {
-    @apply mono text-[.62rem] text-mute uppercase tracking-[.11em] mt-3 leading-relaxed;
+  .page-subtitle {
+    @apply text-sm text-mute mt-1 leading-snug;
   }
   .metric-label {
-    @apply mono text-[.52rem] text-mute uppercase tracking-[.12em];
+    @apply text-xs text-mute;
   }
   .metric-value {
     @apply mono text-sm text-ink tabular-nums mt-1;
@@ -198,7 +182,7 @@
     @apply px-4 py-3 border-b border-line/60 last:border-0;
   }
   .modal-shell {
-    @apply fixed inset-0 z-50 bg-bg/90 backdrop-blur flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+16px)];
+    @apply fixed inset-0 z-50 bg-bg/85 flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom)+16px)];
     overscroll-behavior: contain;
   }
   .modal-panel {
@@ -206,12 +190,12 @@
     overscroll-behavior: contain;
   }
   .modal-actions {
-    @apply sticky bottom-[-1rem] -mx-4 -mb-4 flex gap-2 mt-1 p-4 bg-surface/95 border-t border-line/70 backdrop-blur;
+    @apply sticky bottom-[-1rem] -mx-4 -mb-4 flex gap-2 mt-1 p-4 bg-surface border-t border-line;
   }
 
   /* Skeleton shimmer */
   .skeleton {
-    background: linear-gradient(90deg, theme(colors.surface) 0%, theme(colors.surface2) 50%, theme(colors.surface) 100%);
+    background: theme(colors.surface2);
     background-size: 200% 100%;
     animation: shimmer 1.4s linear infinite;
     border-radius: 6px;
@@ -231,40 +215,34 @@
   .meter > span {
     position: absolute; left: 0; top: 0; bottom: 0;
     background: theme(colors.signal);
-    box-shadow: 0 0 10px theme(colors.signal);
     border-radius: inherit;
     transition: width .45s cubic-bezier(.2,.8,.2,1);
   }
-  .meter.over   > span { background: theme(colors.danger); box-shadow: 0 0 12px theme(colors.danger); }
-  .meter.dim    > span { background: theme(colors.cyan);   box-shadow: 0 0 8px  theme(colors.cyan);   }
-  .meter.warn   > span { background: theme(colors.warn);   box-shadow: 0 0 8px  theme(colors.warn);   }
-  .meter.heart  > span { background: theme(colors.coral);  box-shadow: 0 0 10px theme(colors.coral);  }
-  .meter.energy > span { background: theme(colors.amber);  box-shadow: 0 0 10px theme(colors.amber);  }
-  .meter.hydro  > span { background: theme(colors.cyan);   box-shadow: 0 0 8px  theme(colors.cyan);   }
-  .meter.muscle > span { background: theme(colors.lime);   box-shadow: 0 0 10px theme(colors.lime);   }
+  .meter.over   > span { background: theme(colors.danger); }
+  .meter.dim    > span { background: theme(colors.cyan);   }
+  .meter.warn   > span { background: theme(colors.warn);   }
+  .meter.heart  > span { background: theme(colors.coral);  }
+  .meter.energy > span { background: theme(colors.amber);  }
+  .meter.hydro  > span { background: theme(colors.cyan);   }
+  .meter.muscle > span { background: theme(colors.lime);   }
 
   /* Success flash — brief green glow pulse on save */
   .flash-ok { animation: flashOk .55s ease-out; }
   @keyframes flashOk {
-    0%   { box-shadow: 0 0 0 0 rgba(184,255,44,.0); transform: scale(1); }
-    30%  { box-shadow: 0 0 28px 4px rgba(184,255,44,.65); transform: scale(1.06); }
-    100% { box-shadow: 0 0 0 0 rgba(184,255,44,0); transform: scale(1); }
+    0%   { background-color: theme(colors.surface); }
+    30%  { background-color: rgba(0,212,170,.12); }
+    100% { background-color: theme(colors.surface); }
   }
 
   /* Phase strip — 4 segmented bar */
   .phase-seg { @apply flex-1 h-[3px] rounded-full bg-bg2 border border-line relative overflow-hidden; }
-  .phase-seg.done { background: theme(colors.lime);  border-color: theme(colors.lime);  box-shadow: 0 0 8px rgba(212,255,58,.5); }
-  .phase-seg.now  { background: theme(colors.amber); border-color: theme(colors.amber); box-shadow: 0 0 8px rgba(255,180,84,.5); animation: phasePulse 1.8s ease-in-out infinite; }
+  .phase-seg.done { background: theme(colors.lime);  border-color: theme(colors.lime); }
+  .phase-seg.now  { background: theme(colors.amber); border-color: theme(colors.amber); }
   @keyframes phasePulse { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
 
   /* Tick line: animated dash stream (for active cards) */
   .tick-top { position: relative; }
-  .tick-top::after {
-    content: ""; position: absolute; top: -1px; left: 8%; right: 8%; height: 1px;
-    background: linear-gradient(90deg, transparent, theme(colors.amber), transparent);
-    opacity: .55;
-    animation: tick 2.4s ease-in-out infinite;
-  }
+  .tick-top::after { display: none; }
   @keyframes tick { 0%,100% { opacity: .15; } 50% { opacity: .7; } }
 
   /* Chip (fuel/eating badges: OMAD, FAST, LOW, rest, A/B/C) */
@@ -292,13 +270,13 @@
   :focus-visible { outline: 1px solid theme(colors.lime); outline-offset: 2px; border-radius: 6px; }
 
   /* Per-page atmosphere — subtle tints via CSS vars */
-  body:has(.page-dashboard) { --page-glow-a: rgba(184,255,44,.085); --page-glow-b: rgba(255,176,0,.055); }
-  body:has(.page-today)     { --page-glow-a: rgba(184,255,44,.085); --page-glow-b: rgba(46,233,211,.05); }
-  body:has(.page-log)       { --page-glow-a: rgba(255,176,0,.085); --page-glow-b: rgba(184,255,44,.05); }
-  body:has(.page-training)  { --page-glow-a: rgba(255,107,107,.08); --page-glow-b: rgba(184,255,44,.045); }
-  body:has(.page-progress)  { --page-glow-a: rgba(46,233,211,.06); --page-glow-b: rgba(255,176,0,.045); }
-  body:has(.page-checkin)   { --page-glow-a: rgba(46,233,211,.07); --page-glow-b: rgba(184,166,255,.045); }
-  body:has(.page-settings)  { --page-glow-a: rgba(46,233,211,.045); --page-glow-b: transparent; }
+  body:has(.page-dashboard),
+  body:has(.page-today),
+  body:has(.page-log),
+  body:has(.page-training),
+  body:has(.page-progress),
+  body:has(.page-checkin),
+  body:has(.page-settings) { background: theme(colors.bg); }
 
   /* Ring gauge — SVG progress */
   .ring-track { stroke: theme(colors.surface2); }
@@ -334,8 +312,8 @@
   }
   .gif-modal-focus {
     max-width: min(520px, calc(100vw - 24px));
-    border-color: rgba(184,255,44,.45);
-    box-shadow: 0 28px 80px -40px rgba(184,255,44,.52), inset 0 1px 0 rgba(255,248,234,.07);
+    border-color: theme(colors.line2);
+    box-shadow: none;
   }
   .target-modal-panel {
     align-items: center;
@@ -366,9 +344,7 @@
     overflow: hidden;
     border: 1px solid theme(colors.line);
     border-radius: 8px;
-    background:
-      radial-gradient(circle at 50% 20%, rgba(184,255,44,.1), transparent 34%),
-      theme(colors.bg2);
+    background: theme(colors.bg2);
     padding: 10px;
   }
   .muscle-diagram {
@@ -408,7 +384,7 @@
     border: 1px solid theme(colors.line);
     background: rgba(17,16,13,.92);
     color: theme(colors.ink2);
-    box-shadow: 0 16px 42px -28px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.05);
+    box-shadow: none;
     opacity: 0;
     pointer-events: none;
     will-change: transform, opacity;
@@ -420,12 +396,12 @@
     opacity: 1;
   }
   .pull-refresh.is-armed {
-    border-color: rgba(184,255,44,.55);
+    border-color: theme(colors.signal);
     color: theme(colors.signal);
   }
   .pull-refresh.is-refreshing {
     transform: translate3d(-50%, 58px, 0);
-    border-color: rgba(184,255,44,.7);
+    border-color: theme(colors.signal);
     color: theme(colors.signal);
   }
   .pull-refresh-dot {
@@ -451,7 +427,7 @@
     animation: refreshPulse .68s ease-in-out infinite alternate;
   }
   .pull-refresh-text {
-    @apply mono text-[.58rem] uppercase tracking-[.16em];
+    @apply mono text-[.58rem];
   }
   @keyframes refreshSpin {
     to { transform: rotate(360deg); }

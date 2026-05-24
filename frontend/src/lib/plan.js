@@ -17,10 +17,10 @@ export const PLAN = {
   },
 
   phases: [
-    { id: 1, nameKey: "phase1", weeks: [1, 4],   from: 93, to: 88, color: "#ffb000" },
-    { id: 2, nameKey: "phase2", weeks: [5, 12],  from: 88, to: 80, color: "#ffb000" },
-    { id: 3, nameKey: "phase3", weeks: [13, 20], from: 80, to: 75, color: "#2ee9d3" },
-    { id: 4, nameKey: "phase4", weeks: [21, 26], from: 75, to: 73, color: "#b8ff2c" }
+    { id: 1, nameKey: "phase1", weeks: [1, 4],   from: 93, to: 88, color: "#d9a441" },
+    { id: 2, nameKey: "phase2", weeks: [5, 12],  from: 88, to: 80, color: "#d9a441" },
+    { id: 3, nameKey: "phase3", weeks: [13, 20], from: 80, to: 75, color: "#9a9a9a" },
+    { id: 4, nameKey: "phase4", weeks: [21, 26], from: 75, to: 73, color: "#00d4aa" }
   ],
 
   // Weekly pattern by getDay() (0=Sun..6=Sat). Gym days use split meals; rest days keep fast/OMAD-low structure.

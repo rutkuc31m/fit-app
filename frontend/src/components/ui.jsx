@@ -35,33 +35,28 @@ export const Icon = {
   cart:    (p) => <Svg {...p} d={<><circle cx="9" cy="20" r="1.4" /><circle cx="17" cy="20" r="1.4" /><path d="M2 3h3l3 12h11l2-8H6" /></>} />
 };
 
-/* ─────────── Shared accent card ─────────── */
-export function AccentCard({ accent = "#b8ff2c", as: Component = "div", className = "", contentClassName = "pl-2", style, children, ...props }) {
+export function AccentCard({ accent = "#00d4aa", as: Component = "div", className = "", contentClassName = "pl-2", style, children, ...props }) {
   return (
     <Component
       className={`accent-card ${className}`}
       style={{
-        borderColor: `${accent}44`,
-        background: `linear-gradient(155deg, ${accent}12 0%, rgba(25,23,19,.96) 34%, rgba(12,11,9,.97) 100%)`,
         ...style
       }}
       {...props}
     >
-      <div className="accent-card-rail" style={{ background: accent, boxShadow: `0 0 18px ${accent}75` }} />
       <div className={`relative z-10 ${contentClassName}`}>{children}</div>
     </Component>
   );
 }
 
-export function PageCommand({ accent = "#b8ff2c", kicker, title, sub, metrics = [], className = "", children }) {
+export function PageCommand({ accent = "#00d4aa", kicker, title, sub, metrics = [], className = "", children }) {
   return (
-    <AccentCard accent={accent} className={`p-4 ${className}`}>
+    <AccentCard accent={accent} className={`p-4 ${className}`} contentClassName="pl-0">
       {children}
-      <div className="page-hero-kicker" style={{ color: accent }}>{kicker}</div>
-      <div className="page-hero-title">{title}</div>
-      {sub && <div className="page-hero-sub">{sub}</div>}
+      {title && <div className="page-title">{title}</div>}
+      {sub && <div className="page-subtitle">{sub}</div>}
       {metrics.length > 0 && (
-        <div className={`grid ${metrics.length === 4 ? "grid-cols-4" : "grid-cols-3"} gap-2 mt-4`}>
+        <div className={`grid ${metrics.length === 4 ? "grid-cols-4" : "grid-cols-3"} gap-2 mt-3`}>
           {metrics.map((metric) => (
             <div key={metric.label} className="metric-tile">
               <div className="metric-label">{metric.label}</div>
@@ -80,7 +75,7 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, target > 0 ? value / target : 0));
   const dash = c * pct;
-  const color = over ? "#ff9500" : "#b8ff2c";
+  const color = over ? "#ff9500" : "#00d4aa";
   return (
     <div className="relative inline-grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90 overflow-visible">
@@ -88,7 +83,7 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
         <circle cx={size / 2} cy={size / 2} r={r}
           stroke={color} strokeWidth={stroke} fill="none"
           strokeDasharray={`${dash} ${c}`} strokeLinecap="round"
-          style={{ filter: `drop-shadow(0 0 6px ${color}aa)`, transition: "stroke-dasharray .5s cubic-bezier(.2,.8,.2,1)" }} />
+          style={{ transition: "stroke-dasharray .16s ease" }} />
         {/* Tick marks every 10% */}
         {Array.from({ length: 24 }).map((_, i) => {
           const a = (i / 24) * 2 * Math.PI - Math.PI / 2;
@@ -115,7 +110,7 @@ export function Ring({ value = 0, target = 100, size = 110, stroke = 8, label, u
 }
 
 /* ─────────── Mini ring (compact macro display) ─────────── */
-export function MiniRing({ value = 0, target = 100, size = 54, stroke = 5, color = "#b8ff2c" }) {
+export function MiniRing({ value = 0, target = 100, size = 54, stroke = 5, color = "#00d4aa" }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, target > 0 ? value / target : 0));
@@ -124,7 +119,7 @@ export function MiniRing({ value = 0, target = 100, size = 54, stroke = 5, color
       <circle cx={size/2} cy={size/2} r={r} stroke="#2c2c2e" strokeWidth={stroke} fill="none" />
       <circle cx={size/2} cy={size/2} r={r} stroke={color} strokeWidth={stroke} fill="none"
         strokeDasharray={`${c * pct} ${c}`} strokeLinecap="round"
-        style={{ filter: `drop-shadow(0 0 4px ${color}aa)`, transition: "stroke-dasharray .5s cubic-bezier(.2,.8,.2,1)" }} />
+        style={{ transition: "stroke-dasharray .16s ease" }} />
     </svg>
   );
 }
@@ -142,7 +137,7 @@ export function Bar({ value = 0, target = 100, tone = "signal" }) {
 }
 
 /* ─────────── Sparkline (tiny trend) ─────────── */
-export function Sparkline({ values = [], width = 200, height = 32, color = "#b8ff2c" }) {
+export function Sparkline({ values = [], width = 200, height = 32, color = "#00d4aa" }) {
   const pts = values.filter((v) => v != null && !isNaN(v));
   if (pts.length < 2) return <div style={{ height }} className="mono text-[.58rem] text-mute flex items-center">no trend yet</div>;
   const min = Math.min(...pts), max = Math.max(...pts);
@@ -154,8 +149,8 @@ export function Sparkline({ values = [], width = 200, height = 32, color = "#b8f
   const lastY = height - ((last - min) / span) * height;
   return (
     <svg width={width} height={height} className="overflow-visible">
-      <path d={d} stroke={color} strokeWidth="1.3" fill="none" style={{ filter: `drop-shadow(0 0 4px ${color}80)` }} />
-      <circle cx={lastX} cy={lastY} r="2.2" fill={color} style={{ filter: `drop-shadow(0 0 5px ${color})` }} />
+      <path d={d} stroke={color} strokeWidth="1.3" fill="none" />
+      <circle cx={lastX} cy={lastY} r="2.2" fill={color} />
     </svg>
   );
 }
@@ -189,7 +184,7 @@ export function DayGlyph({ type = "A", size = 34 }) {
   };
   const shape = shapes[type] || null;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="text-signal" style={{ filter: "drop-shadow(0 0 6px rgba(184,255,44,.4))" }}>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="text-signal">
       <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">{shape}</g>
       <text x={size/2} y={size/2 + 4} textAnchor="middle" className="mono" fontSize={size * 0.32} fill="currentColor" fontWeight="700">{type}</text>
     </svg>
@@ -202,7 +197,7 @@ export const Skeleton = ({ className = "h-4 w-full" }) => <div className={`skele
 /* ─────────── Empty state ─────────── */
 export function Empty({ label, hint, icon, action }) {
   return (
-    <AccentCard accent="#2ee9d3" className="p-6 text-center" contentClassName="pl-2 flex flex-col items-center gap-2">
+    <AccentCard accent="#9a9a9a" className="p-6 text-center" contentClassName="pl-2 flex flex-col items-center gap-2">
       {icon && <div className="text-mute2 mb-1">{icon}</div>}
       <div className="mono text-xs text-ink2 caps">{label}</div>
       {hint && <div className="mono text-[.68rem] text-mute max-w-[28ch] leading-relaxed">{hint}</div>}
@@ -248,7 +243,7 @@ export function Stepper({ value, onChange, step = 0.1, min, max, suffix, big = f
         <input type="number" step={step} inputMode="decimal"
           value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? "" : +e.target.value)}
           className={`w-full h-full text-center mono font-bold text-signal bg-transparent border-none outline-none ${big ? "text-[2rem]" : "text-lg"} py-2`}
-          style={{ textShadow: "0 0 14px rgba(184,255,44,.35)" }}
+          style={{ textShadow: "0 0 14px rgba(0,212,170,.35)" }}
           placeholder="0" />
         {suffix && <div className="absolute right-3 top-1/2 -translate-y-1/2 mono text-xs text-mute pointer-events-none">{suffix}</div>}
       </div>

@@ -27,8 +27,8 @@ const FIELD_COLOR = {
   adherence_pct: "lime"
 };
 const colorOf = (id) => FIELD_COLOR[id] || "lime";
-const ACCENT_HEX = { lime: "#b8ff2c", cyan: "#2ee9d3", amber: "#ffb000" };
-const accentOf = (id) => ACCENT_HEX[colorOf(id)] || "#b8ff2c";
+const ACCENT_HEX = { lime: "#00d4aa", cyan: "#9a9a9a", amber: "#d9a441" };
+const accentOf = (id) => ACCENT_HEX[colorOf(id)] || "#00d4aa";
 
 const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -140,7 +140,7 @@ export default function Checkin() {
   return (
     <div className="page page-checkin">
       <PageCommand
-        accent="#2ee9d3"
+        accent="#9a9a9a"
         kicker="weekly check-in"
         title="Photos tell the truth."
         metrics={[
@@ -152,7 +152,7 @@ export default function Checkin() {
 
       <div className="section-label">{t("checkin.title")} · W{week}</div>
 
-      <AccentCard accent="#2ee9d3" className={uploading === "general" ? "border-amber/60" : ""}>
+      <AccentCard accent="#9a9a9a" className={uploading === "general" ? "border-amber/60" : ""}>
         <div className="flex justify-between items-center gap-2">
           <div>
             <div className="card-title">Progress photos</div>

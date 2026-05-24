@@ -10,41 +10,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        // structure — matte command UI
-        bg:       "#080806",
-        bg2:      "#11100d",
-        surface:  "#191713",
-        surface2: "#242117",
-        line:     "#342f24",
-        line2:    "#50483a",
-        ink:      "#fff8ea",
-        ink2:     "#c9bea8",
-        mute:     "#827866",
-        mute2:    "#5f5547",
+        // structure — uncodixfied graphite
+        bg:       "#0f0f0f",
+        bg2:      "#141414",
+        surface:  "#1a1a1a",
+        surface2: "#242424",
+        line:     "#2f2f2f",
+        line2:    "#3a3a3a",
+        ink:      "#f5f5f5",
+        ink2:     "#d1d1d1",
+        mute:     "#8a8a8a",
+        mute2:    "#5f5f5f",
 
-        // semantic accents — high contrast product palette
-        lime:    "#b8ff2c",
-        limed:   "#89d100",
-        coral:   "#ff6b6b",
-        corald:  "#e63e55",
-        amber:   "#ffb000",
-        amberd:  "#cf7b00",
-        cyan:    "#2ee9d3",
-        cyand:   "#00b8ae",
+        // semantic accents — calm and functional
+        lime:    "#00d4aa",
+        limed:   "#00a383",
+        coral:   "#ff6b9d",
+        corald:  "#d94f7f",
+        amber:   "#d9a441",
+        amberd:  "#ad7f25",
+        cyan:    "#9a9a9a",
+        cyand:   "#737373",
 
         // extra hues
-        yellow:  "#f7e75b",
-        purple:  "#b8a6ff",
-        blue:    "#6bb7ff",
+        yellow:  "#d9a441",
+        purple:  "#9b8ac5",
+        blue:    "#8a8a8a",
 
         // system states
-        warn:    "#ffb000",
-        danger:  "#ff6b6b",
+        warn:    "#d9a441",
+        danger:  "#ff6b9d",
 
         // legacy aliases
-        signal:  "#b8ff2c",
-        signald: "#89d100",
-        cool:    "#2ee9d3"
+        signal:  "#00d4aa",
+        signald: "#00a383",
+        cool:    "#9a9a9a"
       },
       fontFamily: {
         mono:    ["'JetBrains Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
@@ -53,7 +53,7 @@ export default {
       },
       borderRadius: { xl: "10px", lg: "8px", "2xl": "14px" },
       boxShadow: {
-        glow: "0 0 0 1px rgba(184,255,44,.12), 0 20px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04)"
+        glow: "0 2px 8px rgba(0,0,0,.12)"
       }
     }
   },

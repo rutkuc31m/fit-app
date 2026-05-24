@@ -24,17 +24,17 @@ export default function Login() {
   return (
     <div className="page pt-[80px]">
       <PageCommand
-        accent="#b8ff2c"
+        accent="#00d4aa"
         kicker="fit rutkuc"
         title="Six months. One direction."
         className="text-center"
       >
         <div className="relative z-10 text-center mb-4">
-          <div className="mx-auto w-[48px] h-[48px] rounded-lg bg-signal grid place-items-center text-[#000000] mono font-bold text-xl shadow-[0_0_30px_-6px_theme(colors.signal)]">F</div>
+          <div className="mx-auto w-[48px] h-[48px] rounded-md bg-signal grid place-items-center text-bg font-semibold text-xl">F</div>
         </div>
       </PageCommand>
 
-      <AccentCard as="form" onSubmit={submit} accent="#b8ff2c" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
+      <AccentCard as="form" onSubmit={submit} accent="#00d4aa" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
         <div className="section-label">{t(`auth.${mode}`)}</div>
 
         {mode === "register" && (

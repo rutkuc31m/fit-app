@@ -90,7 +90,7 @@ const findCommonFoodMatch = (query, lang) => {
 function FoodShortcutRow({ title, items, onAdd, onRemove, limit = 12 }) {
   if (!items?.length) return null;
   return (
-    <AccentCard accent={title === "Favoriten" ? "#b8ff2c" : "#2ee9d3"} className="p-3" contentClassName="pl-2">
+    <AccentCard accent={title === "Favoriten" ? "#00d4aa" : "#9a9a9a"} className="p-3" contentClassName="pl-2">
       <div className="section-label mt-0 mb-2">{title} · {items.length}</div>
       <div className="flex gap-2 overflow-x-auto pb-1">
         {items.slice(0, limit).map((item) => (
@@ -136,7 +136,7 @@ function HistoryPicker({ items, onAdd }) {
   if (!items?.length) return null;
   return (
     <>
-      <AccentCard accent="#2ee9d3" className="p-3" contentClassName="pl-2">
+      <AccentCard accent="#9a9a9a" className="p-3" contentClassName="pl-2">
         <button
           type="button"
           className="w-full flex items-center justify-between gap-3 text-left"
@@ -210,7 +210,7 @@ function MealTemplatePicker({ templates, items, onToggle }) {
   };
 
   return (
-    <AccentCard accent="#b8ff2c" className="p-3" contentClassName="pl-2">
+    <AccentCard accent="#00d4aa" className="p-3" contentClassName="pl-2">
       <div className="section-label mt-0 mb-2">Gerichte</div>
       <div className="grid grid-cols-1 min-[430px]:grid-cols-2 gap-2">
         {templates.map((template) => {
@@ -327,7 +327,7 @@ function LogCommand({
   ];
 
   return (
-    <AccentCard accent="#ffb000" className="p-3" contentClassName="pl-2">
+    <AccentCard accent="#d9a441" className="p-3" contentClassName="pl-2">
       <div className="flex items-center justify-between gap-2">
         <button className="btn-icon" aria-label="prev day" onClick={() => onShiftDate(-1)}>
           <Icon.chev size={16} className="rotate-180" />
@@ -364,7 +364,7 @@ function LogCommand({
           {showAddMenu && (
             <>
               <div className="fixed inset-0 z-20" onClick={() => setShowAddMenu(false)} />
-              <div className="absolute left-0 right-0 top-full mt-2 z-30 card overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)] border border-line">
+              <div className="absolute left-0 right-0 top-full mt-2 z-30 card overflow-hidden border border-line">
                 <button className="w-full text-left px-4 py-3 border-b border-line hover:bg-bg2 active:bg-bg2 flex items-center gap-3 transition-colors duration-200" onClick={openCamera}>
                   <Icon.camera size={16} className="text-signal shrink-0" />
                   <div className="mono text-sm text-ink">Kamera / Barkod</div>
@@ -797,7 +797,7 @@ export default function Log() {
       )}
 
       {allItems.length > 0 && (
-        <AccentCard accent="#ffb000" className="overflow-hidden" contentClassName="pl-2">
+        <AccentCard accent="#d9a441" className="overflow-hidden" contentClassName="pl-2">
           <div className="divide-y divide-line">
             {allItems.map((it) => {
               const pct = eatenPct(it);
@@ -970,7 +970,7 @@ export default function Log() {
                 onChange={(e) => updateDraftName(e.target.value)}
               />
               {mode === "gram" && results.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1 z-30 card max-h-52 overflow-y-auto shadow-[0_10px_30px_-10px_rgba(0,0,0,.8)]">
+                <div className="absolute left-0 right-0 top-full mt-1 z-30 card max-h-52 overflow-y-auto">
                   {results.map((r, i) => (
                     <button key={i} type="button" onClick={() => pickResult(r)}
                       className="w-full text-left px-3 py-2 border-b border-line last:border-0 hover:bg-bg2">
