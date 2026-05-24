@@ -3,6 +3,23 @@
 This file is the handoff memory for future Codex/agent sessions on `rutkuc31m/fit-app`.
 Read `AGENTS.md` first, then this file. Do not store secrets here.
 
+## Latest Handoff Snapshot - 2026-05-24
+
+- Latest deployed app commit: `02d0448 Add meal template picker`.
+- Before answering implementation questions, read `AGENTS.md`, then this file.
+- Current phase: Phase 2 started on Tuesday `2026-05-19` after Phase 1 ended. User wants phase checkpoints aligned to Tuesday fasted measurements.
+- Latest stable checkpoint from Phase 1 end:
+  - Weight: about `84 kg`
+  - Waist: `94-95 cm` at navel, user notes previous `96 cm` may have been measured too tight and mentally treats it closer to `97 cm`
+  - Neck: `39 cm`
+  - Estimated body fat: roughly `23-25%`, not exact.
+- User now prefers weekly fasting on Monday only, with Tuesday morning fasted measurement. Earlier 2x/week fasting was reduced for muscle retention.
+- Current core app additions:
+  - Football activity logging is deployed.
+  - Training set `logged_date` tracking is deployed.
+  - Essen meal templates are deployed.
+- Do not start from scratch if session context is lost. The core product and user preferences are captured here.
+
 ## Current Project
 
 - Repo: `rutkuc31m/fit-app`
@@ -73,6 +90,21 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
 - App tracks nutrition, fasting, training, hydration, recovery, photos, progress/stats.
 - Meals can be edited after adding.
 - Food history/recent add exists and should stay quick.
+- Essen now has 6 static meal templates in `frontend/src/lib/mealTemplates.js`.
+  - UI component is `MealTemplatePicker` in `frontend/src/pages/Log.jsx`.
+  - Templates are shown in Essen as compact `Gerichte`.
+  - User opens a template to see ingredients and macro totals.
+  - Check button adds all template items to the selected day; green state means eaten/logged.
+  - Pressing check again removes only that template's items for the selected day.
+  - No backend schema was added. Template items are tracked with existing `meal_items.barcode = template:<id>`.
+  - Keep this marker behavior if extending templates; it makes undo/status stable without a new table.
+- Current static meal templates:
+  - `potato_chicken`: Kartoffeln + Hähnchen + Körniger + Skyr/Whey
+  - `potato_salmon_egg`: Kartoffeln + Lachs + Eier + Körniger + Skyr/Whey
+  - `potato_tuna`: Kartoffeln + Thunfisch + Körniger + Skyr/Whey
+  - `wrap_chicken`: Ja Vollkorn Wraps + Hähnchen + Körniger + Skyr/Whey
+  - `wrap_rinderhack`: Ja Vollkorn Wraps + REWE Bio Rinderhack + Skyr Sauce + Whey
+  - `wrap_tuna`: Ja Vollkorn Wraps + Thunfisch + Körniger + Skyr/Whey
 - Photo upload is general: user uploads progress photos without body-part sections. Photos should save to backend but not show as gallery in app for now.
 - Food photos can be uploaded for later analysis; user may ask agent to inspect backend photos.
 - Hydration tracks water and coffee separately, but total hydration is `water_ml + coffee_ml`.
@@ -110,6 +142,7 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - `87.9 kg`, waist `103 cm`, neck `41 cm`.
   - `86.5 kg`, waist `99.5 cm`, neck `40.5 cm`.
   - 2026-05-12 after fasting: `85.3 kg`, waist `96 cm`, neck `40 cm`.
+  - 2026-05-19 / Phase 1 end after Monday fast: about `84 kg`, waist `94-95 cm`, neck `39 cm`.
 - User tracks weekly Tuesday morning fasted measurements as the cleanest trend.
 - Phase checkpoint/end dates should align with Tuesday morning fasted measurements. If a phase boundary/end is displayed as Sunday or Monday, shift the displayed checkpoint date to Tuesday.
 - User cares more about waist trend and strength than daily scale noise.
@@ -126,10 +159,15 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - Rest day: roughly `1500-1700 kcal`, `160-180g protein`, carbs can be lower but not zero.
   - Keto is not required. Controlled carbs from vegetables, fruit, wraps, rice/potato as needed are acceptable.
 - User feels guilty when stomach is full even at 1700-1800 kcal. Remind: with 10-13k steps + gym, 1800 is still a cut, not overeating.
+- User is moving toward repeatable daily templates rather than improvising every meal:
+  - Main meal + evening skyr/whey/shake.
+  - Keep protein high first; calories can vary by 2-3 day average if weekly trend is good.
+  - User likes choosing from a fixed meal list in Essen instead of following recipe text.
 - User likes high-volume foods: cucumber, zucchini, iceberg, paprika, broccoli/cauliflower, watermelon.
 - User frequently eats: chicken breast, turkey, eggs, skyr, whey, zero almond milk, More Protein Wraps, cottage cheese/körniger Frischkäse, fish, tuna, salmon, quinoa/rice/potato, salads.
 - User avoids or limits: sugar, gluten/bread, pizza except cheat/family days, nuts due calorie density, dates due calories.
 - Whey + zero almond milk is a key tool; user likes vanilla whey with cinnamon/decaf coffee aroma.
+- User's current Optimum Nutrition vanilla whey isolate label per 30g scoop: `108 kcal`, `25g protein`, `1.2g carbs`, `0.4g fat`. Use this for manual DB entries unless user changes product.
 - Creatine: effective generally, but user suspects hair shedding from previous creatine use. Recommendation so far: skip for now, not necessary.
 - Peptides/fat burners/metabolic peptides: discussed and not recommended; core system is enough.
 
@@ -143,6 +181,7 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
 - If the user's sentence contains "ekle" anywhere before/after a food list, treat it as an explicit instruction to write that food to the production DB unless the user clearly says not to. The user often asks hypothetical nutrition questions too; do not write those unless an add/write cue is present.
 - User likes conservative/high estimates for buffet/restaurant meals.
 - For buffet/restaurant meals, if uncertain, estimate high rather than low.
+- For Apple Watch football/workouts, use active calories (`Aktiv`), not total calories (`Gesamt`), unless the user explicitly says otherwise.
 - Recent example 2026-05-13 after correction:
   - 400g Skyr
   - 6 L eggs
@@ -176,6 +215,10 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - Goal is to complete four days in the week, not attach them to fixed weekdays.
 - Rest days can include 10-13k steps / forest walk as active recovery.
 - User sometimes feels "missing out" when not gyming. Remind: rest is part of the program.
+- Football/top is now part of Phase 2 cardio and enjoyment:
+  - Track manually in app with minutes and active kcal from Apple Watch.
+  - User enjoys 20-35 minute football sessions and reports rapid cardio improvement.
+  - Treat it as cardio/conditioning, not leg hypertrophy programming.
 
 ## Training Intensity / Hypertrophy Rule
 
@@ -262,6 +305,19 @@ Day 4 - Pull B:
   - Area: lower back / glutes
   - Primary: `5012`
 
+## Football / Activity Logging
+
+- Feature deployed in commit `984273c Add football activity logging`.
+- Backend has `activity_logs` table and `/api/training/activity` endpoints.
+- Frontend has compact football card in `frontend/src/pages/Training.jsx`.
+- User should enter Apple Watch active calories (`Aktiv`) and minutes.
+- Known logged examples:
+  - `2026-05-19`: 25 min / 320 kcal
+  - `2026-05-20`: 26 min / 300 kcal
+  - `2026-05-21`: 30 min / 372 kcal
+  - `2026-05-22`: 30 min / 333 kcal
+  - `2026-05-23`: 35 min / 360 kcal
+
 Turkish area translations user asked for:
 - `delts` = omuz kasları / deltoid.
 - `front delt` = ön omuz.
@@ -303,6 +359,12 @@ Turkish area translations user asked for:
 
 ## Recent Important Commits
 
+- `02d0448 Add meal template picker`
+- `33241ef Track training set log dates`
+- `984273c Add football activity logging`
+- `bb9bd86 Align phase checkpoints to Tuesday`
+- `434e348 Add Turkish muscle labels to training`
+- `b0b736c Expand training movement details`
 - `5313aa3 Add working memory notes`
 - `a055671 Prefer latest open training cycle`
 - `482ecd0 Show muscle targets in training plan`
