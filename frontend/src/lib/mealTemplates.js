@@ -11,17 +11,37 @@ const item = (name, amount_g, kcal, protein_g, carbs_g, fat_g) => ({
 });
 
 const withTotals = (template) => {
-  const totals = template.items.reduce((acc, entry) => {
+  const parts = template.parts || splitTemplateParts(template.items);
+  const items = parts.flatMap((part) => part.items);
+  const totals = items.reduce((acc, entry) => {
     acc.kcal += n(entry.kcal);
     acc.protein += n(entry.protein_g);
     acc.carbs += n(entry.carbs_g);
     acc.fat += n(entry.fat_g);
     return acc;
   }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
-  return { ...template, totals };
+  return { ...template, items, parts: parts.map((part) => ({ ...part, totals: totalsFor(part.items) })), totals };
 };
 
+const totalsFor = (items) =>
+  items.reduce((acc, entry) => {
+    acc.kcal += n(entry.kcal);
+    acc.protein += n(entry.protein_g);
+    acc.carbs += n(entry.carbs_g);
+    acc.fat += n(entry.fat_g);
+    return acc;
+  }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
+
+const isShakeItem = (entry) =>
+  /^(Skyr natur|ON Whey Isolate|Zero Mandelmilch|Beerenmix TK)$/i.test(entry.name);
+
+const splitTemplateParts = (items) => [
+  { id: "main", title: "Ana öğün", items: items.filter((entry) => !isShakeItem(entry)) },
+  { id: "shake", title: "Shake", items: items.filter(isShakeItem) }
+].filter((part) => part.items.length > 0);
+
 export const mealTemplateMarker = (templateId) => `template:${templateId}`;
+export const mealTemplatePartMarker = (templateId, partId) => `${mealTemplateMarker(templateId)}:${partId}`;
 
 export const MEAL_TEMPLATES = [
   withTotals({

@@ -112,6 +112,10 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - `wrap_rinderhack`: Ja Vollkorn Wraps + REWE Bio Rinderhack + Skyr Sauce + Whey
   - `rice_chicken`: Reis + Hähnchen + Körniger + Skyr/Whey
 - Current weekly meal template split is 3 chicken, 1 tuna, 1 salmon, 1 lean beef, plus 1 fasting day. The second tuna template was replaced because the user preferred less weekly fish.
+- Meal templates are displayed as day cards with two separately tappable/loggable parts:
+  - `Ana öğün`
+  - `Shake`
+- Each part expands independently and logs/removes independently with barcode markers like `template:<id>:main` and `template:<id>:shake`. Keep legacy `template:<id>` compatibility if touching this area.
 - Photo upload is general: user uploads progress photos without body-part sections. Photos should save to backend but not show as gallery in app for now.
 - Food photos can be uploaded for later analysis; user may ask agent to inspect backend photos.
 - Hydration tracks water and coffee separately, but total hydration is `water_ml + coffee_ml`.
