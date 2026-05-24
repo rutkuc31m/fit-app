@@ -58,8 +58,7 @@ function AdherenceCard({ review }) {
     ["meals", `${review.meal_consistency_pct ?? "--"}%`],
     ["protein", `${review.protein_days ?? 0}/5`],
     ["fast", `${review.fast_clean_days ?? 0}/2`],
-    ["recovery", `${review.recovery_days ?? 0}/7`],
-    ["water", `${review.hydration_days ?? 0}/7`]
+    ["training", `${review.training_done}/${review.training_planned || 0}`]
   ];
   return (
     <AccentCard accent="#00d4aa" className="p-4">
@@ -74,7 +73,7 @@ function AdherenceCard({ review }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="section-label mt-0 mb-2">adherence</div>
-          <div className="grid grid-cols-2 min-[460px]:grid-cols-5 gap-1">
+          <div className="grid grid-cols-2 min-[460px]:grid-cols-4 gap-1">
             {items.map(([label, value]) => (
               <div key={label} className="metric-tile px-2 py-1 text-center">
                 <div className="metric-label">{label}</div>
@@ -123,10 +122,7 @@ function WeeklyReviewCard({ review }) {
     ["protein days", `${review.protein_days ?? 0}/5`],
     ["fast clean", `${review.fast_clean_days ?? 0}/2`],
     ["kcal avg", fmt(review.avg_kcal, 0)],
-    ["protein avg", `${fmt(review.avg_protein_g, 0)}g`],
-    ["energy", `${fmt(review.avg_energy)}/5`],
-    ["hunger", `${fmt(review.avg_hunger)}/5`],
-    ["headache", `${fmt(review.avg_headache)}/5`]
+    ["protein avg", `${fmt(review.avg_protein_g, 0)}g`]
   ];
 
   return (
@@ -159,6 +155,8 @@ export default function Progress() {
   const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [review, setReview] = useState(null);
+  const [weightInput, setWeightInput] = useState("");
+  const [savedFlash, setSavedFlash] = useState(false);
 
   const load = async () => {
     const to = todayStr();
@@ -176,6 +174,19 @@ export default function Progress() {
   const latestWeight = [...logs].reverse().find((l) => l.weight_kg != null)?.weight_kg ?? null;
   const lost = latestWeight != null ? Math.max(0, PLAN.startWeight - latestWeight) : 0;
   const left = Math.max(0, (PLAN.startWeight - PLAN.targetWeight) - lost);
+
+  useEffect(() => {
+    setWeightInput(latestWeight != null ? String(latestWeight) : "");
+  }, [latestWeight]);
+
+  const saveWeight = async () => {
+    const n = parseFloat(weightInput);
+    if (!Number.isFinite(n) || n <= 0) return;
+    await api.put(`/logs/${todayStr()}`, { weight_kg: n });
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 700);
+    await load();
+  };
 
   return (
     <div className="page page-progress">
@@ -203,6 +214,34 @@ export default function Progress() {
 
       <WeeklyReviewCard review={review} />
       <AdherenceCard review={review} />
+
+      <AccentCard accent="#00d4aa">
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div>
+            <div className="card-title">Weight</div>
+            <div className="mono text-sm text-mute mt-1">
+              {latestWeight != null ? `${latestWeight.toFixed(1)}kg` : "--"}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="mono text-sm text-lime tabular-nums">{lost.toFixed(1)}kg</div>
+            <div className="text-xs text-mute">lost</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            step="0.1"
+            inputMode="decimal"
+            className="input flex-1 mono text-sm"
+            placeholder="kg"
+            value={weightInput}
+            onChange={(e) => setWeightInput(e.target.value)}
+          />
+          <button className="btn-ghost" onClick={saveWeight}>save</button>
+          {savedFlash && <span className="mono text-sm text-signal">saved</span>}
+        </div>
+      </AccentCard>
 
       <div className="section-label">{t("progress.weight_chart")}</div>
       <AccentCard accent="#9a9a9a" className="p-4"><WeightChart logs={logs} /></AccentCard>

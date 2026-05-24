@@ -411,6 +411,12 @@ Turkish area translations user asked for:
   - solid graphite surfaces, subtle borders, no decorative gradients/glows/rails.
   - no pill dock; simple fixed bottom nav with solid background.
   - no uppercase/letter-spaced eyebrow style by default.
+- Later same day:
+  - Today screen recovery signal removed because user does not use it.
+  - Today screen hydration removed because user does not use it.
+  - Weight logging moved to Progress/Stats.
+  - Production DB 2026-05-24 added separate `Shake` meal: template potato_chicken shake + 20g chiasamen + 1 kiwi + 1 large cucumber.
+  - 2026-05-24 total after shake: 1680 kcal, P197.7, C166.4, F23.4.
 - Nutrition plan:
   - 6 eating days + 1 fast day.
   - Protein split: 3 chicken, 1 tuna, 1 salmon, 1 lean beef.

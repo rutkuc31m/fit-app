@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { PLAN, todayStr, fmtDate, getWeekNum, getPhase, getDayPlan, getEatingTarget, daysBetween } from "../lib/plan";
 import { useAuth } from "../lib/auth.jsx";
 import { api } from "../lib/api";
-import { dailyReadiness, recoveryCoachNote } from "../lib/coaching";
+import { dailyReadiness } from "../lib/coaching";
 import { effectiveMacro } from "../lib/nutrition";
 import { FOOD_CHOICES, GYM_CHOICES, findFoodChoice, findGymChoice, readTodayCallPrefs, writeTodayCallPrefs } from "../lib/todayCall";
 import { AccentCard, Icon, Empty } from "../components/ui";
@@ -50,15 +50,6 @@ const windowState = (eating) => {
 };
 
 const fastGuardrails = ["water", "coffee", "easy walk", "sleep"];
-
-const recoverySnapshotKey = (value = {}) => JSON.stringify({
-  energy: value.energy === "" || value.energy == null ? null : Number(value.energy),
-  hunger: value.hunger === "" || value.hunger == null ? null : Number(value.hunger),
-  headache: value.headache === "" || value.headache == null ? null : Number(value.headache)
-});
-
-const hasRecoveryValue = (value = {}) =>
-  ["energy", "hunger", "headache"].some((field) => value[field] !== "" && value[field] != null);
 
 const buildEffectiveDay = (day, foodChoice, gymChoice) => ({
   ...day,
@@ -137,7 +128,6 @@ const buildTodayDay = (date, session) => {
       targets
     },
     training,
-    waterLiters: isFastDay ? 3.0 : 2.5,
     supplements: {
       morning: ["D3+K2 · Pazar/Çarşamba"],
       evening: ["Magnesium"],
@@ -146,59 +136,6 @@ const buildTodayDay = (date, session) => {
     session
   };
 };
-
-function RecoveryCheck({ value, onChange, onSave, saving, saved, coachNote }) {
-  const fields = [
-    { id: "energy", label: "energy", color: "#00d4aa" },
-    { id: "hunger", label: "hunger", color: "#d9a441" },
-    { id: "headache", label: "headache", color: "#9a9a9a" }
-  ];
-  return (
-    <AccentCard accent="#9a9a9a">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <div className="card-title">Recovery signal</div>
-        </div>
-        <button className="btn-ghost shrink-0" onClick={onSave} disabled={saving || saved}>
-          {saving ? "..." : saved ? "saved" : "save"}
-        </button>
-      </div>
-      <div className="grid gap-2">
-        {fields.map((f) => (
-          <div key={f.id} className="grid grid-cols-[74px_1fr_32px] items-center gap-2">
-            <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em]">{f.label}</div>
-            <div className="grid grid-cols-5 gap-1">
-              {[1, 2, 3, 4, 5].map((n) => {
-                const active = Number(value[f.id]) === n;
-                return (
-                  <button
-                    key={n}
-                    className="h-8 rounded-md border mono text-xs transition-colors duration-200"
-                    style={{
-                      borderColor: active ? f.color : "rgba(72,72,74,.75)",
-                      background: active ? f.color : "rgba(17,16,13,.78)",
-                      color: active ? "#090806" : "#c9bea8"
-                    }}
-                    onClick={() => onChange(f.id, n)}
-                    type="button"
-                  >
-                    {n}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="mono text-[.56rem] text-ink2 tabular-nums text-right">{value[f.id] || "--"}/5</div>
-          </div>
-        ))}
-      </div>
-      {coachNote && (
-        <div className="mt-3 soft-band px-3 py-2 mono text-[.64rem] text-ink2 leading-snug">
-          {coachNote}
-        </div>
-      )}
-    </AccentCard>
-  );
-}
 
 function CommandCard({ readiness, day, leftKg, journeyPct, foodChoice, gymChoice, headline, onFoodChange, onGymChange }) {
   if (!readiness) return null;
@@ -328,16 +265,9 @@ export default function Today() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [date, setDate] = useState(todayStr());
-  const [waterMl, setWaterMl] = useState(0);
-  const [coffeeMl, setCoffeeMl] = useState(0);
-  const [savedFlash, setSavedFlash] = useState(false);
   const [currentWeight, setCurrentWeight] = useState(null);
-  const [weightInput, setWeightInput] = useState("");
   const [mealsTotals, setMealsTotals] = useState({ kcal: 0, protein: 0, carbs: 0, fat: 0, count: 0 });
   const [session, setSession] = useState(null);
-  const [recovery, setRecovery] = useState({ energy: "", hunger: "", headache: "" });
-  const [savedRecoveryKey, setSavedRecoveryKey] = useState(null);
-  const [recoverySaving, setRecoverySaving] = useState(false);
   const [, setClockTick] = useState(0);
   const [callPrefs, setCallPrefs] = useState(() => readTodayCallPrefs(todayStr()));
   const week = getWeekNum(date);
@@ -345,7 +275,6 @@ export default function Today() {
   const dayIdx = daysBetween(PLAN.startDate, date) + 1;
   const phaseStartDay = (phase.weeks[0] - 1) * 7 + 1;
   const isPhaseFirstDay = dayIdx === phaseStartDay;
-  const recoverySaved = hasRecoveryValue(recovery) && savedRecoveryKey === recoverySnapshotKey(recovery);
 
   const sw = user?.start_weight || PLAN.startWeight;
   const tw = user?.target_weight || PLAN.targetWeight;
@@ -375,8 +304,7 @@ export default function Today() {
   const callHeadline = useMemo(() => buildCallHeadline(foodChoice, gymChoice), [foodChoice, gymChoice]);
   const effectiveDay = useMemo(() => buildEffectiveDay(day, foodChoice, gymChoice), [day, foodChoice, gymChoice]);
   const preStart = date < PLAN.startDate;
-  const readiness = effectiveDay ? dailyReadiness({ day: effectiveDay, recovery, mealsTotals, session }) : null;
-  const recoveryNote = recoverySaved ? recoveryCoachNote(recovery, !foodChoice?.window) : null;
+  const readiness = effectiveDay ? dailyReadiness({ day: effectiveDay, recovery: {}, mealsTotals, session }) : null;
 
   useEffect(() => {
     setCallPrefs(readTodayCallPrefs(date));
@@ -388,25 +316,6 @@ export default function Today() {
 
   useEffect(() => {
     let cancelled = false;
-    setSavedRecoveryKey(null);
-    api.get(`/logs/${date}`).then((l) => {
-      if (cancelled) return;
-      setWaterMl(l?.water_ml || 0);
-      setCoffeeMl(l?.coffee_ml || 0);
-      if (l?.weight_kg != null) {
-        setCurrentWeight(l.weight_kg);
-        setWeightInput(String(l.weight_kg));
-      } else {
-        setWeightInput("");
-      }
-      const nextRecovery = {
-        energy: l?.energy ?? "",
-        hunger: l?.hunger ?? "",
-        headache: l?.headache ?? ""
-      };
-      setRecovery(nextRecovery);
-      setSavedRecoveryKey(hasRecoveryValue(nextRecovery) ? recoverySnapshotKey(nextRecovery) : null);
-    }).catch(() => {});
     api.get(`/meals?date=${date}`).then((meals) => {
       if (cancelled) return;
       const totals = (meals || []).reduce((acc, m) => {
@@ -425,42 +334,6 @@ export default function Today() {
     }).catch(() => { if (!cancelled) setSession(null); });
     return () => { cancelled = true; };
   }, [date]);
-
-  const saveWeight = async () => {
-    const n = parseFloat(weightInput);
-    if (!Number.isFinite(n) || n <= 0) return;
-    await api.put(`/logs/${date}`, { weight_kg: n });
-    setCurrentWeight(n);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 600);
-  };
-
-  const saveWater = async (ml) => {
-    const next = Math.max(0, ml);
-    setWaterMl(next);
-    await api.put(`/logs/${date}`, { water_ml: next });
-  };
-
-  const saveCoffee = async (ml) => {
-    const next = Math.max(0, ml);
-    setCoffeeMl(next);
-    await api.put(`/logs/${date}`, { coffee_ml: next });
-  };
-
-  const saveRecovery = async () => {
-    setRecoverySaving(true);
-    try {
-      const clean = Object.fromEntries(
-        Object.entries(recovery).map(([key, value]) => [key, value === "" ? null : Number(value)])
-      );
-      await api.put(`/logs/${date}`, clean);
-      setSavedRecoveryKey(recoverySnapshotKey(clean));
-      setSavedFlash(true);
-      setTimeout(() => setSavedFlash(false), 600);
-    } finally {
-      setRecoverySaving(false);
-    }
-  };
 
   const shiftDate = (delta) => {
     const d = new Date(date);
@@ -523,49 +396,6 @@ export default function Today() {
         onGymChange={(gymId) => setCallPrefs((prev) => ({ ...prev, gymId }))}
       />
 
-      <RecoveryCheck
-        value={recovery}
-        saving={recoverySaving}
-        saved={recoverySaved}
-        coachNote={recoveryNote}
-        onChange={(field, score) => setRecovery((prev) => ({ ...prev, [field]: score }))}
-        onSave={saveRecovery}
-      />
-
-      {/* Weight card */}
-      <AccentCard accent="#00d4aa">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <div className="mono text-[.58rem] text-mute uppercase tracking-[.2em]">weight</div>
-            <div className="font-display text-[1.5rem] text-ink leading-none tabular-nums mt-[2px]"
-              style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-              {currentWeight != null ? currentWeight.toFixed(1) : "—"}<span className="text-[.8rem] text-ink2 font-light ml-[4px]">kg</span>
-            </div>
-          </div>
-          {currentWeight != null && (
-            <div className="text-right">
-              <div className={`mono text-[.72rem] tabular-nums font-bold ${sw - currentWeight >= 0 ? "text-lime" : "text-coral"}`}>
-                {sw - currentWeight >= 0 ? "−" : "+"}{Math.abs(sw - currentWeight).toFixed(1)}kg
-              </div>
-              <div className="mono text-[.54rem] text-mute uppercase tracking-[.18em] mt-[2px]">vs start</div>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            step="0.1"
-            inputMode="decimal"
-            className="input flex-1 mono text-sm"
-            placeholder="kg"
-            value={weightInput}
-            onChange={(e) => setWeightInput(e.target.value)}
-          />
-          <button className="btn-ghost" onClick={saveWeight}>save</button>
-          {savedFlash && <span className="mono text-[.58rem] text-signal uppercase tracking-[.14em]">✓</span>}
-        </div>
-      </AccentCard>
-
       {/* Meals ring */}
       {(() => {
         const kcalTarget = foodChoice.kcal || 0;
@@ -625,68 +455,6 @@ export default function Today() {
                 </div>
               </>
             )}
-          </AccentCard>
-        );
-      })()}
-
-      {/* Water tracker */}
-      {(() => {
-        const target = (day.waterLiters || 3) * 1000;
-        const glassSize = 250;
-        const totalGlasses = Math.ceil(target / glassSize);
-        const totalMl = waterMl + coffeeMl;
-        const filled = Math.floor(totalMl / glassSize);
-        const pct = Math.min(100, Math.round((totalMl / target) * 100));
-        const drinkControl = (label, value, colorClass, onMinus, onPlus) => (
-          <div className="soft-band px-2 py-2 flex items-center gap-2">
-            <div className="min-w-[54px]">
-              <div className={`mono text-[.56rem] uppercase tracking-[.14em] ${colorClass}`}>{label}</div>
-              <div className="mono text-[.62rem] text-ink2 tabular-nums">{(value / 1000).toFixed(2)}L</div>
-            </div>
-            <button
-              className="h-10 w-10 rounded-md bg-bg2 hover:bg-surface2 border border-line text-lg leading-none text-mute transition-colors duration-200 grid place-items-center shrink-0"
-              onClick={onMinus}
-              disabled={value <= 0}
-              title={`-250ml ${label}`}
-              type="button"
-            >
-              −
-            </button>
-            <button
-              className={`h-10 w-10 rounded-md bg-bg2 hover:bg-surface2 border border-line text-lg leading-none transition-colors duration-200 grid place-items-center shrink-0 ${colorClass}`}
-              onClick={onPlus}
-              title={`+250ml ${label}`}
-              type="button"
-            >
-              +
-            </button>
-          </div>
-        );
-        return (
-          <AccentCard accent="#9a9a9a">
-            <div className="flex items-start justify-between mb-2 gap-3">
-              <div>
-                <div className="mono text-[.58rem] text-cyan uppercase tracking-[.2em]">hydration</div>
-                <div className="font-display text-[1.5rem] text-cyan leading-none tabular-nums mt-[2px]"
-                  style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-                  {(totalMl / 1000).toFixed(2)}<span className="text-[.8rem] text-ink2 font-light ml-[4px]">L</span>
-                  <span className="text-mute text-[.7rem] font-light ml-[6px]">/ {(target / 1000).toFixed(1)}L</span>
-                </div>
-                <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mt-1">
-                  water {(waterMl / 1000).toFixed(2)}L · coffee {(coffeeMl / 1000).toFixed(2)}L
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 mb-2">
-              {drinkControl("water", waterMl, "text-cyan", () => saveWater(waterMl - 250), () => saveWater(waterMl + 250))}
-              {drinkControl("coffee", coffeeMl, "text-amber", () => saveCoffee(coffeeMl - 250), () => saveCoffee(coffeeMl + 250))}
-            </div>
-            <div className="flex gap-[3px] mt-1">
-              {Array.from({ length: totalGlasses }).map((_, i) => (
-                <div key={i} className={`flex-1 h-[6px] rounded-sm transition-colors duration-150 ${i < filled ? "bg-cyan" : "bg-bg2 border border-line/50"}`} />
-              ))}
-            </div>
-            <div className="mt-1 mono text-[.52rem] text-mute uppercase tracking-[.18em] text-right">{pct}%</div>
           </AccentCard>
         );
       })()}
