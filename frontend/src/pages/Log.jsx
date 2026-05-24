@@ -515,9 +515,9 @@ export default function Log() {
     setQuickBusy(true);
     setQuickError("");
     try {
-      const explicitMassUnit = /\b(?:g|gr|gram|gramm|kg|kgs?|kilo)\b/.test(normalizeQuickText(rawText));
+      const explicitMassUnit = /\b(?:g|gr|gram|gramm|kg|kgs?|kilo|el|essl?offel|tbsp|tablespoon|tl|teel?offel|tsp|teaspoon)\b/.test(normalizeQuickText(rawText));
       const commonFood = findCommonFoodMatch(text, lang);
-      if (commonFood && parsed.amount != null && (parsed.unit === "piece" || !explicitMassUnit)) {
+      if (commonFood && parsed.amount != null && (parsed.unit === "piece" || parsed.kind === "count" || !explicitMassUnit)) {
         const amount = parsed.amount;
         const scaled = scaleByPieces(commonFood, amount);
         const item = {

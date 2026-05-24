@@ -23,9 +23,30 @@ const parseAmount = (value) => {
   return Number.isFinite(n) && n > 0 ? n : null;
 };
 
+const normalizeUnit = (unit = "") =>
+  normalizeQuickText(unit)
+    .replace(/\b(essl?offel|tbsp|tablespoon)\b/g, "el")
+    .replace(/\b(teel?offel|tsp|teaspoon)\b/g, "tl")
+    .replace(/\b(stuck|stueck)\b/g, "stueck");
+
 const amountFromMatch = (match) => {
   if (!match) return null;
   return parseAmount(match[2] || match[3] || match[1]);
+};
+
+const pickMeasureAmount = (unitText = "", count = 1) => {
+  const unit = normalizeUnit(unitText);
+  if (/\b(el)\b/.test(unit)) return count * 15;
+  if (/\b(tl)\b/.test(unit)) return count * 5;
+  return null;
+};
+
+const wordToCount = (value = "") => {
+  const v = normalizeQuickText(value);
+  if (!v) return null;
+  if (/^(ein|eine|einen|einem|einer|1)$/i.test(v)) return 1;
+  const n = parseAmount(v);
+  return n;
 };
 
 export function parseQuickFoodEntry(input = "") {
@@ -34,7 +55,7 @@ export function parseQuickFoodEntry(input = "") {
   const normalized = normalizeQuickText(original);
   if (!normalized) return null;
 
-  const amountRegex = /(^|\s)(\d+(?:[.,]\d+)?)\s*(g|gr|gram|gramm|kgs?|kg|adet|adetler|piece|pieces|stk|stuck|stueck|piece(?:s)?)\b/ig;
+  const amountRegex = /(^|\s)(\d+(?:[.,]\d+)?)\s*(g|gr|gram|gramm|kgs?|kg|adet|adetler|piece|pieces|stk|stuck|stueck|piece(?:s)?|el|essl?offel|tbsp|tablespoon|tl|teel?offel|tsp|teaspoon)\b/ig;
   const firstAmount = amountRegex.exec(normalized);
 
   let amount = null;
@@ -43,38 +64,66 @@ export function parseQuickFoodEntry(input = "") {
   let kind = "name";
 
   if (firstAmount) {
-    amount = amountFromMatch(firstAmount);
     const unitRaw = firstAmount[3] || "";
-    unit = /kg|kilo/i.test(unitRaw) ? "kg" : /(adet|piece|pieces|stk|stuck|stueck)/i.test(unitRaw) ? "piece" : "g";
+    const count = amountFromMatch(firstAmount);
+    unit = /kg|kilo/i.test(unitRaw) ? "kg"
+      : /(adet|piece|pieces|stk|stuck|stueck)/i.test(unitRaw) ? "piece"
+      : /(el|essl?offel|tbsp|tablespoon|tl|teel?offel|tsp|teaspoon)/i.test(unitRaw) ? "g"
+      : "g";
+    amount = /(el|essl?offel|tbsp|tablespoon|tl|teel?offel|tsp|teaspoon)/i.test(unitRaw)
+      ? pickMeasureAmount(unitRaw, count)
+      : count;
     const before = normalized.slice(0, firstAmount.index).trim();
     const after = normalized.slice(firstAmount.index + firstAmount[0].length).trim();
     query = stripFillers(`${before} ${after}`);
-    kind = "amount";
+    kind = unit === "piece" ? "piece" : "mass";
   } else {
-    const pieceRegex = /(^|\s)(\d+(?:[.,]\d+)?)\s*(x|adet|adetler|piece|pieces|stk|stuck|stueck)\b/ig;
-    const firstPiece = pieceRegex.exec(normalized);
-    if (firstPiece) {
-      amount = amountFromMatch(firstPiece);
-      unit = "piece";
-      const before = normalized.slice(0, firstPiece.index).trim();
-      const after = normalized.slice(firstPiece.index + firstPiece[0].length).trim();
+    const spoonRegex = /(^|\s)(ein|1|eine|einen|einem|einer)?\s*(halbe?r?|ganze?r?)?\s*(el|essl?offel|tbsp|tablespoon|tl|teel?offel|tsp|teaspoon)\b/ig;
+    const firstSpoon = spoonRegex.exec(normalized);
+    if (firstSpoon) {
+      const base = wordToCount(firstSpoon[2]) || 1;
+      const modifier = /halb|halbe|halbes/i.test(firstSpoon[3] || "") ? 0.5 : 1;
+      amount = pickMeasureAmount(firstSpoon[4], base * modifier);
+      unit = "g";
+      const before = normalized.slice(0, firstSpoon.index).trim();
+      const after = normalized.slice(firstSpoon.index + firstSpoon[0].length).trim();
       query = stripFillers(`${before} ${after}`);
-      kind = "piece";
+      kind = "mass";
     } else {
-      const bareNumber = normalized.match(/(^|\s)(\d+(?:[.,]\d+)?)(\s+|$)/);
-      if (bareNumber) {
-        amount = amountFromMatch(bareNumber);
-        const before = normalized.slice(0, bareNumber.index).trim();
-        const after = normalized.slice(bareNumber.index + bareNumber[0].length).trim();
+      const pieceRegex = /(^|\s)(\d+(?:[.,]\d+)?)\s*(x|adet|adetler|piece|pieces|stk|stuck|stueck)\b/ig;
+      const firstPiece = pieceRegex.exec(normalized);
+      if (firstPiece) {
+        amount = amountFromMatch(firstPiece);
+        unit = "piece";
+        const before = normalized.slice(0, firstPiece.index).trim();
+        const after = normalized.slice(firstPiece.index + firstPiece[0].length).trim();
         query = stripFillers(`${before} ${after}`);
-        kind = "amount";
+        kind = "piece";
       } else {
-        query = stripFillers(normalized);
+        const bareNumber = normalized.match(/(^|\s)(\d+(?:[.,]\d+)?)(\s+|$)/);
+        if (bareNumber) {
+          amount = amountFromMatch(bareNumber);
+          const before = normalized.slice(0, bareNumber.index).trim();
+          const after = normalized.slice(bareNumber.index + bareNumber[0].length).trim();
+          query = stripFillers(`${before} ${after}`);
+          kind = "count";
+        } else {
+          query = stripFillers(normalized);
+          if (/\b(halb|halbe|halbes)\b/.test(query) && /\b(zitrone|zitron|lemon|limon|zitronensaft)\b/.test(query)) {
+            amount = 0.5;
+            unit = "piece";
+            query = stripFillers(query.replace(/\b(halb|halbe|halbes)\b/g, ""));
+            kind = "piece";
+          }
+        }
       }
     }
   }
 
   query = stripFillers(query);
+  if (amount != null) {
+    query = query.replace(/\b(ein|eine|einen|einem|einer)\b/g, " ").replace(/\s+/g, " ").trim();
+  }
   if (!query) {
     query = stripFillers(original);
   }
