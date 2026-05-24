@@ -93,13 +93,13 @@ export default function Settings() {
   return (
     <div className="page page-settings">
       <PageCommand
-        accent="#64d2ff"
+        accent="#2ee9d3"
         kicker="system setup"
         title="Settings"
       />
 
       <div className="section-label">{t("settings.profile")}</div>
-      <AccentCard accent="#64d2ff" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
+      <AccentCard accent="#2ee9d3" className="p-4" contentClassName="pl-2 flex flex-col gap-3">
         <label className="flex flex-col gap-1">
           <span className="mono text-[.62rem] text-mute uppercase tracking-[.14em]">{t("auth.name")}</span>
           <input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -126,7 +126,7 @@ export default function Settings() {
       {pushSupported() && (
         <>
           <div className="section-label">Notifications</div>
-          <AccentCard accent="#30d158" contentClassName="pl-2 flex flex-col gap-3">
+          <AccentCard accent="#b8ff2c" contentClassName="pl-2 flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="mono text-[.62rem] text-ink2 uppercase tracking-[.14em]">coach mode</div>
@@ -135,7 +135,7 @@ export default function Settings() {
                 </div>
               </div>
               <div className="mono text-[.58rem] uppercase tracking-[.14em]"
-                style={{ color: pushStatus === "subscribed" ? "#4ade80" : pushStatus === "denied" ? "#fb7185" : "#6d6d70" }}>
+                style={{ color: pushStatus === "subscribed" ? "#b8ff2c" : pushStatus === "denied" ? "#ff6b6b" : "#6d6d70" }}>
                 {pushStatus === "subscribed" ? "on" : pushStatus === "denied" ? "blocked" : "off"}
               </div>
             </div>
@@ -167,7 +167,7 @@ export default function Settings() {
                       type="button"
                       aria-label={`${label} notifications`}
                       className="relative w-10 h-6 rounded-full transition-colors duration-200 shrink-0 overflow-hidden border border-line/60"
-                      style={{ background: prefs[key] ? "#4ade80" : "#3a3a3c" }}
+                      style={{ background: prefs[key] ? "#b8ff2c" : "#3a3a3c" }}
                       onClick={() => !prefsBusy && togglePref(key)}
                     >
                       <span

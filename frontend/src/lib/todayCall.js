@@ -1,14 +1,14 @@
 export const TODAY_CALL_KEY = "fitapp:today-call";
 
 export const FOOD_CHOICES = [
-  { id: "FAST", label: "FAST", kcal: 0, protein: 0, carbs: 0, fat: 0, window: null, tone: "#64d2ff", hint: "water / coffee" },
-  { id: "TRAIN", label: "TRAIN", kcal: 1700, protein: 170, carbs: 105, fat: 65, window: { start: "13:00", end: "22:00" }, tone: "#30d158", hint: "split meal" },
+  { id: "FAST", label: "FAST", kcal: 0, protein: 0, carbs: 0, fat: 0, window: null, tone: "#2ee9d3", hint: "water / coffee" },
+  { id: "TRAIN", label: "TRAIN", kcal: 1700, protein: 170, carbs: 105, fat: 65, window: { start: "13:00", end: "22:00" }, tone: "#b8ff2c", hint: "split meal" },
   { id: "CHEAT", label: "CHEAT", kcal: 2200, protein: 140, carbs: 160, fat: 80, window: { start: "18:00", end: "21:00" }, tone: "#ff453a", hint: "free meal" }
 ];
 
 export const GYM_CHOICES = [
-  { id: "REST", label: "REST", hint: "walk only", tone: "#64d2ff" },
-  { id: "GYM", label: "GYM", hint: "full session", tone: "#30d158" },
+  { id: "REST", label: "REST", hint: "walk only", tone: "#2ee9d3" },
+  { id: "GYM", label: "GYM", hint: "full session", tone: "#b8ff2c" },
   { id: "CARDIO", label: "CARDIO", hint: "walk / bike", tone: "#bf5af2" }
 ];
 

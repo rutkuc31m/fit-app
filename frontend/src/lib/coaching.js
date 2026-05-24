@@ -46,7 +46,7 @@ export function dailyReadiness({ day, recovery = {}, mealsTotals = {}, session =
   if (fastBreach) {
     return {
       level: "yellow",
-      color: "#ff9f0a",
+      color: "#ffb000",
       label: "audit fast",
       action: "Stop the bleed. Return to water, coffee, sleep.",
       detail: "Fast-day calories are logged. Do not chase with extra cardio."
@@ -56,7 +56,7 @@ export function dailyReadiness({ day, recovery = {}, mealsTotals = {}, session =
   if ((headache != null && headache >= 3) || (energy != null && energy <= 2) || (hunger != null && hunger >= 5)) {
     return {
       level: "yellow",
-      color: "#ff9f0a",
+      color: "#ffb000",
       label: "hold back",
       action: trainingDay ? "Train lighter. Skip HIIT. Keep form strict." : "Keep steps easy. No intensity.",
       detail: recoveryCoachNote(recovery, fastDay)
@@ -66,7 +66,7 @@ export function dailyReadiness({ day, recovery = {}, mealsTotals = {}, session =
   if (session?.completed) {
     return {
       level: "green",
-      color: "#30d158",
+      color: "#b8ff2c",
       label: "done",
       action: "Training is logged. Finish food, water, sleep.",
       detail: "No need to add work."
@@ -75,7 +75,7 @@ export function dailyReadiness({ day, recovery = {}, mealsTotals = {}, session =
 
   return {
     level: "green",
-    color: fastDay ? "#64d2ff" : "#30d158",
+    color: fastDay ? "#2ee9d3" : "#b8ff2c",
     label: fastDay ? "fast guardrail" : "plan intact",
     action: fastDay ? "Zero calories. Easy walk only." : "Run the plan exactly.",
     detail: recoveryCoachNote(recovery, fastDay)

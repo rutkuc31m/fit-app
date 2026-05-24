@@ -90,7 +90,7 @@ const findCommonFoodMatch = (query, lang) => {
 function FoodShortcutRow({ title, items, onAdd, onRemove, limit = 12 }) {
   if (!items?.length) return null;
   return (
-    <AccentCard accent={title === "Favoriten" ? "#30d158" : "#64d2ff"} className="p-3" contentClassName="pl-2">
+    <AccentCard accent={title === "Favoriten" ? "#b8ff2c" : "#2ee9d3"} className="p-3" contentClassName="pl-2">
       <div className="section-label mt-0 mb-2">{title} · {items.length}</div>
       <div className="flex gap-2 overflow-x-auto pb-1">
         {items.slice(0, limit).map((item) => (
@@ -136,7 +136,7 @@ function HistoryPicker({ items, onAdd }) {
   if (!items?.length) return null;
   return (
     <>
-      <AccentCard accent="#64d2ff" className="p-3" contentClassName="pl-2">
+      <AccentCard accent="#2ee9d3" className="p-3" contentClassName="pl-2">
         <button
           type="button"
           className="w-full flex items-center justify-between gap-3 text-left"
@@ -210,7 +210,7 @@ function MealTemplatePicker({ templates, items, onToggle }) {
   };
 
   return (
-    <AccentCard accent="#30d158" className="p-3" contentClassName="pl-2">
+    <AccentCard accent="#b8ff2c" className="p-3" contentClassName="pl-2">
       <div className="section-label mt-0 mb-2">Gerichte</div>
       <div className="grid grid-cols-1 min-[430px]:grid-cols-2 gap-2">
         {templates.map((template) => {
@@ -327,7 +327,7 @@ function LogCommand({
   ];
 
   return (
-    <AccentCard accent="#ff9f0a" className="p-3" contentClassName="pl-2">
+    <AccentCard accent="#ffb000" className="p-3" contentClassName="pl-2">
       <div className="flex items-center justify-between gap-2">
         <button className="btn-icon" aria-label="prev day" onClick={() => onShiftDate(-1)}>
           <Icon.chev size={16} className="rotate-180" />
@@ -797,7 +797,7 @@ export default function Log() {
       )}
 
       {allItems.length > 0 && (
-        <AccentCard accent="#ff9f0a" className="overflow-hidden" contentClassName="pl-2">
+        <AccentCard accent="#ffb000" className="overflow-hidden" contentClassName="pl-2">
           <div className="divide-y divide-line">
             {allItems.map((it) => {
               const pct = eatenPct(it);

@@ -404,6 +404,8 @@ Turkish area translations user asked for:
 - User explicitly requested a full slimmer redesign after earlier rule said preserve compact dark UI; redesign permission applies.
 - App shell now has 4 bottom tabs: Today, Essen, Training, Progress. Settings moved to topbar icon.
 - User wants app lean, direct, modern, no unused/verbose areas.
+- On 2026-05-24 user clarified they wanted a visually different, more modern root redesign, not just slimming.
+- New visual direction: matte command UI, warm graphite/ivory base, acid-lime primary, amber/cyan/coral semantic accents, floating capsule topbar, pill dock bottom nav.
 - Nutrition plan:
   - 6 eating days + 1 fast day.
   - Protein split: 3 chicken, 1 tuna, 1 salmon, 1 lean beef.

@@ -117,8 +117,8 @@ export default function Dashboard() {
               <defs>
                 <linearGradient id="heroRing" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%"   stopColor="#ff375f" />
-                  <stop offset="55%"  stopColor="#ff9f0a" />
-                  <stop offset="100%" stopColor="#30d158" />
+                  <stop offset="55%"  stopColor="#ffb000" />
+                  <stop offset="100%" stopColor="#b8ff2c" />
                 </linearGradient>
               </defs>
               <circle cx="62" cy="62" r="54" stroke="#2c2c2e" strokeWidth="10" fill="none" />
@@ -182,7 +182,7 @@ export default function Dashboard() {
       </AccentCard>
 
       {/* Quick weigh-in */}
-      <AccentCard accent="#30d158" className="p-4">
+      <AccentCard accent="#b8ff2c" className="p-4">
         <div className="card-title mb-2">{t("dashboard.quick_weigh")}</div>
         <div className="flex gap-2">
           <input className="input flex-1 mono text-lg text-signal" type="number" step="0.1"
@@ -192,7 +192,7 @@ export default function Dashboard() {
       </AccentCard>
 
       {/* Calorie ring + macros */}
-      <AccentCard accent="#ff9f0a" className="p-4">
+      <AccentCard accent="#ffb000" className="p-4">
         <div className="flex justify-between items-baseline mb-3">
           <div className="card-title">{t("dashboard.kcal")}</div>
           <div className="mono text-[.64rem] text-mute uppercase tracking-[.18em]">
@@ -205,9 +205,9 @@ export default function Dashboard() {
             unit="kcal" label={`${Math.max(0, target.kcal - Math.round(macros.kcal))} left`} />
           <div className="flex-1 grid grid-cols-3 gap-2">
             {[
-              { k: "protein", v: macros.protein, t: target.protein, color: "#30d158" },
-              { k: "carbs",   v: macros.carbs,   t: target.carbs,   color: "#64d2ff" },
-              { k: "fat",     v: macros.fat,     t: target.fat,     color: "#ff9f0a" }
+              { k: "protein", v: macros.protein, t: target.protein, color: "#b8ff2c" },
+              { k: "carbs",   v: macros.carbs,   t: target.carbs,   color: "#2ee9d3" },
+              { k: "fat",     v: macros.fat,     t: target.fat,     color: "#ffb000" }
             ].map((m) => {
               const pct = m.t > 0 ? (m.v / m.t) : 0;
               const over = pct > 1;
@@ -227,7 +227,7 @@ export default function Dashboard() {
       {/* Today plan */}
       <div className="section-label">{t("dashboard.today_plan")}</div>
       <div className="grid grid-cols-2 gap-[10px]">
-        <AccentCard as={Link} to="/training" accent="#30d158" className="p-4 hover:border-line2 flex items-center gap-3" contentClassName="pl-2 flex items-center gap-3 w-full">
+        <AccentCard as={Link} to="/training" accent="#b8ff2c" className="p-4 hover:border-line2 flex items-center gap-3" contentClassName="pl-2 flex items-center gap-3 w-full">
           <div className="shrink-0">
             {dayPlan.type === "rest"
               ? <div className="w-[34px] h-[34px] rounded-full border border-dashed border-line2 grid place-items-center text-mute mono text-xs">z</div>
@@ -240,7 +240,7 @@ export default function Dashboard() {
             </div>
           </div>
         </AccentCard>
-        <AccentCard as={Link} to="/log" accent="#ff9f0a" className="p-4 hover:border-line2">
+        <AccentCard as={Link} to="/log" accent="#ffb000" className="p-4 hover:border-line2">
           <div className="card-title mb-1">{t("nav.log")}</div>
           <div className="mono font-bold text-xl text-signal">{eatingLabel}</div>
           <div className="mono text-[.7rem] text-mute uppercase tracking-[.14em] mt-1">{target.kcal} kcal</div>
@@ -248,7 +248,7 @@ export default function Dashboard() {
       </div>
 
       {/* Today timeline + Check-in quick links */}
-      <AccentCard as={Link} to="/today" accent="#64d2ff" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
+      <AccentCard as={Link} to="/today" accent="#2ee9d3" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
         <Icon.clock size={16} className="text-signal" />
         <div className="flex-1">
           <div className="card-title">Schedule</div>
@@ -256,7 +256,7 @@ export default function Dashboard() {
         </div>
         <Icon.chev size={14} className="text-mute" />
       </AccentCard>
-      <AccentCard as={Link} to="/checkin" accent="#64d2ff" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
+      <AccentCard as={Link} to="/checkin" accent="#2ee9d3" className="hover:border-line2 flex items-center gap-2" contentClassName="pl-2 flex items-center gap-2 w-full">
         <Icon.camera size={16} className="text-signal" />
         <div className="flex-1 min-w-0">
           <div className="card-title">{t("checkin.title")}</div>
@@ -275,7 +275,7 @@ export default function Dashboard() {
           {meals.map((m) => {
             const kcal = Math.round(m.items.reduce((a, i) => a + effectiveMacro(i, "kcal"), 0));
             return (
-              <AccentCard key={m.id} accent="#ff9f0a" className="flex items-center gap-3" contentClassName="pl-2 flex items-center gap-3 w-full">
+              <AccentCard key={m.id} accent="#ffb000" className="flex items-center gap-3" contentClassName="pl-2 flex items-center gap-3 w-full">
                 <div className="w-8 h-8 rounded-md border border-line bg-bg2 grid place-items-center text-ink2 shrink-0">
                   <Icon.utensils size={16} />
                 </div>

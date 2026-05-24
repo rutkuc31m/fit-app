@@ -1,7 +1,7 @@
 export const GYM80_AREA_TONES = {
-  upper: "#64d2ff",
-  lower: "#30d158",
-  core: "#ff9f0a",
+  upper: "#2ee9d3",
+  lower: "#b8ff2c",
+  core: "#ffb000",
   full: "#bf5af2"
 };
 
