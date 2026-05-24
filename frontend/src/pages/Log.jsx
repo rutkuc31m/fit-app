@@ -5,6 +5,7 @@ import { api } from "../lib/api";
 import { todayStr } from "../lib/plan";
 import { findFoodChoice, readTodayCallPrefs } from "../lib/todayCall";
 import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
+import { MEAL_TEMPLATES, mealTemplateMarker } from "../lib/mealTemplates";
 import { normalizeQuickText, parseQuickFoodEntry, pickBestFoodMatch } from "../lib/quickFoodEntry";
 import { eatenPct, effectiveMacros, sumMealMacros } from "../lib/nutrition";
 import BarcodeScanner from "../components/BarcodeScanner";
@@ -183,6 +184,95 @@ function HistoryPicker({ items, onAdd }) {
   );
 }
 
+function MealTemplatePicker({ templates, items, onToggle }) {
+  const [openId, setOpenId] = useState(null);
+  const [busyId, setBusyId] = useState(null);
+
+  const itemsForTemplate = (template) =>
+    items.filter((item) => item.barcode === mealTemplateMarker(template.id));
+
+  const handleToggle = async (template) => {
+    if (busyId) return;
+    setBusyId(template.id);
+    try {
+      await onToggle(template, itemsForTemplate(template));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    <AccentCard accent="#30d158" className="p-3" contentClassName="pl-2">
+      <div className="section-label mt-0 mb-2">Gerichte</div>
+      <div className="grid grid-cols-1 min-[430px]:grid-cols-2 gap-2">
+        {templates.map((template) => {
+          const open = openId === template.id;
+          const loggedItems = itemsForTemplate(template);
+          const logged = loggedItems.length > 0;
+          return (
+            <div
+              key={template.id}
+              className={`soft-band overflow-hidden border ${logged ? "border-signal/70 bg-signal/10" : "border-line/70"}`}
+            >
+              <div className="flex items-stretch">
+                <button
+                  type="button"
+                  className="min-w-0 flex-1 text-left px-3 py-2 hover:bg-bg2/60 active:bg-bg2 transition"
+                  onClick={() => setOpenId(open ? null : template.id)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-[.82rem] text-ink leading-snug font-semibold">{template.title}</div>
+                      <div className="mono text-[.56rem] text-mute uppercase tracking-[.12em] mt-[2px]">{template.type}</div>
+                    </div>
+                    <Icon.chev size={14} className={`text-mute shrink-0 mt-[2px] transition ${open ? "rotate-90" : ""}`} />
+                  </div>
+                  <div className="mono text-[.62rem] text-mute tabular-nums mt-2">
+                    <span className="text-amber">{Math.round(template.totals.kcal)}</span> kcal · <span className="text-lime">P</span>{Math.round(template.totals.protein)}g
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  className={`w-12 grid place-items-center border-l border-line/70 transition ${logged ? "text-signal bg-signal/10" : "text-mute hover:text-signal hover:bg-bg2/60"}`}
+                  onClick={() => handleToggle(template)}
+                  aria-label={logged ? "remove template" : "add template"}
+                  disabled={busyId === template.id}
+                >
+                  {busyId === template.id ? <span className="mono text-[.62rem]">...</span> : <Icon.check size={17} />}
+                </button>
+              </div>
+
+              {open && (
+                <div className="border-t border-line/70 px-3 py-2 bg-bg2/30">
+                  <div className="grid grid-cols-4 gap-1 mb-2">
+                    <div className="metric-tile"><div className="metric-label">kcal</div><div className="metric-value text-amber">{Math.round(template.totals.kcal)}</div></div>
+                    <div className="metric-tile"><div className="metric-label">protein</div><div className="metric-value text-lime">{Math.round(template.totals.protein)}g</div></div>
+                    <div className="metric-tile"><div className="metric-label">carbs</div><div className="metric-value text-amber">{Math.round(template.totals.carbs)}g</div></div>
+                    <div className="metric-tile"><div className="metric-label">fat</div><div className="metric-value">{Math.round(template.totals.fat)}g</div></div>
+                  </div>
+                  <div className="divide-y divide-line/60">
+                    {template.items.map((item) => (
+                      <div key={`${template.id}-${item.name}`} className="py-[6px] flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[.72rem] text-ink leading-snug">{item.name}</div>
+                          <div className="mono text-[.54rem] text-mute tabular-nums mt-[1px]">{Math.round(Number(item.amount_g) || 0)}g</div>
+                        </div>
+                        <div className="mono text-[.58rem] text-mute tabular-nums shrink-0">
+                          <span className="text-amber">{Math.round(Number(item.kcal) || 0)}</span> · <span className="text-lime">P</span>{Math.round(Number(item.protein_g) || 0)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </AccentCard>
+  );
+}
+
 export default function Log() {
   const { t } = useTranslation();
   const lang = (i18n.language || "en").startsWith("de") ? "de" : "en";
@@ -273,6 +363,17 @@ export default function Log() {
   const addFoodItem = async (item) => {
     const mealId = await ensureMeal();
     await api.post(`/meals/${mealId}/items`, itemPayload(item));
+    await load();
+  };
+  const toggleMealTemplate = async (template, loggedItems = []) => {
+    if (loggedItems.length > 0) {
+      await Promise.all(loggedItems.map((item) => api.del(`/meals/items/${item.id}`)));
+      await load();
+      return;
+    }
+    const mealId = await ensureMeal();
+    const marker = mealTemplateMarker(template.id);
+    await Promise.all(template.items.map((item) => api.post(`/meals/${mealId}/items`, itemPayload({ ...item, barcode: marker }))));
     await load();
   };
   const saveFavorite = async (item) => {
@@ -619,6 +720,8 @@ export default function Log() {
           <Icon.mic size={16} />
         </button>
       </div>
+
+      <MealTemplatePicker templates={MEAL_TEMPLATES} items={allItems} onToggle={toggleMealTemplate} />
 
       <FoodShortcutRow title="Favoriten" items={favoriteItems} onAdd={addFoodItem} onRemove={removeFavorite} />
       <HistoryPicker items={recentItems} onAdd={addFoodItem} />
