@@ -5,7 +5,7 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
 
 ## Latest Handoff Snapshot - 2026-05-24
 
-- Latest deployed app commit: `02d0448 Add meal template picker`.
+- Latest deployed app commit: `0f00b66 Fix quick food measure parsing`.
 - Before answering implementation questions, read `AGENTS.md`, then this file.
 - Current phase: Phase 2 started on Tuesday `2026-05-19` after Phase 1 ended. User wants phase checkpoints aligned to Tuesday fasted measurements.
 - Latest stable checkpoint from Phase 1 end:
@@ -17,7 +17,13 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
 - Current core app additions:
   - Football activity logging is deployed.
   - Training set `logged_date` tracking is deployed.
-  - Essen meal templates are deployed.
+- Essen meal templates are deployed.
+- Quick food entry measure parsing is deployed:
+  - `1 kg ...` stays kilograms until Log converts it once.
+  - `EL`/`TL`/tablespoon/teaspoon inputs are treated as gram estimates (`15g`/`5g`).
+  - `halb zitrone` is treated as half a piece so the lemon preset scales correctly.
+- Session cleanup on `2026-05-24` removed transient untracked repo files from a previous session: transcription venv, WhatsApp audio/transcript, local `data/` DB copy, empty `.codex`, and OCI ops logs/scripts. Production DB was not touched.
+- Frontend deploy smoke initially failed because `/var/www/fitapp/gifs` symlink was missing while `/var/www/fitapp-gifs` existed. Symlink was restored and smoke then passed.
 - Do not start from scratch if session context is lost. The core product and user preferences are captured here.
 
 ## Current Project
