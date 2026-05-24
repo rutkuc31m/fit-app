@@ -14,7 +14,7 @@ export default function TopBar() {
       <div className="max-w-[760px] mx-auto h-[66px] px-[12px] flex items-center gap-2">
         <div className="top-capsule w-full px-2 py-2 flex items-center gap-2">
         <Link to="/" className="flex items-center gap-[9px] flex-1 min-w-0 hover:opacity-85 transition-opacity duration-200">
-          <div className="brand-mark relative w-[34px] h-[34px] rounded-lg bg-signal grid place-items-center text-[#090806] mono font-black text-[.76rem] shrink-0">
+          <div className="brand-mark relative w-[34px] h-[34px] rounded-md bg-signal grid place-items-center text-[#090806] mono font-black text-[.76rem] shrink-0">
             FC
             <span className="absolute -bottom-[2px] -right-[2px] w-[8px] h-[8px] rounded-full bg-amber border border-bg shadow-[0_0_9px_theme(colors.amber)]" />
           </div>
