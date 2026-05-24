@@ -24,6 +24,11 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - `halb zitrone` is treated as half a piece so the lemon preset scales correctly.
 - Session cleanup on `2026-05-24` removed transient untracked repo files from a previous session: transcription venv, WhatsApp audio/transcript, local `data/` DB copy, empty `.codex`, and OCI ops logs/scripts. Production DB was not touched.
 - Frontend deploy smoke initially failed because `/var/www/fitapp/gifs` symlink was missing while `/var/www/fitapp-gifs` existed. Symlink was restored and smoke then passed.
+- UI slimming/redesign pass started on `2026-05-24`:
+  - Bottom nav reduced to four core flows: Today, Essen, Training, Progress.
+  - Settings moved to the top bar icon.
+  - Supplement copy reflects current stack: D3+K2, magnesium, seasonal loratadine; no B12/Omega default.
+  - Visual system moved toward tighter premium dark PWA surfaces with slimmer cards/nav.
 - Do not start from scratch if session context is lost. The core product and user preferences are captured here.
 
 ## Current Project

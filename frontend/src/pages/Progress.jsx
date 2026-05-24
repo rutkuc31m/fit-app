@@ -348,8 +348,8 @@ export default function Progress() {
           <Icon.camera size={19} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="card-title">Progress photos</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">general upload · private history</div>
+          <div className="card-title">Photos</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">upload only</div>
         </div>
         <Icon.chev size={14} className="text-mute shrink-0" />
       </AccentCard>

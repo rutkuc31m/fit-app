@@ -33,6 +33,7 @@ export default function App() {
         <Route path="/training" element={<Protected><Training /></Protected>} />
         <Route path="/progress" element={<Protected><Progress /></Protected>} />
         <Route path="/checkin"  element={<Protected><Checkin /></Protected>} />
+        <Route path="/today"    element={<Navigate to="/" replace />} />
         <Route path="/settings" element={<Protected><Settings /></Protected>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -139,9 +139,9 @@ const buildTodayDay = (date, session) => {
     training,
     waterLiters: isFastDay ? 3.0 : 2.5,
     supplements: {
-      morning: ["D3+K2", "Omega-3 (vegan)"],
-      evening: ["Magnesium", "B12"],
-      note: "Oruç günlerinde de supplement al"
+      morning: ["D3+K2 · Pazar/Çarşamba"],
+      evening: ["Magnesium"],
+      note: "B12/Omega yok. Alerji sezonunda Loratadin."
     },
     session
   };

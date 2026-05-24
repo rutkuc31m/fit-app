@@ -13,7 +13,7 @@ export const PLAN = {
     glutenFree: true,
     sugarFree: true,
     noPork: true,
-    supplements: ["magnesium", "b12", "d3_k2", "vegan_omega3"]
+    supplements: ["magnesium", "d3_k2"]
   },
 
   phases: [

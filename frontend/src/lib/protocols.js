@@ -76,7 +76,7 @@ export const PROTOCOLS = {
     1: {
       morning: [
         { id: "water", label: "500ml water on wake", icon: "water" },
-        { id: "supp_am", label: "D3+K2, Omega-3", icon: "pill" },
+        { id: "supp_am", label: "D3+K2", icon: "pill" },
         { id: "core_routine", label: "5min core routine (dead bug, bird dog, glute bridge)", icon: "yoga" }
       ],
       throughout: [
@@ -84,7 +84,7 @@ export const PROTOCOLS = {
         { id: "water_total", label: "2.5L+ water", icon: "water" }
       ],
       evening: [
-        { id: "supp_pm", label: "Magnesium, B12", icon: "pill" },
+        { id: "supp_pm", label: "Magnesium", icon: "pill" },
         { id: "sleep", label: "7+ hours sleep", icon: "moon" },
         { id: "no_screen", label: "Screens off 30min before bed", icon: "phone_off" }
       ],
@@ -96,7 +96,7 @@ export const PROTOCOLS = {
     2: {
       morning: [
         { id: "water", label: "500ml water on wake", icon: "water" },
-        { id: "supp_am", label: "D3+K2, Omega-3", icon: "pill" },
+        { id: "supp_am", label: "D3+K2", icon: "pill" },
         { id: "core_routine", label: "5min core routine", icon: "yoga" }
       ],
       throughout: [
@@ -104,7 +104,7 @@ export const PROTOCOLS = {
         { id: "water_total", label: "2.5L+ water", icon: "water" }
       ],
       evening: [
-        { id: "supp_pm", label: "Magnesium, B12", icon: "pill" },
+        { id: "supp_pm", label: "Magnesium", icon: "pill" },
         { id: "sleep", label: "7+ hours sleep", icon: "moon" }
       ],
       weekly: [
@@ -116,14 +116,14 @@ export const PROTOCOLS = {
     3: {
       morning: [
         { id: "water", label: "500ml water on wake", icon: "water" },
-        { id: "supp_am", label: "D3+K2, Omega-3", icon: "pill" }
+        { id: "supp_am", label: "D3+K2", icon: "pill" }
       ],
       throughout: [
         { id: "logbook", label: "Log training weights", icon: "book" },
         { id: "water_total", label: "3L+ water", icon: "water" }
       ],
       evening: [
-        { id: "supp_pm", label: "Magnesium, B12", icon: "pill" },
+        { id: "supp_pm", label: "Magnesium", icon: "pill" },
         { id: "sleep", label: "7-8 hours sleep", icon: "moon" }
       ],
       weekly: [
@@ -135,13 +135,13 @@ export const PROTOCOLS = {
     4: {
       morning: [
         { id: "water", label: "500ml water on wake", icon: "water" },
-        { id: "supp_am", label: "D3+K2, Omega-3", icon: "pill" }
+        { id: "supp_am", label: "D3+K2", icon: "pill" }
       ],
       throughout: [
         { id: "logbook", label: "Log training weights", icon: "book" }
       ],
       evening: [
-        { id: "supp_pm", label: "Magnesium, B12", icon: "pill" },
+        { id: "supp_pm", label: "Magnesium", icon: "pill" },
         { id: "sleep", label: "7-8 hours sleep", icon: "moon" }
       ],
       weekly: [
