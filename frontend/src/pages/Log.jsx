@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import { api } from "../lib/api";
 import { todayStr } from "../lib/plan";
-import { findFoodChoice, readTodayCallPrefs } from "../lib/todayCall";
+import { FOOD_CHOICES, findFoodChoice, readTodayCallPrefs, writeTodayCallPrefs } from "../lib/todayCall";
 import { COMMON_FOODS, scaleByPieces } from "../lib/commonFoods";
 import { MEAL_TEMPLATES, mealTemplateMarker, mealTemplatePartMarker } from "../lib/mealTemplates";
 import { normalizeQuickText, parseQuickFoodEntry, pickBestFoodMatch } from "../lib/quickFoodEntry";
@@ -19,12 +19,6 @@ const isQuickEntry = (item) =>
   Number(item?.protein_g || 0) === 0 &&
   Number(item?.carbs_g || 0) === 0 &&
   Number(item?.fat_g || 0) === 0;
-const getFoodTarget = (dateStr) => {
-  const prefs = readTodayCallPrefs(dateStr);
-  const choice = findFoodChoice(prefs.foodId);
-  return { kcal: choice.kcal, protein: choice.protein, carbs: choice.carbs, fat: choice.fat };
-};
-
 const getSpeechRecognitionCtor = () =>
   (typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition)) || null;
 
@@ -317,8 +311,16 @@ function LogCommand({
   openManual,
   openQuickVoice,
   quickListening,
-  todayLabel
+  todayLabel,
+  foodPrefs,
+  onFoodChoice,
+  foodTarget
 }) {
+  const kcalLeft = Math.max(0, Math.round((foodTarget?.kcal || 0) - totals.kcal));
+  const proteinLeft = Math.max(0, Math.round((foodTarget?.protein || 0) - totals.protein));
+  const targetLabel = foodTarget?.kcal
+    ? `${kcalLeft} kcal · P ${proteinLeft}g`
+    : "FAST";
   const metrics = [
     { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
     { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
@@ -349,6 +351,30 @@ function LogCommand({
             <div className={`metric-value text-[.82rem] ${m.className}`}>{m.value}</div>
           </div>
         ))}
+      </div>
+
+      <div className="mb-3 rounded-lg border border-line bg-bg2/45 p-1.5">
+        <div className="grid grid-cols-3 gap-1">
+          {FOOD_CHOICES.map((choice) => {
+            const active = foodPrefs?.foodId === choice.id;
+            return (
+              <button
+                key={choice.id}
+                type="button"
+                className={`h-9 rounded-md mono text-[.66rem] font-bold transition-colors duration-150 ${
+                  active ? "bg-surface2 text-ink border border-line2" : "text-mute hover:text-ink2 hover:bg-surface2/60"
+                }`}
+                onClick={() => onFoodChoice(choice.id)}
+              >
+                {choice.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-1.5 flex items-center justify-between gap-2 px-1">
+          <span className="mono text-[.56rem] text-mute uppercase tracking-[.14em]">remaining</span>
+          <span className="mono text-[.62rem] text-ink tabular-nums">{targetLabel}</span>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
@@ -415,6 +441,7 @@ export default function Log() {
   const [quickListening, setQuickListening] = useState(false);
   const [recentItems, setRecentItems] = useState([]);
   const [favoriteItems, setFavoriteItems] = useState([]);
+  const [foodPrefs, setFoodPrefs] = useState(() => readTodayCallPrefs(todayStr()));
   const quickTextRef = useRef("");
   const recognitionRef = useRef(null);
   const quickListenTimerRef = useRef(null);
@@ -447,6 +474,7 @@ export default function Log() {
     await Promise.all([loadMeals(), loadLibrary()]);
   };
   useEffect(() => { load(); }, [date]);
+  useEffect(() => { setFoodPrefs(readTodayCallPrefs(date)); }, [date]);
   useEffect(() => { quickTextRef.current = quickText; }, [quickText]);
   useEffect(() => () => {
     try { recognitionRef.current?.abort?.(); } catch {}
@@ -470,7 +498,12 @@ export default function Log() {
   // All items flat across all meals
   const allItems = meals.flatMap((m) => m.items);
   const totals = sumMealMacros(meals);
-  const foodTarget = getFoodTarget(date);
+  const foodTarget = findFoodChoice(foodPrefs.foodId);
+  const updateFoodChoice = (foodId) => {
+    const next = { ...foodPrefs, foodId };
+    setFoodPrefs(next);
+    writeTodayCallPrefs(date, next);
+  };
   const itemPayload = (item) => ({
     name: item.name,
     barcode: item.barcode || null,
@@ -784,6 +817,9 @@ export default function Log() {
         openQuickVoice={openQuickVoice}
         quickListening={quickListening}
         todayLabel={t("log.today")}
+        foodPrefs={foodPrefs}
+        onFoodChoice={updateFoodChoice}
+        foodTarget={foodTarget}
       />
 
       <MealTemplatePicker templates={MEAL_TEMPLATES} items={allItems} onToggle={toggleMealTemplate} />

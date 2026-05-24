@@ -8,9 +8,6 @@ import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
 import Log from "./pages/Log";
 import Checkin from "./pages/Checkin";
-import Today from "./pages/Today";
-import PushPrompt from "./components/PushPrompt";
-import AppUpdatePrompt from "./components/AppUpdatePrompt";
 import PullToRefresh from "./components/PullToRefresh";
 
 function Protected({ children }) {
@@ -27,9 +24,9 @@ export default function App() {
       {user && <TopBar />}
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/"         element={<Protected><Today /></Protected>} />
-        <Route path="/log"      element={<Protected><Log /></Protected>} />
-        <Route path="/recipes"  element={<Navigate to="/log" replace />} />
+        <Route path="/"         element={<Protected><Log /></Protected>} />
+        <Route path="/log"      element={<Navigate to="/" replace />} />
+        <Route path="/recipes"  element={<Navigate to="/" replace />} />
         <Route path="/training" element={<Protected><Training /></Protected>} />
         <Route path="/progress" element={<Protected><Progress /></Protected>} />
         <Route path="/checkin"  element={<Protected><Checkin /></Protected>} />
@@ -38,9 +35,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {user && <NavBar />}
-      {user && <PushPrompt />}
       {user && <PullToRefresh />}
-      <AppUpdatePrompt />
     </>
   );
 }

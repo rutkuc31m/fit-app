@@ -9,10 +9,6 @@ import trainingRoutes from "./routes/training.js";
 import checkinsRoutes from "./routes/checkins.js";
 import habitsRoutes from "./routes/habits.js";
 import statsRoutes from "./routes/stats.js";
-import pushRoutes from "./routes/push.js";
-import { startPushScheduler } from "./push_worker.js";
-import { startDailyQuoteCron } from "./jobs/dailyQuotePush.js";
-import { startReminderCrons } from "./jobs/reminderPush.js";
 
 const app = express();
 const PORT = process.env.PORT || 8001;
@@ -32,7 +28,6 @@ app.use("/api/training", trainingRoutes);
 app.use("/api/checkins", checkinsRoutes);
 app.use("/api/habits", habitsRoutes);
 app.use("/api/stats", statsRoutes);
-app.use("/api/push", pushRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
@@ -41,7 +36,4 @@ app.use((err, _req, res, _next) => {
 
 app.listen(PORT, () => {
   console.log(`fit-api :${PORT}`);
-  try { startPushScheduler(); } catch (e) { console.error("push scheduler failed:", e); }
-  try { startDailyQuoteCron(); } catch (e) { console.error("daily quote cron failed:", e); }
-  try { startReminderCrons(); } catch (e) { console.error("reminder crons failed:", e); }
 });
