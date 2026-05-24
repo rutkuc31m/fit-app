@@ -112,7 +112,7 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - `wrap_rinderhack`: Ja Vollkorn Wraps + REWE Bio Rinderhack + Skyr Sauce + Whey
   - `rice_chicken`: Reis + Hähnchen + Körniger + Skyr/Whey
 - Current weekly meal template split is 3 chicken, 1 tuna, 1 salmon, 1 lean beef, plus 1 fasting day. The second tuna template was replaced because the user preferred less weekly fish.
-- Chicken templates include `Senf + Zero Ketchup` as `20g` total (`10g` mustard + `10g` zero ketchup). User may vary chicken amount manually by day, commonly `300-400g`, so do not hardcode all chicken templates to 400g unless explicitly asked.
+- Meal templates include `Senf + Zero Ketchup` as `40g` total (`20g` mustard + `20g` zero ketchup) wherever that sauce is used. User may vary chicken amount manually by day, commonly `300-400g`, so do not hardcode all chicken templates to 400g unless explicitly asked.
 - Meal templates are displayed as day cards with two separately tappable/loggable parts:
   - `Ana öğün`
   - `Shake`
