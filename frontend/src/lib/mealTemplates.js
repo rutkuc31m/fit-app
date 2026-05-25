@@ -52,6 +52,7 @@ export const MEAL_TEMPLATES = [
     items: [
       item("Kartoffeln gekocht aus 500g roh", 500, 390, 9, 88, 0.5),
       item("Hähnchenbrust", 350, 395.5, 82.3, 0, 6.3),
+      item("Ei M x3", 180, 222, 18.9, 1.2, 15.9),
       item("Fitline Körniger Frischkäse", 200, 164, 25, 6, 4),
       item("Gemüse frei: Paprika / Gurke / Salat", 250, 70, 3, 12, 0.5),
       item("Senf + Zero Ketchup", 40, 28, 1, 3.6, 0.8),
@@ -86,6 +87,7 @@ export const MEAL_TEMPLATES = [
     items: [
       item("Kartoffeln gekocht aus 500g roh", 500, 390, 9, 88, 0.5),
       item("Thunfisch", 260, 302, 67.6, 0, 2.6),
+      item("Ei M x4", 240, 296, 25.2, 1.6, 21.2),
       item("Fitline Körniger Frischkäse", 200, 164, 25, 6, 4),
       item("Paprika / Salat / Zwiebel", 250, 70, 3, 12, 0.5),
       item("Senf + Zero Ketchup", 40, 28, 1, 3.6, 0.8),
@@ -103,6 +105,7 @@ export const MEAL_TEMPLATES = [
     items: [
       item("Ja! Vollkorn Wraps", 124, 380, 12, 64, 9),
       item("Hähnchenbrust", 350, 395.5, 82.3, 0, 6.3),
+      item("Ei M x3", 180, 222, 18.9, 1.2, 15.9),
       item("Fitline Körniger Frischkäse", 200, 164, 25, 6, 4),
       item("Paprika / Zwiebel / Salat", 250, 70, 3, 12, 0.5),
       item("Senf + Zero Ketchup", 40, 28, 1, 3.6, 0.8),
@@ -135,6 +138,7 @@ export const MEAL_TEMPLATES = [
     items: [
       item("Reis gekocht aus 80g roh", 240, 280, 6, 62, 0.6),
       item("Hähnchenbrust", 350, 395.5, 82.3, 0, 6.3),
+      item("Ei M x3", 180, 222, 18.9, 1.2, 15.9),
       item("Fitline Körniger Frischkäse", 200, 164, 25, 6, 4),
       item("Paprika / Zwiebel / Salat", 250, 70, 3, 12, 0.5),
       item("Olivenöl", 10, 90, 0, 0, 10),
