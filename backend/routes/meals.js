@@ -42,8 +42,8 @@ r.post("/:mealId/items", (req, res) => {
   if (!meal) return res.status(404).json({ error: "not_found" });
   const { barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct, photo_path } = req.body || {};
   const info = db.prepare(
-    `INSERT INTO meal_items (meal_id, barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct, photo_path)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO meal_items (meal_id, barcode, name, amount_g, kcal, protein_g, carbs_g, fat_g, eaten_pct, photo_path, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
   ).run(meal.id, barcode || null, name, amount_g, kcal || 0, protein_g || 0, carbs_g || 0, fat_g || 0, cleanEatenPct(eaten_pct), photo_path || null);
   res.json(db.prepare("SELECT * FROM meal_items WHERE id = ?").get(info.lastInsertRowid));
 });

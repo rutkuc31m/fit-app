@@ -129,9 +129,11 @@ function MealTemplatePicker({ templates, items, onToggle }) {
 }
 
 function LogCommand({ totals, date, dateLabel, isToday, onToday, onShiftDate, todayLabel, foodPrefs, onFoodChoice, foodTarget }) {
-  const kcalLeft = Math.max(0, Math.round((foodTarget?.kcal || 0) - totals.kcal));
-  const proteinLeft = Math.max(0, Math.round((foodTarget?.protein || 0) - totals.protein));
-  const targetLabel = foodTarget?.kcal ? `${kcalLeft} kcal · P ${proteinLeft}g` : "FAST";
+  const kcalDelta = Math.round((foodTarget?.kcal || 0) - totals.kcal);
+  const proteinDelta = Math.round((foodTarget?.protein || 0) - totals.protein);
+  const targetLabel = foodTarget?.kcal
+    ? `${Math.max(0, kcalDelta)} kcal · P ${Math.max(0, proteinDelta)}g`
+    : "FAST";
   const metrics = [
     { label: "kcal", value: Math.round(totals.kcal), className: "text-amber" },
     { label: "protein", value: `${Math.round(totals.protein)}g`, className: "text-lime" },
@@ -193,6 +195,69 @@ function LogCommand({ totals, date, dateLabel, isToday, onToday, onShiftDate, to
           {todayLabel}
         </button>
       )}
+    </AccentCard>
+  );
+}
+
+function CodexReview({ meals, totals, foodTarget }) {
+  const items = meals.flatMap((meal) => (meal.items || []).map((item) => ({ ...item, meal_time: meal.time })));
+  if (!items.length) return null;
+  const kcalDelta = Math.round((foodTarget?.kcal || 0) - totals.kcal);
+  const proteinDelta = Math.round((foodTarget?.protein || 0) - totals.protein);
+  const sorted = [...items].sort((a, b) => {
+    const at = a.created_at || "";
+    const bt = b.created_at || "";
+    if (at !== bt) return bt.localeCompare(at);
+    return Number(b.id || 0) - Number(a.id || 0);
+  });
+  const last = sorted[0];
+  const lastLabel = last?.created_at
+    ? new Date(`${String(last.created_at).replace(" ", "T")}Z`).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : last?.meal_time || "--";
+  const status = foodTarget?.kcal === 0
+    ? totals.kcal <= 50 ? ["fast clean", "text-lime"] : ["fast breached", "text-amber"]
+    : kcalDelta < 0 ? [`${Math.abs(kcalDelta)} kcal over`, "text-amber"]
+      : proteinDelta <= 0 ? ["protein done", "text-lime"]
+        : [`P ${proteinDelta}g left`, "text-cyan"];
+  const grouped = meals.map((meal) => ({
+    id: meal.id,
+    label: meal.name || meal.time || "meal",
+    count: meal.items?.length || 0,
+    kcal: sumMealMacros([meal]).kcal
+  })).filter((meal) => meal.count > 0);
+
+  return (
+    <AccentCard accent={status[1] === "text-lime" ? "#00d4aa" : "#d9a441"} className="p-3" contentClassName="pl-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="section-label mt-0 mb-1">Codex check</div>
+          <div className={`mono text-sm font-bold tabular-nums ${status[1]}`}>{status[0]}</div>
+        </div>
+        <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] text-right shrink-0">
+          last<br /><span className="text-ink">{lastLabel}</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-1.5 mt-3">
+        <div className="metric-tile text-center">
+          <div className="metric-label">items</div>
+          <div className="metric-value text-[.82rem]">{items.length}</div>
+        </div>
+        <div className="metric-tile text-center">
+          <div className="metric-label">kcal gap</div>
+          <div className={`metric-value text-[.82rem] ${kcalDelta < 0 ? "text-amber" : "text-ink"}`}>{kcalDelta}</div>
+        </div>
+        <div className="metric-tile text-center">
+          <div className="metric-label">protein gap</div>
+          <div className={`metric-value text-[.82rem] ${proteinDelta <= 0 ? "text-lime" : "text-cyan"}`}>{proteinDelta}g</div>
+        </div>
+      </div>
+      <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        {grouped.map((meal) => (
+          <div key={meal.id} className="chip chip-mute shrink-0">
+            {meal.label} · {meal.count} · {Math.round(meal.kcal)}
+          </div>
+        ))}
+      </div>
     </AccentCard>
   );
 }
@@ -280,6 +345,8 @@ export default function Log() {
         onFoodChoice={updateFoodChoice}
         foodTarget={foodTarget}
       />
+
+      <CodexReview meals={meals} totals={totals} foodTarget={foodTarget} />
 
       <MealTemplatePicker templates={MEAL_TEMPLATES} items={allItems} onToggle={toggleMealTemplate} />
 

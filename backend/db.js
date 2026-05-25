@@ -320,6 +320,10 @@ const addMealItemCol = (col, def) => {
 };
 addMealItemCol("eaten_pct", "REAL DEFAULT 100");
 addMealItemCol("photo_path", "TEXT");
+addMealItemCol("created_at", "TEXT");
+try {
+  db.exec("UPDATE meal_items SET created_at = datetime('now') WHERE created_at IS NULL;");
+} catch {}
 
 const prefCols = db.prepare("PRAGMA table_info(notification_prefs)").all().map((c) => c.name);
 const addPrefCol = (col, def = 1) => {
