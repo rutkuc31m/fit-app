@@ -21,6 +21,18 @@ r.get("/", (req, res) => {
   res.json(db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? ORDER BY week_number ASC").all(req.user.id));
 });
 
+r.get("/photos", (req, res) => {
+  const limit = Math.min(Math.max(Number(req.query.limit) || 30, 1), 120);
+  const rows = db.prepare(`
+    SELECT id, date, path, angle
+    FROM progress_photos
+    WHERE user_id = ?
+    ORDER BY date DESC, id DESC
+    LIMIT ?
+  `).all(req.user.id, limit);
+  res.json(rows);
+});
+
 r.get("/:week", (req, res) => {
   const week = parseInt(req.params.week, 10);
   const row = db.prepare("SELECT * FROM weekly_checkins WHERE user_id = ? AND week_number = ?").get(req.user.id, week);

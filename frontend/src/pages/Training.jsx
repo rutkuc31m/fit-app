@@ -200,9 +200,6 @@ export default function Training() {
   const [session, setSession] = useState(null);
   const [historyByExercise, setHistoryByExercise] = useState({});
   const [weightDrafts, setWeightDrafts] = useState({});
-  const [football, setFootball] = useState(null);
-  const [footballDraft, setFootballDraft] = useState({ minutes: "", kcal: "" });
-  const [footballSaving, setFootballSaving] = useState(false);
 
   const studioMachines = STUDIO_MACHINES;
 
@@ -251,22 +248,9 @@ export default function Training() {
     setSession(s || null);
   };
 
-  const loadFootball = async () => {
-    const row = await api.get(`/training/activity?date=${date}&type=football`);
-    setFootball(row);
-    setFootballDraft({
-      minutes: row?.minutes ? String(row.minutes) : "",
-      kcal: row?.kcal ? String(row.kcal) : ""
-    });
-  };
-
   useEffect(() => {
     load();
   }, [date, planDays]);
-
-  useEffect(() => {
-    loadFootball();
-  }, [date]);
 
   useEffect(() => {
     setWeightDrafts({});
@@ -383,26 +367,6 @@ export default function Training() {
     load();
   };
 
-  const saveFootball = async (event) => {
-    event.preventDefault();
-    setFootballSaving(true);
-    try {
-      const row = await api.put("/training/activity", {
-        date,
-        type: "football",
-        minutes: footballDraft.minutes,
-        kcal: footballDraft.kcal
-      });
-      setFootball(row);
-      setFootballDraft({
-        minutes: row?.minutes ? String(row.minutes) : "",
-        kcal: row?.kcal ? String(row.kcal) : ""
-      });
-    } finally {
-      setFootballSaving(false);
-    }
-  };
-
   return (
     <div className="page page-training">
       <PageCommand
@@ -411,54 +375,9 @@ export default function Training() {
         title="Training"
         metrics={[
           { label: "done", value: `${progressDone}/${progressTotal}`, className: "text-lime" },
-          { label: "cycle", value: allDaysDone ? "done" : "open", className: allDaysDone ? "text-lime" : "text-amber" },
-          { label: "football", value: football ? `${football.minutes || 0}m` : "--", className: "text-amber" }
+          { label: "cycle", value: allDaysDone ? "done" : "open", className: allDaysDone ? "text-lime" : "text-amber" }
         ]}
       />
-
-      <AccentCard accent="#d9a441" className="p-3" contentClassName="pl-2">
-        <form className="flex items-end gap-2" onSubmit={saveFootball}>
-          <div className="min-w-0 flex-1">
-            <div className="section-label mt-0 mb-2">football</div>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="min-w-0">
-                <span className="mono block text-[.55rem] text-mute uppercase tracking-[.12em] mb-1">time</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  max="600"
-                  value={footballDraft.minutes}
-                  onChange={(e) => setFootballDraft((prev) => ({ ...prev, minutes: e.target.value }))}
-                  className="w-full rounded-md border border-line bg-bg px-3 py-2 mono text-sm text-ink outline-none focus:border-warn"
-                  placeholder="min"
-                />
-              </label>
-              <label className="min-w-0">
-                <span className="mono block text-[.55rem] text-mute uppercase tracking-[.12em] mb-1">kcal</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  max="5000"
-                  value={footballDraft.kcal}
-                  onChange={(e) => setFootballDraft((prev) => ({ ...prev, kcal: e.target.value }))}
-                  className="w-full rounded-md border border-line bg-bg px-3 py-2 mono text-sm text-ink outline-none focus:border-warn"
-                  placeholder="0"
-                />
-              </label>
-            </div>
-            {football && (
-              <div className="mono text-[.58rem] text-warn uppercase tracking-[.1em] mt-2">
-                saved · {football.minutes || 0} min · {Math.round(football.kcal || 0)} kcal
-              </div>
-            )}
-          </div>
-          <button className="btn-primary shrink-0" type="submit" disabled={footballSaving}>
-            {footballSaving ? "..." : "Save"}
-          </button>
-        </form>
-      </AccentCard>
 
       <AccentCard accent="#9a9a9a" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

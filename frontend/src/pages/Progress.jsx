@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { PLAN, todayStr } from "../lib/plan";
+import { sumMealMacros } from "../lib/nutrition";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
 const addDays = (dateStr, days) => {
@@ -11,14 +11,8 @@ const addDays = (dateStr, days) => {
   dt.setDate(dt.getDate() + days);
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 };
-const fmt = (value, digits = 1) => value == null ? "--" : Number(value).toFixed(digits);
 
-const PHASE_FOCUS = {
-  1: "routine, fasting tolerance, core/back-safe form",
-  2: "main fat-loss block, strength retention, protein rhythm",
-  3: "shape, conditioning, tighter execution",
-  4: "stabilize, keep habits, land near target"
-};
+const fmt = (value, digits = 1) => value == null ? "--" : Number(value).toFixed(digits);
 
 function WeightChart({ logs }) {
   const data = logs.filter((l) => l.weight_kg != null).map((l) => ({ date: l.date, w: l.weight_kg }));
@@ -48,40 +42,24 @@ function WeightChart({ logs }) {
   );
 }
 
-function AdherenceCard({ review }) {
-  if (!review) return null;
-  const pct = review.adherence_pct ?? 0;
-  const r = 24;
-  const c = 2 * Math.PI * r;
-  const off = c - (Math.min(100, Math.max(0, pct)) / 100) * c;
+function TodaySummary({ today }) {
   const items = [
-    ["meals", `${review.meal_consistency_pct ?? "--"}%`],
-    ["protein", `${review.protein_days ?? 0}/5`],
-    ["fast", `${review.fast_clean_days ?? 0}/2`],
-    ["training", `${review.training_done}/${review.training_planned || 0}`]
+    ["kcal", Math.round(today?.totals?.kcal || 0), "text-amber"],
+    ["protein", `${Math.round(today?.totals?.protein || 0)}g`, "text-lime"],
+    ["weight", today?.log?.weight_kg ? `${Number(today.log.weight_kg).toFixed(1)}kg` : "--", "text-cyan"],
+    ["gym", today?.training ? `${today.training.done}/${today.training.total || 16}` : "--", "text-lime"],
+    ["football", today?.football ? `${today.football.minutes || 0}m` : "--", "text-amber"]
   ];
   return (
-    <AccentCard accent="#00d4aa" className="p-4">
-      <div className="flex items-center gap-4">
-        <div className="relative w-[64px] h-[64px] shrink-0">
-          <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
-            <circle cx="32" cy="32" r={r} stroke="rgba(255,255,255,.08)" strokeWidth="5" fill="none" />
-            <circle cx="32" cy="32" r={r} stroke="#00d4aa" strokeWidth="5" fill="none"
-              strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round" />
-          </svg>
-          <div className="absolute inset-0 grid place-items-center mono text-sm text-lime font-bold tabular-nums">{pct}%</div>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="section-label mt-0 mb-2">adherence</div>
-          <div className="grid grid-cols-2 min-[460px]:grid-cols-4 gap-1">
-            {items.map(([label, value]) => (
-              <div key={label} className="metric-tile px-2 py-1 text-center">
-                <div className="metric-label">{label}</div>
-                <div className="metric-value text-[.78rem]">{value}</div>
-              </div>
-            ))}
+    <AccentCard accent="#00d4aa" className="p-3" contentClassName="pl-2">
+      <div className="section-label mt-0 mb-2">today</div>
+      <div className="grid grid-cols-5 gap-1">
+        {items.map(([label, value, cls]) => (
+          <div key={label} className="metric-tile px-1.5 py-2 text-center">
+            <div className="metric-label">{label}</div>
+            <div className={`metric-value text-[.78rem] ${cls}`}>{value}</div>
           </div>
-        </div>
+        ))}
       </div>
     </AccentCard>
   );
@@ -90,27 +68,10 @@ function AdherenceCard({ review }) {
 function WeeklyReviewCard({ review }) {
   if (!review) return null;
   const signalCopy = {
-    strong: {
-      label: "strong week",
-      tone: "text-lime"
-    },
-    recover: {
-      label: "recovery first",
-      tone: "text-cyan"
-    },
-    audit: {
-      label: "audit week",
-      tone: "text-amber"
-    },
-    keep_going: {
-      label: "collect signal",
-      tone: "text-ink"
-    }
-  }[review.signal] || {
-    label: "collect signal",
-    tone: "text-ink"
-  };
-
+    strong: ["strong week", "text-lime"],
+    audit: ["audit week", "text-amber"],
+    keep_going: ["collect signal", "text-ink"]
+  }[review.signal] || ["collect signal", "text-ink"];
   const weightDelta = review.weight_delta == null ? "--" : `${review.weight_delta > 0 ? "+" : ""}${fmt(review.weight_delta)}kg`;
   const metrics = [
     ["adherence", `${review.adherence_pct ?? "--"}%`],
@@ -118,21 +79,18 @@ function WeeklyReviewCard({ review }) {
     ["avg weight", `${fmt(review.avg_weight)}kg`],
     ["vs last week", weightDelta],
     ["training", `${review.training_done}/${review.training_planned || 0}`],
-    ["meal days", `${review.meal_days}/7`],
+    ["football", `${review.football_minutes || 0}m`],
     ["protein days", `${review.protein_days ?? 0}/5`],
-    ["fast clean", `${review.fast_clean_days ?? 0}/2`],
-    ["kcal avg", fmt(review.avg_kcal, 0)],
-    ["protein avg", `${fmt(review.avg_protein_g, 0)}g`]
+    ["fast clean", `${review.fast_clean_days ?? 0}/2`]
   ];
-
   return (
-    <AccentCard accent={review.signal === "recover" ? "#9a9a9a" : review.signal === "audit" ? "#d9a441" : "#00d4aa"} className="p-4">
+    <AccentCard accent={review.signal === "audit" ? "#d9a441" : "#00d4aa"} className="p-4">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <div className="section-label mt-0 mb-1">weekly review</div>
-          <div className={`font-display text-[1.35rem] leading-none ${signalCopy.tone}`}
+          <div className={`font-display text-[1.35rem] leading-none ${signalCopy[1]}`}
             style={{ fontVariationSettings: '"SOFT" 40, "opsz" 96', fontWeight: 500 }}>
-            {signalCopy.label}
+            {signalCopy[0]}
           </div>
         </div>
         <div className="mono text-[.58rem] text-mute uppercase tracking-[.14em] text-right tabular-nums">
@@ -152,24 +110,43 @@ function WeeklyReviewCard({ review }) {
 }
 
 export default function Progress() {
-  const { t } = useTranslation();
   const [logs, setLogs] = useState([]);
   const [review, setReview] = useState(null);
+  const [today, setToday] = useState(null);
   const [weightInput, setWeightInput] = useState("");
   const [savedFlash, setSavedFlash] = useState(false);
+  const [footballDraft, setFootballDraft] = useState({ minutes: "", kcal: "" });
+  const [footballSaving, setFootballSaving] = useState(false);
 
   const load = async () => {
-    const to = todayStr();
-    const from = addDays(to, -6);
-    const [l, r] = await Promise.all([
-      api.get(`/logs?from=${PLAN.startDate}&to=${to}`),
-      api.get(`/stats/weekly-review?from=${from}&to=${to}`).catch(() => null)
+    const date = todayStr();
+    const from = addDays(date, -6);
+    const [l, r, meals, log, session, football] = await Promise.all([
+      api.get(`/logs?from=${PLAN.startDate}&to=${date}`),
+      api.get(`/stats/weekly-review?from=${from}&to=${date}`).catch(() => null),
+      api.get(`/meals?date=${date}`).catch(() => []),
+      api.get(`/logs/${date}`).catch(() => null),
+      api.get(`/training/session?date=${date}`).catch(() => null),
+      api.get(`/training/activity?date=${date}&type=football`).catch(() => null)
     ]);
-    setLogs(l); setReview(r);
+    const totals = sumMealMacros(meals || []);
+    const setIds = new Set((session?.sets || []).map((set) => set.exercise_id).filter(Boolean));
+    const todayState = {
+      totals,
+      log,
+      training: session ? { done: setIds.size, total: 16 } : null,
+      football
+    };
+    setLogs(l || []);
+    setReview(r);
+    setToday(todayState);
+    setFootballDraft({
+      minutes: football?.minutes ? String(football.minutes) : "",
+      kcal: football?.kcal ? String(football.kcal) : ""
+    });
   };
-  useEffect(() => {
-    load();
-  }, []);
+
+  useEffect(() => { load(); }, []);
 
   const latestWeight = [...logs].reverse().find((l) => l.weight_kg != null)?.weight_kg ?? null;
   const lost = latestWeight != null ? Math.max(0, PLAN.startWeight - latestWeight) : 0;
@@ -188,12 +165,28 @@ export default function Progress() {
     await load();
   };
 
+  const saveFootball = async (event) => {
+    event.preventDefault();
+    setFootballSaving(true);
+    try {
+      await api.put("/training/activity", {
+        date: todayStr(),
+        type: "football",
+        minutes: footballDraft.minutes,
+        kcal: footballDraft.kcal
+      });
+      await load();
+    } finally {
+      setFootballSaving(false);
+    }
+  };
+
   return (
     <div className="page page-progress">
       <PageCommand
         accent="#9a9a9a"
         kicker="body data"
-        title="Trend over mood."
+        title="Stats"
         metrics={[
           { label: "current", value: <>{latestWeight != null ? latestWeight.toFixed(1) : "--"}<span className="text-mute text-[.62rem] ml-1">kg</span></> },
           { label: "lost", value: <>{lost.toFixed(1)}<span className="text-mute text-[.62rem] ml-1">kg</span></>, className: "text-lime" },
@@ -201,19 +194,59 @@ export default function Progress() {
         ]}
       />
 
+      <TodaySummary today={today} />
+
       <AccentCard as={Link} to="/checkin" accent="#9a9a9a" className="hover:border-line2" contentClassName="pl-2 flex items-center gap-3 w-full">
         <div className="w-10 h-10 rounded-md border border-cyan/40 bg-cyan/[.08] grid place-items-center text-cyan shrink-0">
           <Icon.camera size={19} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="card-title">Photos</div>
-          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">upload only</div>
+          <div className="mono text-[.62rem] text-mute uppercase tracking-[.14em] truncate">timeline</div>
         </div>
         <Icon.chev size={14} className="text-mute shrink-0" />
       </AccentCard>
 
       <WeeklyReviewCard review={review} />
-      <AdherenceCard review={review} />
+
+      <AccentCard accent="#d9a441" className="p-3" contentClassName="pl-2">
+        <form className="flex items-end gap-2" onSubmit={saveFootball}>
+          <div className="min-w-0 flex-1">
+            <div className="section-label mt-0 mb-2">football</div>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="min-w-0">
+                <span className="mono block text-[.55rem] text-mute uppercase tracking-[.12em] mb-1">time</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min="0"
+                  max="600"
+                  value={footballDraft.minutes}
+                  onChange={(e) => setFootballDraft((prev) => ({ ...prev, minutes: e.target.value }))}
+                  className="input mono text-sm"
+                  placeholder="min"
+                />
+              </label>
+              <label className="min-w-0">
+                <span className="mono block text-[.55rem] text-mute uppercase tracking-[.12em] mb-1">kcal</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min="0"
+                  max="5000"
+                  value={footballDraft.kcal}
+                  onChange={(e) => setFootballDraft((prev) => ({ ...prev, kcal: e.target.value }))}
+                  className="input mono text-sm"
+                  placeholder="0"
+                />
+              </label>
+            </div>
+          </div>
+          <button className="btn-primary shrink-0" type="submit" disabled={footballSaving}>
+            {footballSaving ? "..." : "Save"}
+          </button>
+        </form>
+      </AccentCard>
 
       <AccentCard accent="#00d4aa">
         <div className="flex items-center justify-between gap-3 mb-2">
@@ -243,22 +276,8 @@ export default function Progress() {
         </div>
       </AccentCard>
 
-      <div className="section-label">{t("progress.weight_chart")}</div>
+      <div className="section-label">Weight chart</div>
       <AccentCard accent="#9a9a9a" className="p-4"><WeightChart logs={logs} /></AccentCard>
-
-      <div className="section-label">{t("progress.phases")}</div>
-      <div className="flex flex-col gap-2">
-        {PLAN.phases.map((p) => (
-          <AccentCard key={p.id} accent={p.color} className="flex items-center gap-3">
-            <div className="flex-1">
-              <div className="mono text-xs text-ink">P{p.id} · W{p.weeks[0]}–{p.weeks[1]}</div>
-              <div className="mono text-[.66rem] text-mute">{p.from} → {p.to}kg</div>
-              <div className="mono text-[.6rem] text-ink2 mt-1">{PHASE_FOCUS[p.id]}</div>
-            </div>
-          </AccentCard>
-        ))}
-      </div>
-
     </div>
   );
 }

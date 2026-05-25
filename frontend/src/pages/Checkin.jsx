@@ -1,34 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
-import { PROTOCOLS } from "../lib/protocols";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
-const FIELD_TO_COL = {
-  energy: "energy",
-  sleep_quality: "sleep_quality",
-  back_pain: "back_pain",
-  motivation: "motivation",
-  adherence_pct: "adherence_pct",
-  notes: "notes"
-};
-
-const PHOTO_FIELDS = { photo_front: "photo_front", photo_side: "photo_side", photo_back: "photo_back", photo_legs: "photo_legs" };
 const MAX_PHOTO_EDGE = 1600;
 const PHOTO_QUALITY = 0.82;
-
-// Semantic color per field (muscle=lime, energy=amber, hydro=cyan)
-const FIELD_COLOR = {
-  energy: "amber",
-  sleep_quality: "cyan",
-  back_pain: "amber",
-  motivation: "lime",
-  adherence_pct: "lime"
-};
-const colorOf = (id) => FIELD_COLOR[id] || "lime";
-const ACCENT_HEX = { lime: "#00d4aa", cyan: "#9a9a9a", amber: "#d9a441" };
-const accentOf = (id) => ACCENT_HEX[colorOf(id)] || "#00d4aa";
 
 const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -45,7 +21,7 @@ const imageToCompressedDataUrl = (file) => new Promise((resolve, reject) => {
 
   const url = URL.createObjectURL(file);
   const img = new Image();
-  img.onload = async () => {
+  img.onload = () => {
     try {
       const scale = Math.min(1, MAX_PHOTO_EDGE / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
       const width = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
@@ -55,7 +31,7 @@ const imageToCompressedDataUrl = (file) => new Promise((resolve, reject) => {
       canvas.height = height;
       const ctx = canvas.getContext("2d", { alpha: false });
       ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(async (blob) => {
+      canvas.toBlob((blob) => {
         URL.revokeObjectURL(url);
         if (!blob) {
           reject(new Error("image_compress_failed"));
@@ -75,183 +51,99 @@ const imageToCompressedDataUrl = (file) => new Promise((resolve, reject) => {
   img.src = url;
 });
 
+const shortDate = (date) => {
+  if (!date) return "--";
+  const [, month, day] = String(date).split("-");
+  return `${day}.${month}`;
+};
+
 export default function Checkin() {
-  const { t } = useTranslation();
   const date = todayStr();
   const week = getWeekNum(date);
-  const order = PROTOCOLS.weeklyCheckpoint.order;
-  const visible = useMemo(() => order.filter((f) => !f.biweekly && !PHOTO_FIELDS[f.id]), [order]);
-  const [data, setData] = useState({});
-  const [saved, setSaved] = useState(false);
-  const [uploading, setUploading] = useState(null);
+  const [photos, setPhotos] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   const load = async () => {
-    const row = await api.get(`/checkins/${week}`).catch(() => null);
-    if (!row) return;
-    const next = {};
-    for (const f of order) {
-      if (PHOTO_FIELDS[f.id]) { next[f.id] = row[f.id]; continue; }
-      const col = FIELD_TO_COL[f.id];
-      if (col && row[col] != null) next[f.id] = row[col];
-    }
-    next._photoCounts = row.photo_counts || {};
-    setData(next);
-  };
-  useEffect(() => { load(); }, [week]);
-
-  const setField = (id, v) => setData((d) => ({ ...d, [id]: v }));
-
-  const save = async () => {
-    const body = { date };
-    for (const f of visible) {
-      if (PHOTO_FIELDS[f.id]) continue;
-      const col = FIELD_TO_COL[f.id];
-      if (col && data[f.id] !== undefined && data[f.id] !== "") body[col] = data[f.id];
-    }
-    await api.put(`/checkins/${week}`, body);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1200);
+    const rows = await api.get("/checkins/photos?limit=36").catch(() => []);
+    setPhotos(rows || []);
   };
 
-  const onPhoto = async (angle, files) => {
+  useEffect(() => { load(); }, []);
+
+  const onPhoto = async (files) => {
     const list = Array.from(files || []).filter(Boolean);
     if (!list.length) return;
-    setUploading(angle);
+    setUploading(true);
     try {
-      let latest = null;
       for (const file of list) {
         const dataUrl = await imageToCompressedDataUrl(file);
-        latest = await api.post(`/checkins/${week}/photo`, { angle: angle.replace("photo_", ""), data_url: dataUrl, date });
+        await api.post(`/checkins/${week}/photo`, { angle: "general", data_url: dataUrl, date });
       }
-      if (latest) {
-        setData((d) => ({
-          ...d,
-          [angle]: latest.path,
-          _photoCounts: { ...(d._photoCounts || {}), [latest.angle]: latest.count_today, total: latest.count_today }
-        }));
-      }
+      await load();
     } finally {
-      setUploading(null);
+      setUploading(false);
     }
   };
-
-  const onGeneralPhoto = (files) => onPhoto("general", files);
 
   return (
     <div className="page page-checkin">
       <PageCommand
         accent="#9a9a9a"
-        kicker="weekly check-in"
-        title="Photos tell the truth."
+        kicker="progress photos"
+        title="Photos"
         metrics={[
           { label: "week", value: `W${String(week).padStart(2, "0")}`, className: "text-cyan" },
-          { label: "fields", value: visible.length },
-          { label: "photos", value: data._photoCounts?.total || 0, className: "text-amber" }
+          { label: "saved", value: photos.length, className: "text-amber" }
         ]}
       />
 
-      <div className="section-label">{t("checkin.title")} · W{week}</div>
-
-      <AccentCard accent="#9a9a9a" className={uploading === "general" ? "border-amber/60" : ""}>
+      <AccentCard accent="#9a9a9a" className={uploading ? "border-amber/60" : ""}>
         <div className="flex justify-between items-center gap-2">
           <div>
             <div className="card-title">Progress photos</div>
-            <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mt-[2px]">general upload</div>
+            <div className="mono text-[.56rem] text-mute uppercase tracking-[.14em] mt-[2px]">upload + timeline</div>
           </div>
-          <span className={`chip ${uploading === "general" ? "chip-energy" : (data._photoCounts?.total || 0) > 0 ? "chip-hydro" : "chip-mute"}`}>
-            {uploading === "general" ? "uploading" : `${data._photoCounts?.total || 0} saved`}
+          <span className={`chip ${uploading ? "chip-energy" : photos.length ? "chip-hydro" : "chip-mute"}`}>
+            {uploading ? "uploading" : `${photos.length} saved`}
           </span>
         </div>
-        <div className="mt-2 rounded-lg overflow-hidden border border-line bg-bg2 min-h-[122px] grid place-items-center relative">
-          <div className="flex flex-col items-center gap-2 text-center px-4 py-5">
-            <Icon.camera size={24} className={(data._photoCounts?.total || 0) > 0 ? "text-lime" : "text-cyan"} />
-            <div className={`mono text-[.68rem] uppercase tracking-[.14em] ${(data._photoCounts?.total || 0) > 0 ? "text-lime" : "text-ink2"}`}>
-              {(data._photoCounts?.total || 0) > 0 ? "photos saved" : "no photo yet"}
-            </div>
-          </div>
-          {uploading === "general" && (
-            <div className="absolute inset-0 bg-bg/80 backdrop-blur-sm grid place-items-center">
-              <div className="mono text-[.66rem] text-amber uppercase tracking-[.16em]">compressing · uploading</div>
-            </div>
-          )}
-        </div>
-        <label className={`btn-ghost mt-2 inline-flex items-center justify-center gap-2 cursor-pointer w-full ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
+        <label className={`btn-ghost mt-3 inline-flex items-center justify-center gap-2 cursor-pointer w-full ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
           <Icon.camera size={14} />
-          <span>{uploading === "general" ? "Uploading" : "Add photo"}</span>
-          <input type="file" accept="image/*" multiple className="hidden"
-            disabled={!!uploading}
+          <span>{uploading ? "Uploading" : "Add photo"}</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            disabled={uploading}
             onChange={(e) => {
-              onGeneralPhoto(e.target.files);
+              void onPhoto(e.target.files);
               e.currentTarget.value = "";
-            }} />
+            }}
+          />
         </label>
       </AccentCard>
 
-      {visible.map((f) => {
-        if (f.type === "number") {
-          const c = colorOf(f.id);
-          return (
-            <AccentCard key={f.id} accent={accentOf(f.id)}>
-              <div className="card-title mb-2">{f.label}</div>
-              <input type="number" step="0.1" inputMode="decimal" className={`input mono text-lg text-${c}`}
-                value={data[f.id] ?? ""} onChange={(e) => setField(f.id, e.target.value === "" ? "" : +e.target.value)} />
-            </AccentCard>
-          );
-        }
-        if (f.type === "scale") {
-          const max = f.id === "back_pain" ? 5 : 5;
-          const min = f.id === "back_pain" ? 0 : 1;
-          const cur = data[f.id];
-          const c = colorOf(f.id);
-          return (
-            <AccentCard key={f.id} accent={accentOf(f.id)}>
-              <div className="flex justify-between items-baseline mb-2">
-                <div className="card-title">{f.label}</div>
-                {cur != null && <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{cur}</div>}
+      <div className="section-label">Timeline</div>
+      {photos.length === 0 ? (
+        <AccentCard accent="#9a9a9a" className="p-4">
+          <div className="mono text-xs text-mute text-center">—</div>
+        </AccentCard>
+      ) : (
+        <div className="grid grid-cols-2 min-[520px]:grid-cols-3 gap-2">
+          {photos.map((photo) => (
+            <AccentCard key={photo.id} accent="#9a9a9a" className="overflow-hidden p-0" contentClassName="p-0">
+              <div className="aspect-[3/4] bg-bg2 overflow-hidden">
+                <img src={photo.path} alt="" className="w-full h-full object-cover" loading="lazy" />
               </div>
-              <div className="flex gap-1">
-                {Array.from({ length: max - min + 1 }).map((_, i) => {
-                  const v = min + i;
-                  const active = cur === v;
-                  return (
-                    <button key={v} onClick={() => setField(f.id, v)}
-                      className={`flex-1 mono text-sm py-2 rounded-lg border transition ${active ? `bg-${c} text-[#000000] border-${c} font-bold` : "border-line text-ink2 hover:border-line2"}`}>
-                      {v}
-                    </button>
-                  );
-                })}
+              <div className="px-2 py-2 flex items-center justify-between gap-2">
+                <span className="mono text-[.62rem] text-ink tabular-nums">{shortDate(photo.date)}</span>
+                <span className="mono text-[.52rem] text-mute uppercase tracking-[.12em]">{photo.angle || "general"}</span>
               </div>
             </AccentCard>
-          );
-        }
-        if (f.type === "percent") {
-          const c = colorOf(f.id);
-          return (
-            <AccentCard key={f.id} accent={accentOf(f.id)}>
-              <div className="flex justify-between items-baseline mb-2">
-                <div className="card-title">{f.label}</div>
-                <div className={`mono text-sm text-${c} font-bold tabular-nums`}>{data[f.id] ?? 0}%</div>
-              </div>
-              <input type="range" min="0" max="100" step="5" value={data[f.id] ?? 80}
-                onChange={(e) => setField(f.id, +e.target.value)} className={`w-full accent-${c}`} />
-            </AccentCard>
-          );
-        }
-        if (f.type === "text") {
-          return (
-            <AccentCard key={f.id} accent="#bf5af2">
-              <div className="card-title mb-2">{f.label}</div>
-              <textarea className="input mono text-sm w-full min-h-[80px]" rows="3"
-                value={data[f.id] ?? ""} onChange={(e) => setField(f.id, e.target.value)} />
-            </AccentCard>
-          );
-        }
-        return null;
-      })}
-
-      <button className={`btn-primary ${saved ? "flash-ok" : ""}`} onClick={save}>
-        {saved ? <span className="inline-flex items-center gap-2 justify-center"><Icon.check size={14} /> {t("settings.saved")}</span> : t("checkin.save")}
-      </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

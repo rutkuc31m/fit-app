@@ -118,6 +118,9 @@ r.get("/weekly-review", (req, res) => {
   const trainingRows = db.prepare(
     "SELECT date, completed FROM training_sessions WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date ASC"
   ).all(uid, from, to);
+  const footballRows = db.prepare(
+    "SELECT minutes, kcal FROM activity_logs WHERE user_id = ? AND type = 'football' AND date >= ? AND date <= ?"
+  ).all(uid, from, to);
   const trainingByDate = new Map(trainingRows.map((r) => [r.date, r]));
   const mealByDate = new Map(meals.map((r) => [r.date, r]));
   const days = dateRange(from, to);
@@ -129,14 +132,11 @@ r.get("/weekly-review", (req, res) => {
   const prevAvgWeight = avg(prevLogs, "weight_kg");
   const avgKcal = avg(meals, "kcal");
   const avgProtein = avg(meals, "protein_g");
-  const avgEnergy = avg(logs, "energy");
-  const avgHunger = avg(logs, "hunger");
-  const avgHeadache = avg(logs, "headache");
   const trainingDone = plannedTrainingDates.filter((date) => trainingByDate.get(date)?.completed).length;
   const weightDays = logs.filter((r) => r.weight_kg != null).length;
-  const recoveryDays = logs.filter((r) => r.energy != null || r.hunger != null || r.headache != null).length;
-  const hydrationDays = logs.filter((r) => (r.water_ml || 0) + (r.coffee_ml || 0) > 0).length;
   const mealDays = meals.length;
+  const footballMinutes = footballRows.reduce((sum, row) => sum + Number(row.minutes || 0), 0);
+  const footballKcal = footballRows.reduce((sum, row) => sum + Number(row.kcal || 0), 0);
   const proteinDays = nonFastDates.filter((date) => {
     const meal = mealByDate.get(date);
     const target = eatingTarget(dayPlan(date).eating);
@@ -157,14 +157,11 @@ r.get("/weekly-review", (req, res) => {
   const adherencePct = Math.round((
     (weightDays / Math.max(1, days.length)) +
     ((mealConsistencyPct ?? 0) / 100) +
-    trainingAdherence +
-    (recoveryDays / Math.max(1, days.length)) +
-    (hydrationDays / Math.max(1, days.length))
-  ) / 5 * 100);
+    trainingAdherence
+  ) / 3 * 100);
   let signal = "keep_going";
-  if ((avgHeadache != null && avgHeadache >= 3) || (avgEnergy != null && avgEnergy <= 2)) signal = "recover";
-  else if (avgWeight != null && prevAvgWeight != null && avgWeight > prevAvgWeight + 0.3 && mealDays >= 4) signal = "audit";
-  else if (trainingDone >= 3 && weightDays >= 5 && (avgEnergy == null || avgEnergy >= 3)) signal = "strong";
+  if (avgWeight != null && prevAvgWeight != null && avgWeight > prevAvgWeight + 0.3 && mealDays >= 4) signal = "audit";
+  else if (trainingDone >= 3 && weightDays >= 5) signal = "strong";
 
   res.json({
     from,
@@ -178,11 +175,8 @@ r.get("/weekly-review", (req, res) => {
     avg_protein_g: avgProtein,
     training_done: trainingDone,
     training_planned: plannedTrainingDates.length,
-    avg_energy: avgEnergy,
-    avg_hunger: avgHunger,
-    avg_headache: avgHeadache,
-    recovery_days: recoveryDays,
-    hydration_days: hydrationDays,
+    football_minutes: footballMinutes,
+    football_kcal: footballKcal,
     protein_days: proteinDays,
     calorie_guardrail_days: calorieGuardrailDays,
     fast_clean_days: fastCleanDays,

@@ -4,10 +4,8 @@ import "./db.js";
 import authRoutes from "./routes/auth.js";
 import logsRoutes from "./routes/logs.js";
 import mealsRoutes from "./routes/meals.js";
-import foodsRoutes from "./routes/foods.js";
 import trainingRoutes from "./routes/training.js";
 import checkinsRoutes from "./routes/checkins.js";
-import habitsRoutes from "./routes/habits.js";
 import statsRoutes from "./routes/stats.js";
 
 const app = express();
@@ -23,10 +21,8 @@ app.get("/api/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 app.use("/api/auth", authRoutes);
 app.use("/api/logs", logsRoutes);
 app.use("/api/meals", mealsRoutes);
-app.use("/api/foods", foodsRoutes);
 app.use("/api/training", trainingRoutes);
 app.use("/api/checkins", checkinsRoutes);
-app.use("/api/habits", habitsRoutes);
 app.use("/api/stats", statsRoutes);
 
 app.use((err, _req, res, _next) => {
