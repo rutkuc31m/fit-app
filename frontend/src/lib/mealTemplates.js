@@ -131,17 +131,16 @@ export const MEAL_TEMPLATES = [
     ]
   }),
   withTotals({
-    id: "rice_chicken",
-    title: "Reis + Tavuk",
-    type: "rice",
+    id: "potato_chicken_400",
+    title: "Patates + Tavuk 400",
+    type: "potato",
     accent: "#00d4aa",
     items: [
-      item("Reis gekocht aus 80g roh", 240, 280, 6, 62, 0.6),
-      item("Hähnchenbrust", 350, 395.5, 82.3, 0, 6.3),
+      item("Kartoffeln gekocht aus 500g roh", 500, 390, 9, 88, 0.5),
+      item("Hähnchenbrust", 400, 452, 94.1, 0, 7.2),
       item("Ei M x3", 180, 222, 18.9, 1.2, 15.9),
       item("Fitline Körniger Frischkäse", 200, 164, 25, 6, 4),
       item("Paprika / Zwiebel / Salat", 250, 70, 3, 12, 0.5),
-      item("Olivenöl", 10, 90, 0, 0, 10),
       item("Senf + Zero Ketchup", 40, 28, 1, 3.6, 0.8),
       item("Skyr natur", 300, 192, 33, 12, 0.6),
       item("ON Whey Isolate", 30, 108, 25, 1.2, 0.4),
