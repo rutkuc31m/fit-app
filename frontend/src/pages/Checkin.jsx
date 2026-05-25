@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "../lib/api";
+import { api, assetUrl } from "../lib/api";
 import { todayStr, getWeekNum } from "../lib/plan";
 import { AccentCard, Icon, PageCommand } from "../components/ui";
 
@@ -134,7 +134,7 @@ export default function Checkin() {
           {photos.map((photo) => (
             <AccentCard key={photo.id} accent="#9a9a9a" className="overflow-hidden p-0" contentClassName="p-0">
               <div className="aspect-[3/4] bg-bg2 overflow-hidden">
-                <img src={photo.path} alt="" className="w-full h-full object-cover" loading="lazy" />
+                <img src={assetUrl(photo.path)} alt="" className="w-full h-full object-cover" loading="lazy" />
               </div>
               <div className="px-2 py-2 flex items-center justify-between gap-2">
                 <span className="mono text-[.62rem] text-ink tabular-nums">{shortDate(photo.date)}</span>

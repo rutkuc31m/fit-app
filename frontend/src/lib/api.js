@@ -1,5 +1,12 @@
-const BASE = import.meta.env.DEV ? "/api" : (import.meta.env.VITE_API_BASE || "https://api.fit.rutkuc.com/api");
+export const API_BASE = import.meta.env.DEV ? "/api" : (import.meta.env.VITE_API_BASE || "https://api.fit.rutkuc.com/api");
 const TOKEN_KEY = "fit.token";
+
+export const assetUrl = (path) => {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  if (import.meta.env.DEV) return path;
+  return `${API_BASE.replace(/\/api\/?$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
+};
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (t) => t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY);
@@ -13,7 +20,7 @@ async function request(path, opts = {}) {
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   let res;
   try {
-    res = await fetch(BASE + path, { ...opts, headers, signal: ctrl.signal, cache: "no-store" });
+    res = await fetch(API_BASE + path, { ...opts, headers, signal: ctrl.signal, cache: "no-store" });
   } catch (e) {
     if (e.name === "AbortError") throw new Error("timeout");
     throw e;

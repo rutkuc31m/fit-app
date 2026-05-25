@@ -33,7 +33,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": { target: "http://localhost:8001", changeOrigin: true }
+      "/api": { target: "http://localhost:8001", changeOrigin: true },
+      "/photos": { target: "http://localhost:8001", changeOrigin: true }
     }
   }
 });
