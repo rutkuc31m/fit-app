@@ -15,15 +15,15 @@ function MealTemplatePicker({ templates, items, onToggle }) {
   const [openId, setOpenId] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
-  const itemsForTemplate = (template) =>
-    items.filter((item) => item.barcode === mealTemplateMarker(template.id) || item.barcode?.startsWith(`${mealTemplateMarker(template.id)}:`));
-
   const itemsForPart = (template, part) => {
     const marker = mealTemplatePartMarker(template.id, part.id);
     const legacyMarker = mealTemplateMarker(template.id);
     const partNames = new Set(part.items.map((entry) => entry.name));
     return items.filter((item) => item.barcode === marker || (item.barcode === legacyMarker && partNames.has(item.name)));
   };
+
+  const loggedPartsForTemplate = (template) =>
+    template.parts.filter((part) => itemsForPart(template, part).length > 0);
 
   const handleToggle = async (template, part) => {
     const partKey = `${template.id}:${part.id}`;
@@ -41,17 +41,25 @@ function MealTemplatePicker({ templates, items, onToggle }) {
       <div className="section-label mt-0 mb-2">Gerichte</div>
       <div className="grid grid-cols-1 min-[430px]:grid-cols-2 gap-2">
         {templates.map((template) => {
-          const logged = itemsForTemplate(template).length > 0;
+          const loggedParts = loggedPartsForTemplate(template);
+          const fullLogged = template.parts.length > 0 && loggedParts.length === template.parts.length;
+          const partialLogged = loggedParts.length > 0 && !fullLogged;
           return (
             <div
               key={template.id}
-              className={`soft-band overflow-hidden border ${logged ? "border-signal/70 bg-signal/10" : "border-line/70"}`}
+              className={`soft-band overflow-hidden border ${
+                fullLogged ? "border-signal/70 bg-signal/10"
+                  : partialLogged ? "border-amber/60 bg-amber/10"
+                    : "border-line/70"
+              }`}
             >
               <div className="px-3 py-2 border-b border-line/60">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="text-[.82rem] text-ink leading-snug font-semibold">{template.title}</div>
-                    <div className="mono text-[.56rem] text-mute uppercase tracking-[.12em] mt-[2px]">{template.type}</div>
+                    <div className="mono text-[.56rem] text-mute uppercase tracking-[.12em] mt-[2px]">
+                      {template.type} · {loggedParts.length}/{template.parts.length}
+                    </div>
                   </div>
                   <div className="mono text-[.62rem] text-mute tabular-nums mt-2">
                     <span className="text-amber">{Math.round(template.totals.kcal)}</span> kcal · <span className="text-lime">P</span>{Math.round(template.totals.protein)}g
@@ -86,7 +94,7 @@ function MealTemplatePicker({ templates, items, onToggle }) {
                           type="button"
                           className={`w-12 grid place-items-center border-l border-line/70 transition-colors duration-150 ${partLogged ? "text-signal bg-signal/10" : "text-mute hover:text-signal hover:bg-bg2/60"}`}
                           onClick={() => handleToggle(template, part)}
-                          aria-label={partLogged ? "remove meal part" : "add meal part"}
+                          aria-label={partLogged ? "meal part logged" : "add meal part"}
                           disabled={busyId === partKey}
                         >
                           {busyId === partKey ? <span className="mono text-[.62rem]">...</span> : <Icon.check size={17} />}
@@ -321,8 +329,6 @@ export default function Log() {
 
   const toggleMealTemplate = async (template, part, loggedItems = []) => {
     if (loggedItems.length > 0) {
-      await Promise.all(loggedItems.map((item) => api.del(`/meals/items/${item.id}`)));
-      await loadMeals();
       return;
     }
     const mealId = await ensureMeal();
