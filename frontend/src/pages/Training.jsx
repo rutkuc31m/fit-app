@@ -268,9 +268,10 @@ function sessionProgress(session, planDays) {
 
 const TARGET_REPS = 10;
 const WEIGHT_MIN = 0;
-const WEIGHT_MAX = 100;
+const WEIGHT_MAX = 250;
 const WEIGHT_STEP = 5;
 const WEIGHT_START = 20;
+const MACHINE_SEARCH_LIMIT = 8;
 
 const clampWeight = (value) => {
   const n = Number(value);
@@ -283,6 +284,8 @@ const formatWeight = (value) => {
   return value % 1 === 0 ? `${value.toFixed(0)} kg` : `${value.toFixed(1)} kg`;
 };
 
+const machineExerciseId = (machine) => `machine:${machine.id}`;
+
 export default function Training() {
   const [date] = useState(todayStr());
   const week = getWeekNum(date);
@@ -290,8 +293,22 @@ export default function Training() {
   const [historyByExercise, setHistoryByExercise] = useState({});
   const [weightDrafts, setWeightDrafts] = useState({});
   const [expandedEntryIds, setExpandedEntryIds] = useState(() => new Set());
+  const [machineQuery, setMachineQuery] = useState("");
+  const [machineWeightInputs, setMachineWeightInputs] = useState({});
 
   const studioMachines = STUDIO_MACHINES;
+
+  const filteredMachines = useMemo(() => {
+    const q = machineQuery.trim().toUpperCase();
+    if (!q) return [];
+    return studioMachines
+      .filter((machine) => (
+        machine.code.toUpperCase().includes(q) ||
+        machine.name.toUpperCase().includes(q) ||
+        machine.series.toUpperCase().includes(q)
+      ))
+      .slice(0, MACHINE_SEARCH_LIMIT);
+  }, [machineQuery, studioMachines]);
 
   const planDays = useMemo(() => buildPlan(studioMachines), [studioMachines]);
   const { map: doneSetIdsByEntry, entries: planEntries } = useMemo(
@@ -308,8 +325,11 @@ export default function Training() {
     return next;
   }, [session]);
   const exerciseIds = useMemo(
-    () => [...new Set(planEntries.map((entry) => entry.entryId))],
-    [planEntries]
+    () => [...new Set([
+      ...planEntries.map((entry) => entry.entryId),
+      ...filteredMachines.map(machineExerciseId)
+    ])],
+    [planEntries, filteredMachines]
   );
 
   const load = async () => {
@@ -423,6 +443,46 @@ export default function Training() {
     return weightDrafts[entry.entryId] ?? sessionWeightByEntry[entry.entryId] ?? historyByExercise[entry.entryId] ?? null;
   };
 
+  const getMachineWeight = (machine) => {
+    const id = machineExerciseId(machine);
+    return weightDrafts[id] ?? sessionWeightByEntry[id] ?? historyByExercise[id] ?? null;
+  };
+
+  const saveMachineWeight = async (machine, nextWeight) => {
+    if (!session) return;
+    const clean = clampWeight(nextWeight);
+    if (clean == null) return;
+    const exerciseId = machineExerciseId(machine);
+    const existingIds = (session?.sets || [])
+      .filter((set) => String(set.exercise_id) === exerciseId)
+      .map((set) => set.id);
+    if (existingIds.length > 0) {
+      await Promise.all(existingIds.map((id) => api.put(`/training/set/${id}`, {
+        weight_kg: clean,
+        reps: TARGET_REPS
+      })));
+    } else {
+      await api.post(`/training/session/${session.id}/set`, {
+        exercise_id: exerciseId,
+        exercise_name: `Machine ${machine.code} ${machine.name}`,
+        set_number: 1,
+        weight_kg: clean,
+        reps: TARGET_REPS,
+        logged_date: date
+      });
+    }
+    setWeightDrafts((prev) => ({ ...prev, [exerciseId]: clean }));
+    setMachineWeightInputs((prev) => ({ ...prev, [exerciseId]: String(clean) }));
+    load();
+  };
+
+  const stepMachineWeight = async (machine, delta) => {
+    const raw = getMachineWeight(machine);
+    const current = raw == null ? WEIGHT_START : Number(raw);
+    const next = raw == null && delta > 0 ? WEIGHT_START : current + delta;
+    await saveMachineWeight(machine, next);
+  };
+
   const toggleEntryDetails = (entryId) => {
     setExpandedEntryIds((prev) => {
       const next = new Set(prev);
@@ -477,6 +537,82 @@ export default function Training() {
           { label: "cycle", value: allDaysDone ? "done" : "open", className: allDaysDone ? "text-lime" : "text-amber" }
         ]}
       />
+
+      <AccentCard accent="#00d4aa" className="p-3" contentClassName="pl-2">
+        <div className="flex items-center gap-2">
+          <Icon.scan size={15} className="text-lime shrink-0" />
+          <input
+            className="input h-10 flex-1 mono text-sm"
+            value={machineQuery}
+            onChange={(event) => setMachineQuery(event.target.value)}
+            placeholder="Makine arama: 3041, 5014, butterfly..."
+            inputMode="search"
+            autoCapitalize="none"
+          />
+        </div>
+        {filteredMachines.length > 0 && (
+          <div className="mt-2 flex flex-col gap-1.5">
+            {filteredMachines.map((machine) => {
+              const exerciseId = machineExerciseId(machine);
+              const savedWeight = getMachineWeight(machine);
+              const inputValue = machineWeightInputs[exerciseId] ?? (savedWeight == null ? "" : String(savedWeight));
+              return (
+                <div key={machine.id} className="rounded-md border border-line/80 bg-bg/60 px-2.5 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-[.72rem] text-ink leading-snug">
+                        {machine.code} · {machine.name}
+                      </div>
+                      <div className="mono text-[.54rem] text-mute uppercase tracking-[.08em] mt-[2px] truncate">
+                        {machine.series} · last {formatWeight(savedWeight ?? NaN)}
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="h-8 w-8 rounded-md border border-line/70 bg-bg/80 text-mute text-sm leading-none"
+                        onClick={() => stepMachineWeight(machine, -WEIGHT_STEP)}
+                        aria-label="decrease machine weight"
+                      >
+                        −
+                      </button>
+                      <input
+                        className="h-8 w-[4.2rem] rounded-md border border-line/70 bg-bg/80 px-2 mono text-[.7rem] text-ink text-center tabular-nums"
+                        value={inputValue}
+                        onChange={(event) => setMachineWeightInputs((prev) => ({ ...prev, [exerciseId]: event.target.value }))}
+                        onBlur={(event) => saveMachineWeight(machine, event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.currentTarget.blur();
+                          }
+                        }}
+                        inputMode="decimal"
+                        aria-label={`${machine.code} weight`}
+                      />
+                      <button
+                        type="button"
+                        className="h-8 w-8 rounded-md border border-line/70 bg-bg/80 text-mute text-sm leading-none"
+                        onClick={() => stepMachineWeight(machine, WEIGHT_STEP)}
+                        aria-label="increase machine weight"
+                      >
+                        +
+                      </button>
+                      <button
+                        type="button"
+                        className="h-8 w-8 rounded-md border border-line/70 bg-bg/80 grid place-items-center"
+                        onClick={() => saveMachineWeight(machine, inputValue)}
+                        aria-label="save machine weight"
+                      >
+                        <Icon.check size={12} className={savedWeight == null ? "text-mute opacity-30" : "text-lime"} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </AccentCard>
 
       <AccentCard accent="#9a9a9a" className="p-3" contentClassName="pl-2 flex flex-col gap-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
