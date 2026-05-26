@@ -131,44 +131,52 @@ function buildPlan(visibleMachines) {
       day: "Day 1",
       title: "Push A",
       focus: "chest / shoulders / triceps / core",
+      regions: "Göğüs, omuz, arka kol, karın",
+      priority: "Önce göğüs + omuz, sonra triceps ve karın.",
       slots: [
-        { label: "chest", move: "chest press / butterfly", area: "mid chest / pecs / orta göğüs", info: "main goal: press or fly for the middle chest. If the press is busy, butterfly/cable fly is fine.", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"], cues: MOVEMENT_CUES.chestPressFly },
-        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", info: "main goal: shoulder cap. Press hits front delts, lateral raise hits side delts.", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"], cues: MOVEMENT_CUES.shoulderPressRaise },
-        { label: "triceps", move: "rope pushdown / triceps extension", area: "triceps / arka kol", info: "main goal: back arm. On 4012 use high cable rope pushdown, elbows close to the body.", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"], cues: MOVEMENT_CUES.triceps },
-        { label: "core", move: "ab crunch", area: "upper abs / üst karın", info: "main goal: controlled crunch for upper abs. Keep hips quiet and curl the rib cage down.", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"], cues: MOVEMENT_CUES.abCrunch }
+        { label: "chest", move: "chest press / butterfly", area: "mid chest / pecs / orta göğüs", choice: "Göğüs: press, pec deck, butterfly veya cable fly olur.", info: "main goal: press or fly for the middle chest. If the press is busy, butterfly/cable fly is fine.", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"], cues: MOVEMENT_CUES.chestPressFly },
+        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", choice: "Omuz: press veya lateral raise makinesi olur.", info: "main goal: shoulder cap. Press hits front delts, lateral raise hits side delts.", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"], cues: MOVEMENT_CUES.shoulderPressRaise },
+        { label: "triceps", move: "rope pushdown / triceps extension", area: "triceps / arka kol", choice: "Arka kol: cable pushdown, triceps machine veya dip machine olur.", info: "main goal: back arm. On 4012 use high cable rope pushdown, elbows close to the body.", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"], cues: MOVEMENT_CUES.triceps },
+        { label: "core", move: "ab crunch", area: "upper abs / üst karın", choice: "Karın: ab crunch / total ab; 5012 doluysa 3008 olur.", info: "main goal: controlled crunch for upper abs. Keep hips quiet and curl the rib cage down.", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"], cues: MOVEMENT_CUES.abCrunch }
       ]
     },
     {
       day: "Day 2",
       title: "Pull A",
       focus: "back / biceps / glute support / core",
+      regions: "Kanat, orta sırt, ön kol, alt sırt/kalça",
+      priority: "Önce sırt genişliği + sırt kalınlığı, sonra biceps ve destek.",
       slots: [
-        { label: "lat", move: "lat pulldown", area: "lats / kanat / sırt genişliği", info: "main goal: wing width. Pull elbows down, do not turn it into a biceps curl.", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"], cues: MOVEMENT_CUES.latPulldown },
-        { label: "row", move: "seated row / t-bar row", area: "mid back / traps / orta sırt", info: "main goal: middle back thickness. Pull elbows back and squeeze shoulder blades.", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"], cues: MOVEMENT_CUES.row },
-        { label: "biceps", move: "biceps curl", area: "biceps / ön kol", info: "main goal: front arm. Optional lighter finisher if biceps are already tired from back work.", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"], cues: MOVEMENT_CUES.biceps },
-        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", info: "main goal: lower back and hip support. Controlled hinge, no swinging.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"], cues: MOVEMENT_CUES.backExtension }
+        { label: "lat", move: "lat pulldown", area: "lats / kanat / sırt genişliği", choice: "Kanat: lat pulldown veya high row olur.", info: "main goal: wing width. Pull elbows down, do not turn it into a biceps curl.", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"], cues: MOVEMENT_CUES.latPulldown },
+        { label: "row", move: "seated row / t-bar row", area: "mid back / traps / orta sırt", choice: "Orta sırt: seated row, low row veya t-bar row olur.", info: "main goal: middle back thickness. Pull elbows back and squeeze shoulder blades.", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"], cues: MOVEMENT_CUES.row },
+        { label: "biceps", move: "biceps curl", area: "biceps / ön kol", choice: "Ön kol: herhangi biceps curl makinesi veya cable curl olur.", info: "main goal: front arm. Optional lighter finisher if biceps are already tired from back work.", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"], cues: MOVEMENT_CUES.biceps },
+        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", choice: "Destek: back extension veya glute/lower-back odaklı alternatif olur.", info: "main goal: lower back and hip support. Controlled hinge, no swinging.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"], cues: MOVEMENT_CUES.backExtension }
       ]
     },
     {
       day: "Day 3",
       title: "Upper B",
       focus: "chest / back / shoulders / arms",
+      regions: "Üst göğüs, sırt, omuz, kol",
+      priority: "Üst göğüs + sırt denge, sonra omuz ve kol bitiriş.",
       slots: [
-        { label: "chest", move: "incline chest press / chest press", area: "upper chest / üst göğüs", info: "main goal: upper chest line. Incline press preferred; normal chest press is okay if needed.", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"], cues: MOVEMENT_CUES.upperChestPress },
-        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", info: "main goal: back balance. Use pulldown for width or row for thickness when gym is busy.", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"], cues: MOVEMENT_CUES.backBalance },
-        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", info: "main goal: shoulder cap. 3050/lateral raise is a good substitute when press machines are busy.", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"], cues: MOVEMENT_CUES.shoulderPressRaise },
-        { label: "arms", move: "rope pushdown / biceps curl", area: "triceps / biceps / arka kol + ön kol", info: "main goal: arm finisher. On 4012 use high cable for triceps, low cable for biceps.", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"], cues: MOVEMENT_CUES.arms }
+        { label: "chest", move: "incline chest press / chest press", area: "upper chest / üst göğüs", choice: "Üst göğüs: incline press öncelik; doluysa normal chest press olur.", info: "main goal: upper chest line. Incline press preferred; normal chest press is okay if needed.", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"], cues: MOVEMENT_CUES.upperChestPress },
+        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", choice: "Sırt: o gün boş olana göre pulldown veya row seç.", info: "main goal: back balance. Use pulldown for width or row for thickness when gym is busy.", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"], cues: MOVEMENT_CUES.backBalance },
+        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", choice: "Omuz: press, lateral raise veya shoulder/lat combo olur.", info: "main goal: shoulder cap. 3050/lateral raise is a good substitute when press machines are busy.", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"], cues: MOVEMENT_CUES.shoulderPressRaise },
+        { label: "arms", move: "rope pushdown / biceps curl", area: "triceps / biceps / arka kol + ön kol", choice: "Kol: triceps veya biceps makinesi/cable; hangi taraf eksikse onu bitir.", info: "main goal: arm finisher. On 4012 use high cable for triceps, low cable for biceps.", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"], cues: MOVEMENT_CUES.arms }
       ]
     },
     {
       day: "Day 4",
       title: "Pull B",
       focus: "back / shoulders / glute support / core",
+      regions: "Sırt, arka/yan omuz, alt göğüs-triceps, alt sırt/kalça",
+      priority: "Sırt + arka omuz ana iş, destekli dip ile alt göğüs/triceps.",
       slots: [
-        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", info: "main goal: back width or thickness. Pick the free pull machine and feel the back, not only arms.", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"], cues: MOVEMENT_CUES.backBalance },
-        { label: "delts", move: "reverse butterfly / lateral raise", area: "rear + side delts / arka + yan omuz", info: "main goal: rear and side shoulder. Reverse butterfly for rear delts, lateral raise for side delts.", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"], cues: MOVEMENT_CUES.rearSideDelts },
-        { label: "touch", move: "dip / triceps extension", area: "lower chest / triceps / alt göğüs + arka kol", info: "main goal: dip pattern. 3017 is best here; chest and triceps should both work.", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"], cues: MOVEMENT_CUES.dipPattern },
-        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", info: "main goal: lower back and hip support. Smooth reps, stop before form breaks.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"], cues: MOVEMENT_CUES.backExtension }
+        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", choice: "Sırt: row, high row veya pulldown; boş olan iyi alternatiftir.", info: "main goal: back width or thickness. Pick the free pull machine and feel the back, not only arms.", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"], cues: MOVEMENT_CUES.backBalance },
+        { label: "delts", move: "reverse butterfly / lateral raise", area: "rear + side delts / arka + yan omuz", choice: "Arka/yan omuz: reverse butterfly veya lateral raise olur.", info: "main goal: rear and side shoulder. Reverse butterfly for rear delts, lateral raise for side delts.", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"], cues: MOVEMENT_CUES.rearSideDelts },
+        { label: "touch", move: "dip / triceps extension", area: "lower chest / triceps / alt göğüs + arka kol", choice: "Alt göğüs/triceps: destekli dip öncelik; doluysa dip/triceps makinesi.", info: "main goal: dip pattern. 3017 is best here; chest and triceps should both work.", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"], cues: MOVEMENT_CUES.dipPattern },
+        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", choice: "Destek: lower back veya glute support, yavaş ve kontrollü.", info: "main goal: lower back and hip support. Smooth reps, stop before form breaks.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"], cues: MOVEMENT_CUES.backExtension }
       ]
     }
   ];
@@ -481,6 +489,8 @@ export default function Training() {
                 <div className="flex items-center justify-between gap-2">
                   <div>
                     <div className="mono text-[.6rem] text-cyan uppercase tracking-[.14em]">{day.day} · {day.title}</div>
+                    <div className="text-[.68rem] text-ink leading-snug mt-1">{day.regions}</div>
+                    <div className="text-[.58rem] text-ink2 leading-snug mt-[2px]">{day.priority}</div>
                     <div className="mono text-[.54rem] text-mute uppercase tracking-[.1em] mt-[2px]">{day.machines.filter(({ entryId }) => doneIds.has(entryId)).length}/{day.machines.length}</div>
                   </div>
                   <Icon.check size={12} className={day.machines.length > 0 && day.machines.every(({ entryId }) => doneIds.has(entryId)) ? "text-lime" : "text-mute opacity-30"} />
@@ -510,6 +520,11 @@ export default function Training() {
                               <div className="mono text-[.55rem] text-ink2 uppercase tracking-[.08em] leading-snug mt-1">
                                 {entry.move}
                               </div>
+                              {entry.choice && (
+                                <div className="text-[.58rem] text-ink2 leading-snug mt-[2px]">
+                                  {entry.choice}
+                                </div>
+                              )}
                               <div className="mono text-[.54rem] text-lime uppercase tracking-[.1em] leading-snug mt-[2px]">
                                 {entry.area} · {entry.target}
                               </div>
