@@ -26,6 +26,87 @@ const STUDIO_CODES = new Set(RAW_STUDIO_CODES.map(resolveCode).filter(Boolean));
 
 const STUDIO_MACHINES = GYM80_MACHINES.filter((machine) => STUDIO_CODES.has(machine.code));
 
+const MOVEMENT_CUES = {
+  chestPressFly: [
+    "Schulterblätter hinten unten halten; Brust bleibt hoch.",
+    "Drücken: Ellbogen leicht unter Schulterhöhe, nicht ganz durchknallen.",
+    "Fly: Arme leicht gebeugt, Bewegung aus der Brust schließen.",
+    "Langsam zurücklassen; Gewicht nur so schwer, dass Brust arbeitet."
+  ],
+  shoulderPressRaise: [
+    "Press: Sitz so einstellen, dass Griffe etwa auf Kinn/Ohrenhöhe starten.",
+    "Rippen unten halten; kein extremes Hohlkreuz.",
+    "Lateral raise: Ellbogen führt, Hände bleiben leicht unter Ellbogen.",
+    "Oben kurz halten, kontrolliert senken, nicht schwingen."
+  ],
+  triceps: [
+    "Ellbogen bleiben eng und möglichst fest an einer Position.",
+    "Schulter bleibt ruhig; nur Unterarm bewegt sich.",
+    "Unten sauber strecken und Trizeps kurz hart anspannen.",
+    "Negativ kontrollieren; kein Körpergewicht in den Stack werfen."
+  ],
+  abCrunch: [
+    "Becken ruhig lassen; nicht aus der Hüfte reißen.",
+    "Rippen Richtung Becken einrollen, als würdest du Bauch kurz machen.",
+    "Ausatmen beim Crunch, oben kurz halten.",
+    "Langsam öffnen; Spannung im Bauch nicht komplett verlieren."
+  ],
+  latPulldown: [
+    "Brust hoch, Schulterblätter zuerst nach unten ziehen.",
+    "Ellbogen Richtung Hüfte führen, nicht mit Bizeps curlen.",
+    "Oben komplett lang werden, aber Schultern nicht an die Ohren fallen lassen.",
+    "Unten kurz halten; Rücken fühlen, Griff nicht totquetschen."
+  ],
+  row: [
+    "Brust bleibt stabil; nicht mit Schwung nach hinten lehnen.",
+    "Ellbogen nach hinten ziehen und Schulterblätter zusammenführen.",
+    "Griff zum unteren Brustkorb/Bauch, je nach Maschine.",
+    "Vorne kontrolliert strecken, ohne Rücken rund zu machen."
+  ],
+  biceps: [
+    "Oberarm bleibt fest; Ellbogen wandert nicht nach vorne.",
+    "Handgelenk neutral halten, nicht abknicken.",
+    "Oben hart anspannen, unten fast ganz strecken.",
+    "Kein Schwung; lieber leichter und sauber."
+  ],
+  backExtension: [
+    "Wirbelsäule neutral halten; Bewegung kommt aus Hüfte/Rumpf.",
+    "Oben nicht überstrecken, nur bis Körperlinie.",
+    "Glutes und unteren Rücken kontrolliert anspannen.",
+    "Langsam ablassen; keine schnellen Reps."
+  ],
+  upperChestPress: [
+    "Bank/Sitz so einstellen, dass Druck leicht nach oben läuft.",
+    "Brust hoch, Schulterblätter hinten unten fixieren.",
+    "Ellbogen nicht zu weit außen; sauber durch die Brust drücken.",
+    "Nicht lockout-jagen; Spannung oben halten."
+  ],
+  backBalance: [
+    "Wenn Breite fehlt: Pulldown wählen; wenn Dicke fehlt: Row wählen.",
+    "Erste Bewegung immer Schulterblatt, danach Arm.",
+    "Rumpf ruhig halten; kein Ziehen mit Schwung.",
+    "Letzte Wiederholungen schwer, aber Rücken muss spürbar bleiben."
+  ],
+  arms: [
+    "Trizeps: Ellbogen eng, unten voll strecken.",
+    "Bizeps: Oberarm ruhig, kontrolliert curlen.",
+    "Kabelzug sauber einstellen, Zuglinie muss angenehm sein.",
+    "Als Finisher schwer genug, aber ohne Technikbruch."
+  ],
+  rearSideDelts: [
+    "Reverse: Brust an Pad, Schulterblätter nicht komplett zusammenquetschen.",
+    "Arka omuz fühlen; Gewicht nicht mit Rücken reißen.",
+    "Lateral: Ellbogen führt seitlich hoch.",
+    "Kleine saubere Range ist besser als schweres Schwingen."
+  ],
+  dipPattern: [
+    "Brust leicht hoch, Schulter bleibt tief und stabil.",
+    "Ellbogen kontrolliert beugen; nicht unten reinfallen.",
+    "Trizeps-Fokus: aufrechter bleiben; Brust-Fokus: leicht vorlehnen.",
+    "Unten sauber stoppen, oben stark drücken."
+  ]
+};
+
 function pickMachine(visibleMachines, usedIds, candidateCodes) {
   for (const code of candidateCodes) {
     const machine = visibleMachines.find((item) => item.code === code && !usedIds.has(item.id));
@@ -51,10 +132,10 @@ function buildPlan(visibleMachines) {
       title: "Push A",
       focus: "chest / shoulders / triceps / core",
       slots: [
-        { label: "chest", move: "chest press / butterfly", area: "mid chest / pecs / orta göğüs", info: "main goal: press or fly for the middle chest. If the press is busy, butterfly/cable fly is fine.", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"] },
-        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", info: "main goal: shoulder cap. Press hits front delts, lateral raise hits side delts.", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"] },
-        { label: "triceps", move: "rope pushdown / triceps extension", area: "triceps / arka kol", info: "main goal: back arm. On 4012 use high cable rope pushdown, elbows close to the body.", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"] },
-        { label: "core", move: "ab crunch", area: "upper abs / üst karın", info: "main goal: controlled crunch for upper abs. Keep hips quiet and curl the rib cage down.", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"] }
+        { label: "chest", move: "chest press / butterfly", area: "mid chest / pecs / orta göğüs", info: "main goal: press or fly for the middle chest. If the press is busy, butterfly/cable fly is fine.", target: "3x10", codes: ["3041", "3016", "5014", "5901", "3014"], cues: MOVEMENT_CUES.chestPressFly },
+        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", info: "main goal: shoulder cap. Press hits front delts, lateral raise hits side delts.", target: "3x10", codes: ["3043", "5902", "4388", "3050", "4385", "3099"], cues: MOVEMENT_CUES.shoulderPressRaise },
+        { label: "triceps", move: "rope pushdown / triceps extension", area: "triceps / arka kol", info: "main goal: back arm. On 4012 use high cable rope pushdown, elbows close to the body.", target: "3x10", codes: ["4012", "3011", "4379", "3036", "5104"], cues: MOVEMENT_CUES.triceps },
+        { label: "core", move: "ab crunch", area: "upper abs / üst karın", info: "main goal: controlled crunch for upper abs. Keep hips quiet and curl the rib cage down.", target: "3x10", codes: ["5012", "3037", "3008", "4342N", "4119"], cues: MOVEMENT_CUES.abCrunch }
       ]
     },
     {
@@ -62,10 +143,10 @@ function buildPlan(visibleMachines) {
       title: "Pull A",
       focus: "back / biceps / glute support / core",
       slots: [
-        { label: "lat", move: "lat pulldown", area: "lats / kanat / sırt genişliği", info: "main goal: wing width. Pull elbows down, do not turn it into a biceps curl.", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"] },
-        { label: "row", move: "seated row / t-bar row", area: "mid back / traps / orta sırt", info: "main goal: middle back thickness. Pull elbows back and squeeze shoulder blades.", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"] },
-        { label: "biceps", move: "biceps curl", area: "biceps / ön kol", info: "main goal: front arm. Optional lighter finisher if biceps are already tired from back work.", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"] },
-        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", info: "main goal: lower back and hip support. Controlled hinge, no swinging.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "lat", move: "lat pulldown", area: "lats / kanat / sırt genişliği", info: "main goal: wing width. Pull elbows down, do not turn it into a biceps curl.", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"], cues: MOVEMENT_CUES.latPulldown },
+        { label: "row", move: "seated row / t-bar row", area: "mid back / traps / orta sırt", info: "main goal: middle back thickness. Pull elbows back and squeeze shoulder blades.", target: "3x10", codes: ["3040", "4319", "4018", "4383", "4900", "4016"], cues: MOVEMENT_CUES.row },
+        { label: "biceps", move: "biceps curl", area: "biceps / ön kol", info: "main goal: front arm. Optional lighter finisher if biceps are already tired from back work.", target: "3x10", codes: ["3098", "3010", "4355", "4366", "5004", "80CL0009"], cues: MOVEMENT_CUES.biceps },
+        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", info: "main goal: lower back and hip support. Controlled hinge, no swinging.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"], cues: MOVEMENT_CUES.backExtension }
       ]
     },
     {
@@ -73,10 +154,10 @@ function buildPlan(visibleMachines) {
       title: "Upper B",
       focus: "chest / back / shoulders / arms",
       slots: [
-        { label: "chest", move: "incline chest press / chest press", area: "upper chest / üst göğüs", info: "main goal: upper chest line. Incline press preferred; normal chest press is okay if needed.", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"] },
-        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", info: "main goal: back balance. Use pulldown for width or row for thickness when gym is busy.", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"] },
-        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", info: "main goal: shoulder cap. 3050/lateral raise is a good substitute when press machines are busy.", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"] },
-        { label: "arms", move: "rope pushdown / biceps curl", area: "triceps / biceps / arka kol + ön kol", info: "main goal: arm finisher. On 4012 use high cable for triceps, low cable for biceps.", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"] }
+        { label: "chest", move: "incline chest press / chest press", area: "upper chest / üst göğüs", info: "main goal: upper chest line. Incline press preferred; normal chest press is okay if needed.", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"], cues: MOVEMENT_CUES.upperChestPress },
+        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", info: "main goal: back balance. Use pulldown for width or row for thickness when gym is busy.", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"], cues: MOVEMENT_CUES.backBalance },
+        { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", info: "main goal: shoulder cap. 3050/lateral raise is a good substitute when press machines are busy.", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"], cues: MOVEMENT_CUES.shoulderPressRaise },
+        { label: "arms", move: "rope pushdown / biceps curl", area: "triceps / biceps / arka kol + ön kol", info: "main goal: arm finisher. On 4012 use high cable for triceps, low cable for biceps.", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"], cues: MOVEMENT_CUES.arms }
       ]
     },
     {
@@ -84,10 +165,10 @@ function buildPlan(visibleMachines) {
       title: "Pull B",
       focus: "back / shoulders / glute support / core",
       slots: [
-        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", info: "main goal: back width or thickness. Pick the free pull machine and feel the back, not only arms.", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"] },
-        { label: "delts", move: "reverse butterfly / lateral raise", area: "rear + side delts / arka + yan omuz", info: "main goal: rear and side shoulder. Reverse butterfly for rear delts, lateral raise for side delts.", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"] },
-        { label: "touch", move: "dip / triceps extension", area: "lower chest / triceps / alt göğüs + arka kol", info: "main goal: dip pattern. 3017 is best here; chest and triceps should both work.", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"] },
-        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", info: "main goal: lower back and hip support. Smooth reps, stop before form breaks.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"] }
+        { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", info: "main goal: back width or thickness. Pick the free pull machine and feel the back, not only arms.", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"], cues: MOVEMENT_CUES.backBalance },
+        { label: "delts", move: "reverse butterfly / lateral raise", area: "rear + side delts / arka + yan omuz", info: "main goal: rear and side shoulder. Reverse butterfly for rear delts, lateral raise for side delts.", target: "3x10", codes: ["5015", "5014", "3043", "3050", "4385", "3099"], cues: MOVEMENT_CUES.rearSideDelts },
+        { label: "touch", move: "dip / triceps extension", area: "lower chest / triceps / alt göğüs + arka kol", info: "main goal: dip pattern. 3017 is best here; chest and triceps should both work.", target: "3x10", codes: ["3017", "3036", "5904", "3011", "4379", "3016"], cues: MOVEMENT_CUES.dipPattern },
+        { label: "support", move: "back extension", area: "lower back / glutes / alt sırt + kalça", info: "main goal: lower back and hip support. Smooth reps, stop before form breaks.", target: "3x10", codes: ["5012", "3038", "4119", "5002", "4384", "4374", "3005"], cues: MOVEMENT_CUES.backExtension }
       ]
     }
   ];
@@ -200,6 +281,7 @@ export default function Training() {
   const [session, setSession] = useState(null);
   const [historyByExercise, setHistoryByExercise] = useState({});
   const [weightDrafts, setWeightDrafts] = useState({});
+  const [expandedEntryIds, setExpandedEntryIds] = useState(() => new Set());
 
   const studioMachines = STUDIO_MACHINES;
 
@@ -333,6 +415,15 @@ export default function Training() {
     return weightDrafts[entry.entryId] ?? sessionWeightByEntry[entry.entryId] ?? historyByExercise[entry.entryId] ?? null;
   };
 
+  const toggleEntryDetails = (entryId) => {
+    setExpandedEntryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(entryId)) next.delete(entryId);
+      else next.add(entryId);
+      return next;
+    });
+  };
+
   const stepWeight = async (entry, delta) => {
     const raw = getEntryWeight(entry);
     const current = raw == null ? WEIGHT_START : Number(raw);
@@ -396,62 +487,90 @@ export default function Training() {
                 </div>
               </button>
               <div className="mt-2 flex flex-col gap-1.5">
-                {day.machines.map((entry) => (
-                  <div
-                    key={entry.entryId}
-                    className={`flex items-stretch justify-between gap-2 rounded-md border px-2.5 py-2 text-left transition-colors duration-200 ${doneIds.has(entry.entryId) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleMachine(entry)}
-                      className="min-w-0 flex-1 text-left"
+                {day.machines.map((entry) => {
+                  const expanded = expandedEntryIds.has(entry.entryId);
+                  return (
+                    <div
+                      key={entry.entryId}
+                      className={`rounded-md border px-2.5 py-2 text-left transition-colors duration-200 ${doneIds.has(entry.entryId) ? "border-lime/50 bg-lime/10" : "border-line/80 bg-bg/60 hover:border-signal/50"}`}
                     >
-                      <div className="text-[.68rem] text-ink text-left leading-snug">
-                        {entry.machine.code} · {entry.machine.name}
-                      </div>
-                      <div className="mono text-[.55rem] text-ink2 uppercase tracking-[.08em] leading-snug mt-1">
-                        {entry.move}
-                      </div>
-                      <div className="mono text-[.54rem] text-lime uppercase tracking-[.1em] leading-snug mt-[2px]">
-                        {entry.area} · {entry.target}
-                      </div>
-                      <div className="mono text-[.55rem] text-lime uppercase tracking-[.1em] leading-snug mt-[2px]">
-                        {formatWeight(getEntryWeight(entry) ?? NaN)}
-                      </div>
-                      {entry.alternatives?.length > 0 && (
-                        <div className="mono text-[.5rem] text-mute uppercase tracking-[.08em] leading-snug mt-[2px] truncate">
-                          alt: {entry.alternatives.map((machine) => machine.code).join(" · ")}
+                      <div className="flex items-stretch justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleEntryDetails(entry.entryId)}
+                          className="min-w-0 flex-1 text-left"
+                          aria-expanded={expanded}
+                        >
+                          <div className="flex items-start gap-1.5">
+                            <Icon.chev size={12} className={`text-mute shrink-0 mt-[2px] transition-transform duration-150 ${expanded ? "rotate-90" : ""}`} />
+                            <div className="min-w-0">
+                              <div className="text-[.68rem] text-ink text-left leading-snug">
+                                {entry.machine.code} · {entry.machine.name}
+                              </div>
+                              <div className="mono text-[.55rem] text-ink2 uppercase tracking-[.08em] leading-snug mt-1">
+                                {entry.move}
+                              </div>
+                              <div className="mono text-[.54rem] text-lime uppercase tracking-[.1em] leading-snug mt-[2px]">
+                                {entry.area} · {entry.target}
+                              </div>
+                              <div className="mono text-[.55rem] text-lime uppercase tracking-[.1em] leading-snug mt-[2px]">
+                                {formatWeight(getEntryWeight(entry) ?? NaN)}
+                              </div>
+                              {entry.alternatives?.length > 0 && (
+                                <div className="mono text-[.5rem] text-mute uppercase tracking-[.08em] leading-snug mt-[2px] truncate">
+                                  alt: {entry.alternatives.map((machine) => machine.code).join(" · ")}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                        <div className="shrink-0 flex items-center gap-1 self-center">
+                          <button
+                            type="button"
+                            className="h-7 w-7 rounded-md border border-line/70 bg-bg/80 text-mute text-sm leading-none"
+                            onClick={() => stepWeight(entry, -WEIGHT_STEP)}
+                            aria-label="decrease weight"
+                          >
+                            −
+                          </button>
+                          <button
+                            type="button"
+                            className="min-w-[3.9rem] rounded-md border border-line/70 bg-bg/80 px-2 py-1 mono text-[.62rem] text-ink tabular-nums"
+                            onClick={() => toggleMachine(entry)}
+                          >
+                            {formatWeight(getEntryWeight(entry) ?? NaN)}
+                          </button>
+                          <button
+                            type="button"
+                            className="h-7 w-7 rounded-md border border-line/70 bg-bg/80 text-mute text-sm leading-none"
+                            onClick={() => stepWeight(entry, WEIGHT_STEP)}
+                            aria-label="increase weight"
+                          >
+                            +
+                          </button>
+                          <button
+                            type="button"
+                            className="h-7 w-7 rounded-md border border-line/70 bg-bg/80 grid place-items-center"
+                            onClick={() => toggleMachine(entry)}
+                            aria-label="toggle exercise done"
+                          >
+                            <Icon.check size={12} className={doneIds.has(entry.entryId) ? "text-lime shrink-0" : "text-mute opacity-25 shrink-0"} />
+                          </button>
                         </div>
+                      </div>
+                      {expanded && entry.cues?.length > 0 && (
+                        <ul className="mt-2 ml-[18px] border-t border-line/60 pt-2 text-[.62rem] leading-snug text-ink2 space-y-1.5">
+                          {entry.cues.map((cue) => (
+                            <li key={cue} className="flex gap-2">
+                              <span className="mt-[7px] h-1 w-1 rounded-full bg-lime/70 shrink-0" />
+                              <span>{cue}</span>
+                            </li>
+                          ))}
+                        </ul>
                       )}
-                    </button>
-                    <div className="shrink-0 flex items-center gap-1 self-center">
-                      <button
-                        type="button"
-                        className="h-7 w-7 rounded-md border border-line/70 bg-bg/80 text-mute text-sm leading-none"
-                        onClick={() => stepWeight(entry, -WEIGHT_STEP)}
-                        aria-label="decrease weight"
-                      >
-                        −
-                      </button>
-                      <button
-                        type="button"
-                        className="min-w-[3.9rem] rounded-md border border-line/70 bg-bg/80 px-2 py-1 mono text-[.62rem] text-ink tabular-nums"
-                        onClick={() => toggleMachine(entry)}
-                      >
-                        {formatWeight(getEntryWeight(entry) ?? NaN)}
-                      </button>
-                      <button
-                        type="button"
-                        className="h-7 w-7 rounded-md border border-line/70 bg-bg/80 text-mute text-sm leading-none"
-                        onClick={() => stepWeight(entry, WEIGHT_STEP)}
-                        aria-label="increase weight"
-                      >
-                        +
-                      </button>
-                      <Icon.check size={12} className={doneIds.has(entry.entryId) ? "text-lime shrink-0 ml-1" : "text-mute opacity-25 shrink-0 ml-1"} />
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
