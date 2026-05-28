@@ -90,7 +90,28 @@ Read `AGENTS.md` first, then this file. Do not store secrets here.
   - `sudo systemctl restart fitapi`
   - `sudo bash /opt/fitapi/scripts/smoke_check.sh`
 - Smoke check expected final result: `fitapi: active`, `caddy: active`, API health OK, frontend assets OK, gifs OK, `ok`.
-- Codex CLI was last seen installed globally via npm as `@openai/codex`. User checked update path from `0.128.0` to stable `0.130.0`.
+- Codex CLI is installed globally via npm as `@openai/codex`.
+- Current known tool versions after 2026-05-27 maintenance:
+  - Node: `v22.22.2`
+  - npm: `11.15.0`
+  - Codex package: `@openai/codex@0.134.0`
+  - `codex --version`: `codex-cli 0.134.0`
+  - Current binary path: `/usr/bin/codex`
+- If an old Codex app-server process was started before the CLI upgrade, restart the session/process to use the new binary cleanly.
+
+## VM / Service Notes
+
+- `fitapi`, `caddy`, and `docker` were active after the latest system cleanup/reboot.
+- Docker is enabled and should auto-start after reboot.
+- Teamspeak must not be deleted or disrupted when doing VM cleanup.
+- Teamspeak container:
+  - Container name: `teamspeak6-server`
+  - Image: `teamspeaksystems/teamspeak6-server:6.0.0-beta9`
+  - Restart policy: `unless-stopped`
+  - Volume: `ts6_teamspeak6-data:/var/tsserver`
+  - Ports: `9988/udp`, `30034/tcp`
+- Latest known kernel after reboot: `6.17.0-1014-oracle`.
+- `dpkg --audit` and `apt-get check` were clean after the latest cleanup.
 
 ## Frontend / Design Decisions
 
