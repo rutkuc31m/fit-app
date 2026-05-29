@@ -296,6 +296,65 @@ const BODY_REGION_DAYS = [
   }
 ];
 
+const DUMBBELL_REFERENCE = [
+  {
+    region: "Biceps",
+    moves: [
+      { name: "Standing dumbbell curl", bench: "No bench", note: "Day 4 finisher için en temiz seçenek." },
+      { name: "Hammer curl", bench: "No bench", note: "Ön kol + brachialis de alır; eklem dostu." },
+      { name: "Incline curl", bench: "Bench needed", note: "Uzun başı daha iyi hissedersen bench varsa iyi." }
+    ]
+  },
+  {
+    region: "Triceps",
+    moves: [
+      { name: "Overhead dumbbell extension", bench: "No bench", note: "Tek veya iki elle yapılır." },
+      { name: "Dumbbell skullcrusher", bench: "Bench needed", note: "Bench varsa iyi, yoksa skip." },
+      { name: "Dumbbell kickback", bench: "No bench", note: "Hafif kilo ile finisher olarak." }
+    ]
+  },
+  {
+    region: "Shoulders",
+    moves: [
+      { name: "Dumbbell lateral raise", bench: "No bench", note: "Yan omuz için en iyi ev alternatifi." },
+      { name: "Bent-over rear delt raise", bench: "No bench", note: "Arka omuz için gövdeyi eğip yap." },
+      { name: "Seated shoulder press", bench: "Bench needed", note: "Bench yoksa ayakta press de olur." }
+    ]
+  },
+  {
+    region: "Chest",
+    moves: [
+      { name: "Dumbbell floor press", bench: "No bench", note: "Bench yoksa göğüs için en iyi güvenli alternatif." },
+      { name: "Dumbbell bench press", bench: "Bench needed", note: "Bench boşsa ana chest dumbbell hareketi." },
+      { name: "Dumbbell fly", bench: "Bench needed", note: "Ağır değil, kontrollü; göğüs hissi için." }
+    ]
+  },
+  {
+    region: "Back",
+    moves: [
+      { name: "One-arm dumbbell row", bench: "Bench helpful", note: "Bench varsa destekli; yoksa diz/kol desteğiyle." },
+      { name: "Dumbbell pullover", bench: "Bench needed", note: "Lat + chest transition için." },
+      { name: "Chest-supported row", bench: "Bench needed", note: "Bench varsa sırtı temiz vurur." }
+    ]
+  },
+  {
+    region: "Legs / Glutes",
+    moves: [
+      { name: "Goblet squat", bench: "No bench", note: "Evde bacak/quad için en basit seçenek." },
+      { name: "Bulgarian split squat", bench: "Bench helpful", note: "Sandalye/bench ile çok iyi çalışır." },
+      { name: "Dumbbell Romanian deadlift", bench: "No bench", note: "Hamstring + glute için." }
+    ]
+  },
+  {
+    region: "Core / Carry",
+    moves: [
+      { name: "Suitcase carry", bench: "No bench", note: "Core + grip; odada bile yapılır." },
+      { name: "Russian twist", bench: "No bench", note: "Hafif kilo ile kontrollü." },
+      { name: "Weighted crunch", bench: "No bench", note: "Karın için kısa finisher." }
+    ]
+  }
+];
+
 const clampWeight = (value) => {
   const n = Number(value);
   if (!Number.isFinite(n)) return null;
@@ -572,6 +631,37 @@ export default function Training() {
                 {day.regions.map((region) => (
                   <div key={region} className="text-[.66rem] text-ink leading-snug">
                     {region}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </AccentCard>
+
+      <AccentCard accent="#9a9a9a" className="p-3" contentClassName="pl-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {DUMBBELL_REFERENCE.map((block) => (
+            <div key={block.region} className="rounded-md border border-line/80 bg-bg/60 px-2.5 py-2">
+              <div className="mono text-[.58rem] text-cyan uppercase tracking-[.1em]">
+                {block.region}
+              </div>
+              <div className="mt-1.5 flex flex-col gap-1.5">
+                {block.moves.map((move) => (
+                  <div key={move.name} className="rounded-sm border border-line/60 bg-bg2/70 px-2 py-1.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-[.68rem] text-ink leading-snug">
+                          {move.name}
+                        </div>
+                        <div className="text-[.58rem] text-ink2 leading-snug mt-[2px]">
+                          {move.note}
+                        </div>
+                      </div>
+                      <div className="mono text-[.5rem] text-lime uppercase tracking-[.08em] shrink-0 text-right leading-snug">
+                        {move.bench}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
