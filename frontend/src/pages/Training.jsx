@@ -143,8 +143,8 @@ function buildPlan(visibleMachines) {
     {
       day: "Day 2",
       title: "Pull A",
-      focus: "back / biceps / glute support / core",
-      regions: "Kanat, orta sırt, ön kol, alt sırt/kalça",
+      focus: "back / biceps / core",
+      regions: "Kanat, orta sırt, biceps, karın",
       priority: "Önce sırt genişliği + sırt kalınlığı, sonra biceps ve destek.",
       slots: [
         { label: "lat", move: "lat pulldown", area: "lats / kanat / sırt genişliği", choice: "Kanat: lat pulldown veya high row olur.", info: "main goal: wing width. Pull elbows down, do not turn it into a biceps curl.", target: "3x10", codes: ["3044", "3020", "4116", "5003", "4042", "5908"], cues: MOVEMENT_CUES.latPulldown },
@@ -156,21 +156,21 @@ function buildPlan(visibleMachines) {
     {
       day: "Day 3",
       title: "Upper B",
-      focus: "chest / back / shoulders / arms",
-      regions: "Üst göğüs, sırt, omuz, kol",
-      priority: "Üst göğüs + sırt denge, sonra omuz ve kol bitiriş.",
+      focus: "chest / back / shoulders / triceps",
+      regions: "Üst göğüs, sırt, omuz, triceps",
+      priority: "Üst göğüs + sırt denge, sonra omuz ve triceps bitiriş.",
       slots: [
         { label: "chest", move: "incline chest press / chest press", area: "upper chest / üst göğüs", choice: "Üst göğüs: incline press öncelik; doluysa normal chest press olur.", info: "main goal: upper chest line. Incline press preferred; normal chest press is okay if needed.", target: "3x10", codes: ["3041", "3016", "5014", "3014", "3097"], cues: MOVEMENT_CUES.upperChestPress },
         { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", choice: "Sırt: o gün boş olana göre pulldown veya row seç.", info: "main goal: back balance. Use pulldown for width or row for thickness when gym is busy.", target: "3x10", codes: ["4170", "3044", "3040", "4018", "4383", "4340"], cues: MOVEMENT_CUES.backBalance },
         { label: "shoulders", move: "shoulder press / lateral raise", area: "front + side delts / ön + yan omuz", choice: "Omuz: press, lateral raise veya shoulder/lat combo olur.", info: "main goal: shoulder cap. 3050/lateral raise is a good substitute when press machines are busy.", target: "3x10", codes: ["3043", "5902", "4385", "3050", "5015", "4388"], cues: MOVEMENT_CUES.shoulderPressRaise },
-        { label: "arms", move: "rope pushdown / biceps curl", area: "triceps / biceps / arka kol + ön kol", choice: "Kol: triceps veya biceps makinesi/cable; hangi taraf eksikse onu bitir.", info: "main goal: arm finisher. On 4012 use high cable for triceps, low cable for biceps.", target: "3x10", codes: ["4012", "3011", "4379", "4366", "4355", "5104"], cues: MOVEMENT_CUES.arms }
+        { label: "arms", move: "rope pushdown / triceps extension", area: "triceps / arka kol", choice: "Arka kol: 4012 high cable rope pushdown öncelik; doluysa triceps extension/dip machine.", info: "main goal: triceps finisher. On 4012 use the high cable for rope pushdown.", target: "3x10", codes: ["4012", "3011", "4379", "5104", "3036"], cues: MOVEMENT_CUES.triceps }
       ]
     },
     {
       day: "Day 4",
       title: "Pull B",
-      focus: "back / shoulders / glute support / core",
-      regions: "Sırt, arka/yan omuz, alt göğüs-triceps, alt sırt/kalça",
+      focus: "back / shoulders / lower chest-triceps / core",
+      regions: "Sırt, arka/yan omuz, alt göğüs-triceps, karın",
       priority: "Sırt + arka omuz ana iş, destekli dip ile alt göğüs/triceps.",
       slots: [
         { label: "back", move: "row / lat pulldown", area: "lats + mid back / kanat + orta sırt", choice: "Sırt: row, high row veya pulldown; boş olan iyi alternatiftir.", info: "main goal: back width or thickness. Pick the free pull machine and feel the back, not only arms.", target: "3x10", codes: ["3044", "4319", "4018", "4383", "4340", "5003"], cues: MOVEMENT_CUES.backBalance },
@@ -272,6 +272,29 @@ const WEIGHT_MAX = 250;
 const WEIGHT_STEP = 5;
 const WEIGHT_START = 20;
 const MACHINE_SEARCH_LIMIT = 8;
+
+const BODY_REGION_DAYS = [
+  {
+    day: "Day 1",
+    title: "Push A",
+    regions: ["Orta göğüs", "Ön/yan omuz", "Triceps", "Karın"]
+  },
+  {
+    day: "Day 2",
+    title: "Pull A",
+    regions: ["Kanat", "Orta sırt", "Biceps", "Karın"]
+  },
+  {
+    day: "Day 3",
+    title: "Upper B",
+    regions: ["Üst göğüs", "Sırt", "Ön/yan omuz", "Triceps"]
+  },
+  {
+    day: "Day 4",
+    title: "Pull B",
+    regions: ["Sırt", "Arka/yan omuz", "Alt göğüs + triceps", "Karın"]
+  }
+];
 
 const clampWeight = (value) => {
   const n = Number(value);
@@ -537,6 +560,25 @@ export default function Training() {
           { label: "cycle", value: allDaysDone ? "done" : "open", className: allDaysDone ? "text-lime" : "text-amber" }
         ]}
       />
+
+      <AccentCard accent="#00d4aa" className="p-3" contentClassName="pl-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {BODY_REGION_DAYS.map((day) => (
+            <div key={day.day} className="rounded-md border border-line/80 bg-bg/60 px-2.5 py-2">
+              <div className="mono text-[.58rem] text-cyan uppercase tracking-[.1em]">
+                {day.day} · {day.title}
+              </div>
+              <div className="mt-1.5 flex flex-col gap-1">
+                {day.regions.map((region) => (
+                  <div key={region} className="text-[.66rem] text-ink leading-snug">
+                    {region}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </AccentCard>
 
       <AccentCard accent="#00d4aa" className="p-3" contentClassName="pl-2">
         <div className="flex items-center gap-2">
