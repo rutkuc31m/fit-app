@@ -377,6 +377,7 @@ export default function Training() {
   const [expandedEntryIds, setExpandedEntryIds] = useState(() => new Set());
   const [machineQuery, setMachineQuery] = useState("");
   const [machineWeightInputs, setMachineWeightInputs] = useState({});
+  const [dumbbellOpen, setDumbbellOpen] = useState(false);
 
   const studioMachines = STUDIO_MACHINES;
 
@@ -639,37 +640,6 @@ export default function Training() {
         </div>
       </AccentCard>
 
-      <AccentCard accent="#9a9a9a" className="p-3" contentClassName="pl-2">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {DUMBBELL_REFERENCE.map((block) => (
-            <div key={block.region} className="rounded-md border border-line/80 bg-bg/60 px-2.5 py-2">
-              <div className="mono text-[.58rem] text-cyan uppercase tracking-[.1em]">
-                {block.region}
-              </div>
-              <div className="mt-1.5 flex flex-col gap-1.5">
-                {block.moves.map((move) => (
-                  <div key={move.name} className="rounded-sm border border-line/60 bg-bg2/70 px-2 py-1.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="text-[.68rem] text-ink leading-snug">
-                          {move.name}
-                        </div>
-                        <div className="text-[.58rem] text-ink2 leading-snug mt-[2px]">
-                          {move.note}
-                        </div>
-                      </div>
-                      <div className="mono text-[.5rem] text-lime uppercase tracking-[.08em] shrink-0 text-right leading-snug">
-                        {move.bench}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </AccentCard>
-
       <AccentCard accent="#00d4aa" className="p-3" contentClassName="pl-2">
         <div className="flex items-center gap-2">
           <Icon.scan size={15} className="text-lime shrink-0" />
@@ -885,6 +855,45 @@ export default function Training() {
           </div>
         </AccentCard>
       )}
+
+      <AccentCard accent="#9a9a9a" className="p-3" contentClassName="pl-2">
+        <button type="button" className="w-full text-left" onClick={() => setDumbbellOpen((prev) => !prev)}>
+          <div className="flex items-center justify-between gap-2">
+            <div className="mono text-[.65rem] text-cyan uppercase tracking-[.14em]">Dumbbell</div>
+            <Icon.chev size={12} className={`text-mute shrink-0 transition-transform duration-150 ${dumbbellOpen ? "rotate-90" : ""}`} />
+          </div>
+        </button>
+        {dumbbellOpen && (
+          <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+            {DUMBBELL_REFERENCE.map((block) => (
+              <div key={block.region} className="rounded-md border border-line/80 bg-bg/60 px-2.5 py-2">
+                <div className="mono text-[.58rem] text-cyan uppercase tracking-[.1em]">
+                  {block.region}
+                </div>
+                <div className="mt-1.5 flex flex-col gap-1.5">
+                  {block.moves.map((move) => (
+                    <div key={move.name} className="rounded-sm border border-line/60 bg-bg2/70 px-2 py-1.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="text-[.68rem] text-ink leading-snug">
+                            {move.name}
+                          </div>
+                          <div className="text-[.58rem] text-ink2 leading-snug mt-[2px]">
+                            {move.note}
+                          </div>
+                        </div>
+                        <div className="mono text-[.5rem] text-lime uppercase tracking-[.08em] shrink-0 text-right leading-snug">
+                          {move.bench}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </AccentCard>
 
     </div>
   );
